@@ -1,0 +1,165 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+@import '@fontsource/geist-sans/latin-400.css';
+@import '@fontsource/geist-sans/latin-500.css';
+@import '@fontsource/geist-sans/latin-600.css';
+@import '@fontsource/jetbrains-mono/latin-400.css';
+@import '@fontsource/jetbrains-mono/latin-500.css';
+
+/*
+ * Map tokens into Tailwind. Default palettes are wiped so only token colors exist —
+ * `bg-red-500` simply doesn't compile, which keeps hardcoded colors out.
+ */
+@theme inline {
+	--color-*: initial;
+	--color-bg-0: var(--bg-0);
+	--color-bg-1: var(--bg-1);
+	--color-bg-2: var(--bg-2);
+	--color-bg-3: var(--bg-3);
+	--color-border: var(--border);
+	--color-border-strong: var(--border-strong);
+	--color-fg-0: var(--text-0);
+	--color-fg-1: var(--text-1);
+	--color-fg-2: var(--text-2);
+	--color-up: var(--up);
+	--color-down: var(--down);
+	--color-warn: var(--warn);
+	--color-info: var(--info);
+	--color-accent: var(--accent);
+	--color-accent-soft: var(--accent-soft);
+	--color-on-accent: var(--on-accent);
+	--color-up-soft: var(--up-soft);
+	--color-down-soft: var(--down-soft);
+	--color-warn-soft: var(--warn-soft);
+	--color-info-soft: var(--info-soft);
+	--color-scrim: var(--scrim);
+	--color-accent-build: var(--accent-build);
+	--color-accent-trade: var(--accent-trade);
+	--color-accent-lab: var(--accent-lab);
+	--color-accent-hub: var(--accent-hub);
+	--color-transparent: transparent;
+	--color-current: currentColor;
+
+	--font-sans: var(--font-ui);
+	--font-mono: var(--font-code);
+
+	--text-*: initial;
+	--text-11: 11px;
+	--text-12: 12px;
+	--text-13: 13px;
+	--text-14: 14px;
+	--text-16: 16px;
+	--text-20: 20px;
+
+	--radius-*: initial;
+	--radius-sm: 4px;
+	--radius-md: 6px;
+	--radius-full: 9999px;
+
+	--shadow-glow: var(--glow);
+	--ease-out: var(--ease-out);
+}
+
+@layer base {
+	html,
+	body,
+	#root {
+		height: 100%;
+	}
+
+	html {
+		font-size: var(--ui-font-size);
+		color-scheme: dark;
+	}
+
+	body {
+		margin: 0;
+		background: var(--bg-0);
+		color: var(--text-0);
+		font-family: var(--font-ui);
+		font-size: var(--ui-font-size);
+		line-height: 1.45;
+		-webkit-font-smoothing: antialiased;
+		overflow: hidden;
+		user-select: none;
+	}
+
+	input,
+	textarea,
+	[contenteditable='true'],
+	.selectable {
+		user-select: text;
+	}
+
+	::selection {
+		background: var(--accent-soft);
+	}
+
+	:focus-visible {
+		outline: 1px solid var(--accent);
+		outline-offset: 1px;
+	}
+
+	code,
+	kbd,
+	pre,
+	.num {
+		font-family: var(--font-code);
+		font-variant-numeric: tabular-nums;
+	}
+
+	::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+	::-webkit-scrollbar-thumb {
+		background: var(--bg-3);
+		border: 2px solid transparent;
+		background-clip: padding-box;
+		border-radius: 9999px;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background-color: var(--border-strong);
+	}
+	::-webkit-scrollbar-track,
+	::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+}
+
+@layer utilities {
+	.drag {
+		-webkit-app-region: drag;
+	}
+	.no-drag {
+		-webkit-app-region: no-drag;
+	}
+	.transition-fast {
+		transition-duration: var(--dur-fast);
+		transition-timing-function: var(--ease-out);
+	}
+	.flash-up {
+		animation: flash-up 400ms var(--ease-out);
+	}
+	.flash-down {
+		animation: flash-down 400ms var(--ease-out);
+	}
+}
+
+@keyframes flash-up {
+	from {
+		background-color: var(--up-soft);
+	}
+	to {
+		background-color: transparent;
+	}
+}
+@keyframes flash-down {
+	from {
+		background-color: var(--down-soft);
+	}
+	to {
+		background-color: transparent;
+	}
+}

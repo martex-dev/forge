@@ -1,0 +1,85 @@
+/*
+ * Forge design tokens — the ONLY file allowed to contain raw color values.
+ * Everything else references these variables (directly or through Tailwind's @theme).
+ */
+
+:root {
+	/* Surfaces */
+	--bg-0: #07080a;
+	--bg-1: #0d0f12;
+	--bg-2: #14171c;
+	--bg-3: #1c2027;
+	--border: #232830;
+	--border-strong: #2f3540;
+
+	/* Text */
+	--text-0: #e8eaed;
+	--text-1: #a3a9b4;
+	--text-2: #6b7280;
+
+	/* Semantic */
+	--up: #22c55e;
+	--down: #ef4444;
+	--warn: #f59e0b;
+	--info: #60a5fa;
+
+	/* Room accents */
+	--accent-build: #6ee7f9;
+	--accent-trade: #a3ff12;
+	--accent-lab: #a78bfa;
+	--accent-hub: #fbbf24;
+	--accent: var(--accent-build);
+
+	/* Text on top of a solid accent fill (all accents are light, so dark text passes AA) */
+	--on-accent: #07080a;
+
+	/* Low-opacity fills derived from semantic colors */
+	--accent-soft: color-mix(in oklab, var(--accent) 14%, transparent);
+	--up-soft: color-mix(in oklab, var(--up) 16%, transparent);
+	--down-soft: color-mix(in oklab, var(--down) 16%, transparent);
+	--warn-soft: color-mix(in oklab, var(--warn) 16%, transparent);
+	--info-soft: color-mix(in oklab, var(--info) 16%, transparent);
+	--scrim: color-mix(in oklab, var(--bg-0) 70%, transparent);
+
+	/* Glow: only for the focused/active element */
+	--glow:
+		0 0 0 1px var(--accent), 0 0 12px -2px color-mix(in oklab, var(--accent) 45%, transparent);
+
+	/* Motion */
+	--dur-fast: 120ms;
+	--dur-base: 160ms;
+	--dur-slow: 180ms;
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+	/* Type */
+	--font-ui: 'Geist Sans', system-ui, sans-serif;
+	--font-code: 'JetBrains Mono', ui-monospace, monospace;
+	--ui-font-size: 13px;
+}
+
+html[data-room='build'] {
+	--accent: var(--accent-build);
+}
+html[data-room='trade'] {
+	--accent: var(--accent-trade);
+}
+html[data-room='lab'] {
+	--accent: var(--accent-lab);
+}
+html[data-room='hub'] {
+	--accent: var(--accent-hub);
+}
+
+html[data-reduce-motion='true'] {
+	--dur-fast: 0ms;
+	--dur-base: 0ms;
+	--dur-slow: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--dur-fast: 0ms;
+		--dur-base: 0ms;
+		--dur-slow: 0ms;
+	}
+}
