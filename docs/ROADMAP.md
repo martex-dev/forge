@@ -2,7 +2,7 @@
 
 Source of truth for progress. Tick boxes as work lands. Only the current phase is worked on.
 
-**Current phase: 0 — Foundation** (plan written; awaiting approval)
+**Current phase: 0 — Foundation** (built and tested; two acceptance items need Marto — see notes below 0.12 and 0.13)
 
 ---
 
@@ -10,124 +10,132 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 ### 0.1 Repo basics
 
-- [ ] `git init`, `.gitignore` (node, python, electron, `.env`, `out/`, `dist/`, userData artifacts)
-- [ ] `.editorconfig` (tabs everywhere, spaces for YAML), `.env.example`, short `README.md`
+- [x] `git init`, `.gitignore` (node, python, electron, `.env`, `out/`, `dist/`, userData artifacts)
+- [x] `.editorconfig` (tabs everywhere, spaces for YAML), `.env.example`, short `README.md`
 
 **Acceptance:** `git status` is clean after the first commit; no `.env`, `node_modules`, `out/` or `.venv` is tracked.
 
 ### 0.2 Scaffold
 
-- [ ] Scaffold from the electron-vite React + TS template
-- [ ] Restructure to `src/main`, `src/preload`, `src/renderer`, `src/shared`
-- [ ] Path aliases `@main`, `@renderer`, `@shared` (tsconfig + electron-vite config)
+- [x] Scaffold from the electron-vite React + TS template
+- [x] Restructure to `src/main`, `src/preload`, `src/renderer`, `src/shared`
+- [x] Path aliases `@main`, `@renderer`, `@shared` (tsconfig + electron-vite config)
 
 **Acceptance:** `npm run dev` opens a window; an import via each alias compiles in its process.
 
 ### 0.3 Tooling
 
-- [ ] Strict TS config per process (`strict`, `noUncheckedIndexedAccess`)
-- [ ] ESLint flat config (TS, React, React Hooks, import order)
-- [ ] Prettier (tabs, single quotes, `jsxSingleQuote`)
-- [ ] Vitest; Playwright Electron smoke test (app launches, title is "Forge")
-- [ ] `simple-git-hooks` + `lint-staged`
-- [ ] All npm scripts from CLAUDE.md §5
+- [x] Strict TS config per process (`strict`, `noUncheckedIndexedAccess`)
+- [x] ESLint flat config (TS, React, React Hooks, import order)
+- [x] Prettier (tabs, single quotes, `jsxSingleQuote`)
+- [x] Vitest; Playwright Electron smoke test (app launches, title is "Forge")
+- [x] `simple-git-hooks` + `lint-staged`
+- [x] All npm scripts from CLAUDE.md §5
 
 **Acceptance:** `npm run lint`, `typecheck`, `test`, `test:e2e` all pass; a pre-commit hook runs lint-staged.
 
 ### 0.4 Security baseline
 
-- [ ] BrowserWindow: `contextIsolation`, `sandbox`, no `nodeIntegration`, `webSecurity`
-- [ ] Strict CSP (dev variant allows Vite HMR only on localhost)
-- [ ] Block `will-navigate`; `setWindowOpenHandler` → `https:` only, via `shell.openExternal`
+- [x] BrowserWindow: `contextIsolation`, `sandbox`, no `nodeIntegration`, `webSecurity`
+- [x] Strict CSP (dev variant allows Vite HMR only on localhost)
+- [x] Block `will-navigate`; `setWindowOpenHandler` → `https:` only, via `shell.openExternal`
 
 **Acceptance:** e2e asserts `window.require` and `window.process` are `undefined`; navigating to an external URL leaves the window on the app URL.
 
 ### 0.5 Design system
 
-- [ ] `tokens.css` with every §6 token, mapped into Tailwind v4 `@theme`
-- [ ] Per-room accent via `<html data-room>`
-- [ ] Local fonts: Geist Sans + JetBrains Mono (`@fontsource` packages)
-- [ ] Primitives in `src/renderer/ui/`: Button, IconButton, Input, Select, Tabs, Tooltip (shortcut hint), Kbd, Badge, Spinner, Panel, EmptyState, ErrorState, Dialog, Toast
-- [ ] Design Playground view (palette: `Dev: Open Design Playground`)
+- [x] `tokens.css` with every §6 token, mapped into Tailwind v4 `@theme`
+- [x] Per-room accent via `<html data-room>`
+- [x] Local fonts: Geist Sans + JetBrains Mono (`@fontsource` packages)
+- [x] Primitives in `src/renderer/ui/`: Button, IconButton, Input, Select, Tabs, Tooltip (shortcut hint), Kbd, Badge, Spinner, Panel, EmptyState, ErrorState, Dialog, Toast
+- [x] Design Playground view (palette: `Dev: Open Design Playground`)
 
 **Acceptance:** playground renders every component in every state and all 4 accents; a lint/test check finds no hex/rgb colors outside `tokens.css`.
 
 ### 0.6 App shell
 
-- [ ] Frameless window + `titleBarOverlay` in `--bg-0`
-- [ ] TitleBar: drag region, app mark, room name, centered search pill → palette
-- [ ] RoomRail: 4 rooms, accent indicator, Ctrl+1…4 (updates `data-room`)
-- [ ] StatusBar: sidecar dot, git branch placeholder, notification count, clock
-- [ ] RoomLayout: dockview per room, saved to DB on change, restored on launch; "Reset layout" command
-- [ ] CommandPalette (`cmdk`): Ctrl+K / Ctrl+Shift+P, registry fed by modules, fuzzy search, grouped by room, shortcut display
-- [ ] Built-in commands: switch room, reset layout, open settings, reload window, toggle design playground
+- [x] Frameless window + `titleBarOverlay` in `--bg-0`
+- [x] TitleBar: drag region, app mark, room name, centered search pill → palette
+- [x] RoomRail: 4 rooms, accent indicator, Ctrl+1…4 (updates `data-room`)
+- [x] StatusBar: sidecar dot, git branch placeholder, notification count, clock
+- [x] RoomLayout: dockview per room, saved to DB on change, restored on launch; "Reset layout" command
+- [x] CommandPalette (`cmdk`): Ctrl+K / Ctrl+Shift+P, registry fed by modules, fuzzy search, grouped by room, shortcut display
+- [x] Built-in commands: switch room, reset layout, open settings, reload window, toggle design playground
 
 **Acceptance:** all shortcuts work; a rearranged layout survives restart; the palette lists commands from all 4 rooms.
 
+> Built in the order 0.7 → 0.9 → 0.8 → 0.6 → 0.10, because the shell needs IPC, the DB and the
+> module registry to persist layouts and list module commands.
+
 ### 0.7 Typed IPC
 
-- [ ] `src/shared/ipc/contract.ts`: channels with zod input/output schemas
-- [ ] Main router validates input, returns `Result<T>`
-- [ ] Preload exposes typed `window.forge.invoke(channel, input)` and `window.forge.on(event, handler)` → unsubscribe
-- [ ] Example channels `app:getVersion`, `app:getPlatform`
+- [x] `src/shared/ipc/contract.ts`: channels with zod input/output schemas
+- [x] Main router validates input, returns `Result<T>`
+- [x] Preload exposes typed `window.forge.invoke(channel, input)` and `window.forge.on(event, handler)` → unsubscribe
+- [x] Example channels `app:getVersion`, `app:getPlatform`
 
 **Acceptance:** router unit tests cover valid input, invalid input (handler never called), and handler error → `{ ok: false }`.
 
 ### 0.8 Module registry
 
-- [ ] Manifest types (CLAUDE.md §3); main + renderer registries
-- [ ] Platform filtering
-- [ ] Enable/disable per module, stored in settings
-- [ ] `build-core`, `trade-core`, `lab-core`, `hub-core`: one Welcome panel + one command each
+- [x] Manifest types (CLAUDE.md §3); main + renderer registries
+- [x] Platform filtering
+- [x] Enable/disable per module, stored in settings
+- [x] `build-core`, `trade-core`, `lab-core`, `hub-core`: one Welcome panel + one command each
 
 **Acceptance:** disabling a module removes its panels and commands live, without restart (unit test + manual).
 
 ### 0.9 Database
 
-- [ ] `better-sqlite3` + Drizzle at `userData/forge.db`, with migrations
-- [ ] Tables: `settings`, `layouts`, `notifications`
-- [ ] Native rebuild for Electron, documented in README
+- [x] `better-sqlite3` + Drizzle at `userData/forge.db`, with migrations
+- [x] Tables: `settings`, `layouts`, `notifications`
+- [x] Native rebuild for Electron, documented in README
 
 **Acceptance:** unit tests use an in-memory DB; settings persist across restarts.
 
 ### 0.10 Secrets and Settings
 
-- [ ] `SecretsService` (safeStorage) in its own encrypted file under userData
-- [ ] IPC: `secrets:has`, `secrets:set`, `secrets:delete` only — no `get`
-- [ ] Settings screen: General (font size, reduce motion), Secrets (keys from manifests, masked input, Saved badge, delete), Modules (toggles + platform note)
+- [x] `SecretsService` (safeStorage) in its own encrypted file under userData
+- [x] IPC: `secrets:has`, `secrets:set`, `secrets:delete` only — no `get`
+- [x] Settings screen: General (font size, reduce motion), Secrets (keys from manifests, masked input, Saved badge, delete), Modules (toggles + platform note)
 
 **Acceptance:** a saved secret survives restart; a test greps log output, DB file and IPC responses and never finds the secret value.
 
 ### 0.11 Python sidecar
 
-- [ ] `sidecar/` uv project (Python 3.12 pinned): FastAPI, uvicorn, pydantic, httpx; dev: pytest, ruff
-- [ ] Ruff per CLAUDE.md §8
-- [ ] `GET /health` → `{status, version, python}`; bearer token required on every route, including health
-- [ ] `SidecarManager`: free port, 32-byte token, spawn `uv run uvicorn`, poll health with timeout, backoff restart (max 5 then error + notification), tree-kill on quit, status events, typed `sidecar.request(method, path, body)`
+- [x] `sidecar/` uv project (Python 3.12 pinned): FastAPI, uvicorn, pydantic, httpx; dev: pytest, ruff
+- [x] Ruff per CLAUDE.md §8
+- [x] `GET /health` → `{status, version, python}`; bearer token required on every route, including health
+- [x] `SidecarManager`: free port, 32-byte token, spawn `uv run uvicorn`, poll health with timeout, backoff restart (max 5 then error + notification), tree-kill on quit, status events, typed `sidecar.request(method, path, body)`
 
 **Acceptance:** StatusBar goes green; killing python.exe turns it amber then green; pytest covers missing/wrong token → 401.
 
 ### 0.12 Webview manager (PoC)
 
-- [ ] `WebviewService` with `WebContentsView`, `persist:svc-<id>` partition, no preload
-- [ ] Bounds synced via `ResizeObserver` → IPC
-- [ ] Hidden when the panel is hidden, on room switch, and while any overlay is open
-- [ ] Popups → system browser (same-site OAuth allowed)
-- [ ] TradingView panel in Trade
+- [x] `WebviewService` with `WebContentsView`, `persist:svc-<id>` partition, no preload
+- [x] Bounds synced via `ResizeObserver` → IPC
+- [x] Hidden when the panel is hidden, on room switch, and while any overlay is open
+- [x] Popups → system browser (same-site OAuth allowed)
+- [x] TradingView panel in Trade
 
 **Acceptance:** TradingView login survives restart; palette never hidden behind the view; resize/dock keeps alignment.
 
+> Verified by e2e: own partition, alignment (incl. window resize), hidden under palette/settings/other rooms.
+> **Needs Marto:** log into TradingView once and confirm it survives a restart (can't be automated without credentials).
+
 ### 0.13 CI
 
-- [ ] GitHub Actions on `windows-latest`: `npm ci`, lint, typecheck, unit tests; `uv sync`, `ruff check`, `ruff format --check`, pytest
-- [ ] Cache npm and uv
+- [x] GitHub Actions on `windows-latest`: `npm ci`, lint, typecheck, unit tests; `uv sync`, `ruff check`, `ruff format --check`, pytest
+- [x] Cache npm and uv
 
 **Acceptance:** workflow green on push.
 
+> Every CI step passes locally from a clean `npm ci`. **Needs Marto:** a GitHub remote — the repo has none yet.
+
 ### 0.14 Wrap-up
 
-- [ ] Tick this file, update ARCHITECTURE.md and README
-- [ ] Final report: what was built, 10-step manual checklist, limitations, Phase 1 plan
+- [x] Tick this file, update ARCHITECTURE.md and README
+- [x] Final report: what was built, 10-step manual checklist, limitations, Phase 1 plan
 
 ---
 

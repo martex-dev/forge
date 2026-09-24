@@ -20,6 +20,35 @@ node node_modules/electron/install.js   # Electron 44 downloads its binary lazil
 npm run dev
 ```
 
+The first launch runs `uv sync` for the Python sidecar (a minute or so); the status-bar dot turns
+green when it's ready.
+
+## Everyday commands
+
+```powershell
+npm run dev          # app + sidecar with hot reload (F12 = devtools)
+npm run lint         # eslint
+npm run typecheck    # tsc for main/preload, renderer and e2e
+npm test             # vitest unit tests
+npm run test:e2e     # builds, then drives the real Electron app with Playwright
+npm run format       # prettier --write
+
+cd sidecar
+uv run pytest
+uv run ruff check .
+uv run ruff format .
+```
+
+| Shortcut                  | Action                    |
+| ------------------------- | ------------------------- |
+| `Ctrl+K` / `Ctrl+Shift+P` | Command palette           |
+| `Ctrl+1` … `Ctrl+4`       | Build / Trade / Lab / Hub |
+| `Ctrl+,`                  | Settings                  |
+| `F12` (dev only)          | Devtools                  |
+
+Set `FORGE_NO_SIDECAR=1` to start without the Python sidecar. Logs are in
+`%APPDATA%\forge\logs\main.log`.
+
 ## Native modules
 
 `better-sqlite3` (and later `node-pty`) are compiled C++ addons. Electron embeds its own Node with

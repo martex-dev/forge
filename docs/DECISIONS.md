@@ -53,3 +53,84 @@ Format: Context → Decision → Consequences. Newest at the bottom.
 - Some boilerplate per module (manifest + two registrations).
 - Features can be switched off when broken (e.g. Forex Factory feed changes) without touching the rest of the app.
 - Core shell code must stay module-agnostic.
+
+---
+
+## ADR-004: Toolchain version pins
+
+**Status:** Accepted (2026-09-24)
+
+**Context:** Several "latest" packages don't work together yet: electron-vite 5 supports Vite ≤ 7;
+typescript-eslint supports TypeScript < 6.1 (TS 7 is the new native compiler); eslint-plugin-react
+supports ESLint ≤ 9; Drizzle 1.0 is still a release candidate.
+
+**Decision:** Pin exact versions: Electron 44.4.5, electron-vite 5.0.0, Vite 7.3, @vitejs/plugin-react
+5.2, TypeScript 6.0.3, ESLint 9.39, Drizzle ORM 0.45.3, Vitest 5. Use `@xterm/xterm` (the unscoped
+`xterm` package is deprecated).
+
+**Consequences:** Upgrades are deliberate, one family at a time, with the full test suite. Revisit
+when electron-vite supports Vite 8 and typescript-eslint supports TS 7.
+
+---
+
+## ADR-005: Renderer-only packages are devDependencies
+
+**Status:** Accepted (2026-09-24)
+
+**Context:** electron-builder packs `dependencies` into the app. Renderer code (React, Radix,
+dockview, Tailwind…) is bundled by Vite, so shipping those packages again is dead weight.
+
+**Decision:** `dependencies` holds only what the main process loads at runtime (better-sqlite3,
+drizzle-orm, zod, electron-log). Everything the renderer uses is a devDependency.
+
+**Consequences:** Smaller installer. A package used by main must be moved to `dependencies`, or it
+will be missing in the packaged app (caught by the Phase 6 smoke test).
+
+---
+
+## ADR-006: Migrations bundled into the main build
+
+**Status:** Accepted (2026-09-24)
+
+**Context:** Drizzle's runtime migrator reads a migrations folder from disk, which then has to be
+shipped and located correctly in packaged builds.
+
+**Decision:** Keep `drizzle-kit generate` for writing SQL, but inline the `.sql` files into the main
+bundle via `import.meta.glob` and apply them with a ~40-line migrator that records applied names in
+`__forge_migrations`.
+
+**Consequences:** Migrations can't go missing in a packaged app. Only forward migrations are
+supported (no down-migrations), which is fine for a single-user local DB.
+
+---
+
+## ADR-007: Webview visibility is owned by the renderer
+
+**Status:** Accepted (2026-09-24)
+
+**Context:** WebContentsViews paint above all HTML. Whether a view may show depends on renderer-only
+facts: its dockview tab is visible, its room is active, no overlay (palette, dialog, select, dock
+drag) is open.
+
+**Decision:** The panel computes `visible` and sends it with its bounds (`webview:setBounds`). Every
+overlay component registers itself in a shared overlay store. Main just applies what it's told.
+
+**Consequences:** A new overlay component must call `useRegisterOverlay(open)`, or a webview can
+cover it. Radix tooltips and toasts are deliberately _not_ overlays, since hiding a chart for a
+tooltip would be worse than a clipped tooltip.
+
+---
+
+## ADR-008: No tree-kill dependency
+
+**Status:** Accepted (2026-09-24)
+
+**Context:** The sidecar runs as `uv → python (venv shim) → python`. Killing only the direct child
+orphans the interpreter.
+
+**Decision:** Implement `killTree` directly: `taskkill /PID <pid> /T /F` on Windows, process-group
+kill elsewhere. As a second safety net, the sidecar watches `FORGE_PARENT_PID` and exits if Forge
+dies.
+
+**Consequences:** One less dependency. An e2e test checks that no process from the sidecar tree
+survives quitting.

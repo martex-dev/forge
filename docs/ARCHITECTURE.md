@@ -66,3 +66,42 @@ sidecar/forge_sidecar/routers/<id>.py  optional Python endpoints
 
 - App DB: SQLite at `userData/forge.db`, via `better-sqlite3` + Drizzle, with migrations. Owned by main only.
 - Secrets: a separate file under `userData`, encrypted with Electron `safeStorage` (DPAPI on Windows). Never stored in SQLite, logs or renderer state.
+
+## Code map (Phase 0)
+
+| Concern            | Main                                                | Shared                                      | Renderer                                                         |
+| ------------------ | --------------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------- |
+| Startup / shutdown | `src/main/index.ts`                                 |                                             | `src/renderer/main.tsx`, `app/App.tsx`                           |
+| Window + security  | `core/window.ts`, `core/security.ts`, `core/csp.ts` | `constants.ts`                              |                                                                  |
+| IPC                | `core/ipc.ts`, `core/ipc-router.ts`                 | `ipc/contract.ts`, `ipc/channels/*`         | `lib/ipc.ts` (`call()`), `lib/use-forge-event.ts`                |
+| Preload bridge     |                                                     | `ipc/api.ts` (`ForgeApi`)                   | `src/preload/index.ts`                                           |
+| DB                 | `core/db/*` (client, migrate, repos)                | `settings.ts`, `notifications.ts`           | hooks in `app/hooks/*`                                           |
+| Secrets            | `core/secrets/*`                                    | `ipc/channels/secrets.ts`                   | `app/settings/Secret*.tsx`                                       |
+| Modules            | `core/modules/*`                                    | `modules/*.manifest.ts`, `modules/types.ts` | `modules/registry.ts`, `modules/<id>/`                           |
+| Sidecar            | `core/sidecar/*`                                    | `ipc/channels/sidecar.ts`                   | `app/SidecarIndicator.tsx`                                       |
+| Webviews           | `core/webviews/*`                                   | `webviews.ts`, `ipc/channels/webview.ts`    | `app/webview/*`                                                  |
+| Shell UI           |                                                     | `rooms.ts`                                  | `app/*` (TitleBar, RoomRail, StatusBar, CommandPalette, layout/) |
+| Design system      |                                                     |                                             | `styles/tokens.css`, `styles/globals.css`, `ui/*`                |
+
+### Request flow example
+
+`Settings → General → font size 14`:
+
+1. `GeneralSettingsTab` calls `call('settings:updateGeneral', { fontSize: 14 })`.
+2. Preload forwards `{ channel, input }` over the single `forge:invoke` transport.
+3. Main checks the sender is Forge's own renderer, then the router validates the input with the
+   channel's zod schema.
+4. The handler writes through `SettingsRepo` (zod-validated JSON in SQLite), emits
+   `settings:generalChanged` and returns the new value.
+5. The router validates the output and returns `{ ok: true, data }`. `call()` unwraps it, and
+   TanStack Query updates the cache.
+
+### Testing layers
+
+- **Vitest** (`npm test`): pure logic in main/shared/renderer: router, repos (in-memory SQLite),
+  registries, secrets service (fake encryptor), sidecar manager (fake process), shortcuts, CSP, and
+  a scan that fails on hardcoded colors outside `tokens.css`.
+- **Playwright + Electron** (`npm run test:e2e`): the real app with a throwaway `--user-data-dir`:
+  security, IPC, restart persistence (settings, layouts, secrets), secret-leak scan of every file,
+  shortcuts/palette/module toggling, webview visibility, sidecar crash recovery and orphan check.
+- **pytest** (`cd sidecar; uv run pytest`): sidecar auth and config.
