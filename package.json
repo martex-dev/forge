@@ -24,6 +24,7 @@
 		"test:watch": "vitest",
 		"test:e2e": "electron-vite build && playwright test",
 		"dist": "electron-vite build && electron-builder --win",
+		"db:generate": "drizzle-kit generate",
 		"postinstall": "electron-builder install-app-deps",
 		"prepare": "simple-git-hooks"
 	},
@@ -40,6 +41,8 @@
 		]
 	},
 	"dependencies": {
+		"better-sqlite3": "13.0.3",
+		"drizzle-orm": "0.45.3",
 		"electron-log": "5.4.4",
 		"zod": "4.6.5"
 	},
@@ -49,10 +52,12 @@
 		"@fontsource/jetbrains-mono": "5.3.0",
 		"@playwright/test": "1.63.0",
 		"@tailwindcss/vite": "4.3.3",
+		"@types/better-sqlite3": "9.6.0",
 		"@types/node": "24.13.6",
 		"@types/react": "19.3.0",
 		"@types/react-dom": "19.3.0",
 		"@vitejs/plugin-react": "5.2.0",
+		"drizzle-kit": "0.31.11",
 		"electron": "44.4.5",
 		"electron-builder": "26.15.3",
 		"electron-vite": "5.0.0",
@@ -81,6 +86,8 @@
 		"electron-winstaller@5.4.0": true,
 		"esbuild@0.25.12": true,
 		"esbuild@0.28.2": true,
-		"simple-git-hooks@2.14.0": true
+		"simple-git-hooks@2.14.0": true,
+		"esbuild@0.18.20": true,
+		"better-sqlite3@13.0.3": true
 	}
 }

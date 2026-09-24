@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 
 import { appChannels } from './channels/app';
+import { dataChannels, dataEvents } from './channels/data';
 import { defineEvents } from './define';
 
 /**
@@ -9,10 +10,13 @@ import { defineEvents } from './define';
  */
 export const ipcContract = {
 	...appChannels,
+	...dataChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */
-export const eventContract = defineEvents({});
+export const eventContract = defineEvents({
+	...dataEvents,
+});
 
 export type IpcContract = typeof ipcContract;
 export type Channel = keyof IpcContract;
