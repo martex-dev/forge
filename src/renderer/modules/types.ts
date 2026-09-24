@@ -18,6 +18,11 @@ export interface PanelDefinition {
 	component: ComponentType<PanelProps>;
 	/** Opened in the room's default layout (first launch and after "Reset layout"). */
 	defaultOpen?: boolean;
+	/**
+	 * 'always' keeps the panel mounted while its tab is hidden (needed for webviews and
+	 * terminals, which would otherwise be torn down and reloaded on every tab switch).
+	 */
+	renderer?: 'always' | 'onlyWhenVisible';
 }
 
 /** Everything a command may do; implemented by the shell. */

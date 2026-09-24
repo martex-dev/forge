@@ -27,7 +27,13 @@ export function openPanelIn(api: DockviewApi, def: PanelDefinition): void {
 		existing.api.setActive();
 		return;
 	}
-	api.addPanel({ id: def.id, component: def.id, title: def.title, params: { room: def.room } });
+	api.addPanel({
+		id: def.id,
+		component: def.id,
+		title: def.title,
+		params: { room: def.room },
+		...(def.renderer ? { renderer: def.renderer } : {}),
+	});
 }
 
 /** Clears the room and opens every default panel of its enabled modules. */

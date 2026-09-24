@@ -14,6 +14,8 @@ import { createSecretsService, registerSecretsHandlers } from './core/secrets/se
 import { installGlobalSecurity } from './core/security';
 import { createSidecar } from './core/sidecar';
 import type { SidecarManager } from './core/sidecar/sidecar-manager';
+import { createWebviews } from './core/webviews';
+import type { WebviewService } from './core/webviews/webview-service';
 import { createMainWindow } from './core/window';
 
 // Logs live next to the rest of userData so --user-data-dir (tests) isolates them too.
@@ -38,15 +40,29 @@ async function start(): Promise<void> {
 	registerSecretsHandlers(secrets);
 	sidecar = createSidecar(notify);
 
+	const webviews = createWebviews(() => mainWindow);
+
 	modules = createModuleRegistry({ settings: data.settings, secrets, notify, sidecar });
 	await modules.start();
 
-	createMainWindow();
+	openWindow(webviews);
 	// Started after the window so a slow first `uv sync` never delays the UI.
 	void sidecar?.start();
 
 	app.on('activate', () => {
-		if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
+		if (BrowserWindow.getAllWindows().length === 0) openWindow(webviews);
+	});
+}
+
+let mainWindow: BrowserWindow | null = null;
+
+function openWindow(webviews: WebviewService): void {
+	const win = createMainWindow();
+	mainWindow = win;
+	win.on('closed', () => {
+		// Views belong to the window; drop our references so a new window starts clean.
+		webviews.destroyAll();
+		if (mainWindow === win) mainWindow = null;
 	});
 }
 

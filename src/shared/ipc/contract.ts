@@ -5,6 +5,7 @@ import { dataChannels, dataEvents } from './channels/data';
 import { moduleChannels, moduleEvents } from './channels/modules';
 import { secretChannels } from './channels/secrets';
 import { sidecarChannels, sidecarEvents } from './channels/sidecar';
+import { webviewChannels, webviewEvents } from './channels/webview';
 import { defineEvents } from './define';
 
 /**
@@ -17,6 +18,7 @@ export const ipcContract = {
 	...moduleChannels,
 	...sidecarChannels,
 	...secretChannels,
+	...webviewChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */
@@ -24,6 +26,7 @@ export const eventContract = defineEvents({
 	...dataEvents,
 	...moduleEvents,
 	...sidecarEvents,
+	...webviewEvents,
 });
 
 export type IpcContract = typeof ipcContract;

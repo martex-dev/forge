@@ -11,6 +11,7 @@ import type { RoomId } from '@shared/rooms';
 import { call } from '../../lib/ipc';
 import { rlog } from '../../lib/log';
 import type { PanelDefinition } from '../../modules/types';
+import { useOverlayStore } from '../../stores/overlay-store';
 import { toast } from '../../stores/toast-store';
 import {
 	applyDefaultLayout,
@@ -68,6 +69,17 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 			};
 			const sub = api.onDidLayoutChange(persist);
 
+			// Native webviews would cover dockview's drop targets, so a drag counts as an overlay.
+			const dragId = `dock-drag-${room}`;
+			const endDrag = (): void => useOverlayStore.getState().remove(dragId);
+			const dragSubs = [
+				api.onWillDragPanel(() => useOverlayStore.getState().add(dragId)),
+				api.onWillDragGroup(() => useOverlayStore.getState().add(dragId)),
+				api.onDidDrop(endDrag),
+			];
+			window.addEventListener('dragend', endDrag, true);
+			window.addEventListener('drop', endDrag, true);
+
 			void (async () => {
 				try {
 					const saved = await call('layouts:get', room);
@@ -92,6 +104,10 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 			cleanupRef.current = () => {
 				clearTimeout(timer);
 				sub.dispose();
+				for (const d of dragSubs) d.dispose();
+				window.removeEventListener('dragend', endDrag, true);
+				window.removeEventListener('drop', endDrag, true);
+				endDrag();
 				unregister();
 			};
 		},
