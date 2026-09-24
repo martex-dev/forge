@@ -91,6 +91,14 @@ export const BUILTIN_COMMANDS: readonly CommandDefinition[] = [
 		run: (ctx) => ctx.reloadWindow(),
 	},
 	{
+		id: 'core.restartSidecar',
+		title: 'Restart Python Sidecar',
+		room: 'global',
+		keywords: ['python', 'backend', 'uv', 'fastapi'],
+		icon: RotateCw,
+		run: (ctx) => ctx.restartSidecar(),
+	},
+	{
 		id: 'core.togglePlayground',
 		title: 'Dev: Open Design Playground',
 		room: 'global',

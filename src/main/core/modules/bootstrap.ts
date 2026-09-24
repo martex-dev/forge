@@ -4,7 +4,11 @@ import { MANIFESTS } from '@shared/modules';
 import { ModuleTogglesSchema } from '@shared/settings';
 
 import type { SettingsRepo } from '../db/settings-repo';
+import { ForgeError } from '../errors';
 import { emitEvent, router } from '../ipc';
+import type { Notifier } from '../notify';
+import type { SecretsService } from '../secrets/secrets-service';
+import type { SidecarManager } from '../sidecar/sidecar-manager';
 import { ModuleRegistry } from './registry';
 import type { MainModule } from './types';
 
@@ -14,7 +18,15 @@ const found = import.meta.glob<MainModule>('../../modules/*/index.ts', {
 	eager: true,
 });
 
-export function createModuleRegistry(settings: SettingsRepo): ModuleRegistry {
+export interface CoreServices {
+	settings: SettingsRepo;
+	secrets: SecretsService;
+	notify: Notifier;
+	sidecar: SidecarManager | null;
+}
+
+export function createModuleRegistry(services: CoreServices): ModuleRegistry {
+	const { settings, secrets, notify, sidecar } = services;
 	const mainModules = new Map(Object.values(found).map((m) => [m.manifest.id, m]));
 
 	const registry = new ModuleRegistry({
@@ -25,6 +37,7 @@ export function createModuleRegistry(settings: SettingsRepo): ModuleRegistry {
 		setToggles: (toggles) => settings.set('modules', ModuleTogglesSchema, toggles),
 		createContext: (manifest, disposers) => {
 			const scope = log.scope(manifest.id);
+			const declared = new Set((manifest.requiredSecrets ?? []).map((s) => s.key));
 			return {
 				manifest,
 				log: {
@@ -37,6 +50,27 @@ export function createModuleRegistry(settings: SettingsRepo): ModuleRegistry {
 				},
 				emit: emitEvent,
 				onDispose: (fn) => disposers.push(fn),
+				notify: (input) => {
+					notify({ ...input, module: manifest.id });
+				},
+				getSecret: (key) => {
+					// A module may only read secrets it declared, so one module can't read another's keys.
+					if (!declared.has(key)) {
+						throw new ForgeError(
+							'SECRET_NOT_DECLARED',
+							`${manifest.id} did not declare "${key}"`,
+						);
+					}
+					return secrets.get(key);
+				},
+				sidecar: (method, path, body) => {
+					if (!sidecar) {
+						return Promise.reject(
+							new ForgeError('SIDECAR_UNAVAILABLE', 'Sidecar is disabled'),
+						);
+					}
+					return sidecar.request(method, path, body);
+				},
 			};
 		},
 		onError: (id, phase, error) =>

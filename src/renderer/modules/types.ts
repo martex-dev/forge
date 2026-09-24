@@ -29,6 +29,7 @@ export interface CommandContext {
 	openPalette(): void;
 	togglePlayground(): void;
 	reloadWindow(): void;
+	restartSidecar(): void;
 }
 
 export interface CommandDefinition {

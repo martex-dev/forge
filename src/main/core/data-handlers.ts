@@ -7,6 +7,7 @@ import { LayoutsRepo } from './db/layouts-repo';
 import { NotificationsRepo } from './db/notifications-repo';
 import { SettingsRepo } from './db/settings-repo';
 import { emitEvent, router } from './ipc';
+import type { Notifier } from './notify';
 
 export interface DataServices {
 	settings: SettingsRepo;
@@ -24,7 +25,10 @@ export function createDataServices(handle: DbHandle): DataServices {
 	};
 }
 
-export function registerDataHandlers({ settings, layouts, notifications }: DataServices): void {
+export function registerDataHandlers(
+	{ settings, layouts, notifications }: DataServices,
+	notify: Notifier,
+): void {
 	const general = (): ReturnType<typeof GeneralSettingsSchema.parse> =>
 		settings.get('general', GeneralSettingsSchema, DEFAULT_GENERAL);
 
@@ -51,9 +55,5 @@ export function registerDataHandlers({ settings, layouts, notifications }: DataS
 		notifications.markAllRead();
 		changed();
 	});
-	router.handle('notifications:add', (input) => {
-		const created = notifications.add(input);
-		changed();
-		return created;
-	});
+	router.handle('notifications:add', (input) => notify(input));
 }

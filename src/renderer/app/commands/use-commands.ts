@@ -35,6 +35,12 @@ export function createCommandContext(): CommandContext {
 				rlog.error('commands', 'reload failed', error),
 			);
 		},
+		restartSidecar: () => {
+			call('sidecar:restart').catch((error: unknown) => {
+				rlog.error('commands', 'sidecar restart failed', error);
+				toast.error('Could not restart the sidecar');
+			});
+		},
 	};
 }
 

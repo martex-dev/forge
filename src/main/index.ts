@@ -6,11 +6,14 @@ import log from 'electron-log/main';
 import { registerAppHandlers } from './core/app-handlers';
 import { createDataServices, registerDataHandlers } from './core/data-handlers';
 import { type DbHandle, openDatabase } from './core/db/client';
-import { attachIpc, router } from './core/ipc';
+import { attachIpc } from './core/ipc';
 import { createModuleRegistry } from './core/modules/bootstrap';
 import type { ModuleRegistry } from './core/modules/registry';
+import { createNotifier } from './core/notify';
 import { createSecretsService, registerSecretsHandlers } from './core/secrets/secrets-handlers';
 import { installGlobalSecurity } from './core/security';
+import { createSidecar } from './core/sidecar';
+import type { SidecarManager } from './core/sidecar/sidecar-manager';
 import { createMainWindow } from './core/window';
 
 // Logs live next to the rest of userData so --user-data-dir (tests) isolates them too.
@@ -19,6 +22,7 @@ log.initialize();
 
 let db: DbHandle | null = null;
 let modules: ModuleRegistry | null = null;
+let sidecar: SidecarManager | null = null;
 
 async function start(): Promise<void> {
 	installGlobalSecurity();
@@ -27,18 +31,19 @@ async function start(): Promise<void> {
 	db = openDatabase(join(app.getPath('userData'), 'forge.db'));
 	const data = createDataServices(db);
 	const secrets = createSecretsService();
+	const notify = createNotifier(data.notifications);
 
 	registerAppHandlers();
-	registerDataHandlers(data);
+	registerDataHandlers(data, notify);
 	registerSecretsHandlers(secrets);
-	// TODO(phase-0): replaced by SidecarManager in step 0.11.
-	router.handle('sidecar:getStatus', () => ({ state: 'disabled' as const, attempt: 0 }));
-	router.handle('sidecar:restart', () => ({ state: 'disabled' as const, attempt: 0 }));
+	sidecar = createSidecar(notify);
 
-	modules = createModuleRegistry(data.settings);
+	modules = createModuleRegistry({ settings: data.settings, secrets, notify, sidecar });
 	await modules.start();
 
 	createMainWindow();
+	// Started after the window so a slow first `uv sync` never delays the UI.
+	void sidecar?.start();
 
 	app.on('activate', () => {
 		if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
@@ -64,8 +69,9 @@ app.on('before-quit', (event) => {
 	void (async () => {
 		try {
 			await modules?.stopAll();
+			await sidecar?.stop();
 		} catch (error) {
-			log.error('[main] error while stopping modules', error);
+			log.error('[main] error during shutdown', error);
 		}
 		db?.close();
 		db = null;
