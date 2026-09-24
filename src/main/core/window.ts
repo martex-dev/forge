@@ -4,6 +4,8 @@ import { BrowserWindow } from 'electron';
 
 import { APP_NAME } from '@shared/constants';
 
+import { lockWindowNavigation } from './security';
+
 export function createMainWindow(): BrowserWindow {
 	const win = new BrowserWindow({
 		width: 1440,
@@ -22,6 +24,7 @@ export function createMainWindow(): BrowserWindow {
 		},
 	});
 
+	lockWindowNavigation(win);
 	win.once('ready-to-show', () => win.show());
 
 	const devUrl = process.env['ELECTRON_RENDERER_URL'];

@@ -8,11 +8,9 @@
 	"include": [
 		"electron.vite.config.ts",
 		"vitest.config.ts",
-		"playwright.config.ts",
 		"drizzle.config.ts",
 		"src/main/**/*",
 		"src/preload/**/*",
-		"src/shared/**/*",
-		"e2e/**/*"
+		"src/shared/**/*"
 	]
 }

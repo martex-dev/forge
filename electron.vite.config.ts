@@ -2,6 +2,28 @@ import { resolve } from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'electron-vite';
+import type { Plugin } from 'vite';
+
+import { buildCsp } from './src/main/core/csp';
+
+function cspPlugin(): Plugin {
+	let mode: 'development' | 'production' = 'production';
+	return {
+		name: 'forge-csp',
+		configResolved(config) {
+			mode = config.command === 'serve' ? 'development' : 'production';
+		},
+		transformIndexHtml() {
+			return [
+				{
+					tag: 'meta',
+					attrs: { 'http-equiv': 'Content-Security-Policy', content: buildCsp(mode) },
+					injectTo: 'head-prepend',
+				},
+			];
+		},
+	};
+}
 
 const alias = {
 	'@main': resolve(__dirname, 'src/main'),
@@ -27,7 +49,7 @@ export default defineConfig({
 	renderer: {
 		root: resolve(__dirname, 'src/renderer'),
 		resolve: { alias },
-		plugins: [react()],
+		plugins: [react(), cspPlugin()],
 		build: {
 			rollupOptions: { input: { index: resolve(__dirname, 'src/renderer/index.html') } },
 		},
