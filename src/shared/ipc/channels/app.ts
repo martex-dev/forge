@@ -22,4 +22,14 @@ export const appChannels = defineChannels({
 	},
 	'app:reloadWindow': { input: z.void(), output: z.void() },
 	'app:openExternal': { input: z.url({ protocol: /^https$/ }), output: z.void() },
+	/** Renderer has no file logger; it forwards warnings/errors to main's electron-log. */
+	'app:log': {
+		input: z.object({
+			level: z.enum(['info', 'warn', 'error']),
+			scope: z.string().max(64),
+			message: z.string().max(4000),
+			detail: z.string().max(20_000).optional(),
+		}),
+		output: z.void(),
+	},
 });

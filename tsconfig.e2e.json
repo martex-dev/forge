@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"composite": true,
 		"lib": ["ES2023", "DOM"],
-		"types": ["node"]
+		"types": ["node", "vite/client"]
 	},
 	"include": ["playwright.config.ts", "e2e/**/*", "src/preload/index.d.ts", "src/shared/**/*"]
 }

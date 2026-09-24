@@ -28,6 +28,6 @@ test('settings persist across restarts', async () => {
 		expect(loaded).toMatchObject({ ok: true, data: { fontSize: 14 } });
 		await second.close();
 	} finally {
-		rmSync(dir, { recursive: true, force: true });
+		rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
 	}
 });

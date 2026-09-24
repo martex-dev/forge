@@ -22,7 +22,7 @@ export const test = base.extend<ForgeFixtures>({
 	userDataDir: async ({}, use) => {
 		const dir = mkdtempSync(join(tmpdir(), 'forge-e2e-'));
 		await use(dir);
-		rmSync(dir, { recursive: true, force: true });
+		rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
 	},
 	app: async ({ userDataDir }, use) => {
 		const app = await electron.launch({

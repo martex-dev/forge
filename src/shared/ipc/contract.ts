@@ -2,6 +2,9 @@ import type { z } from 'zod';
 
 import { appChannels } from './channels/app';
 import { dataChannels, dataEvents } from './channels/data';
+import { moduleChannels, moduleEvents } from './channels/modules';
+import { secretChannels } from './channels/secrets';
+import { sidecarChannels, sidecarEvents } from './channels/sidecar';
 import { defineEvents } from './define';
 
 /**
@@ -11,11 +14,16 @@ import { defineEvents } from './define';
 export const ipcContract = {
 	...appChannels,
 	...dataChannels,
+	...moduleChannels,
+	...sidecarChannels,
+	...secretChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */
 export const eventContract = defineEvents({
 	...dataEvents,
+	...moduleEvents,
+	...sidecarEvents,
 });
 
 export type IpcContract = typeof ipcContract;

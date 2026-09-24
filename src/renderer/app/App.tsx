@@ -1,15 +1,18 @@
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { JSX } from 'react';
 
+import { queryClient } from '../lib/query-client';
 import { Toaster } from '../ui/Toast';
 import { TooltipProvider } from '../ui/Tooltip';
-import { DesignPlayground } from './DesignPlayground';
+import { AppShell } from './AppShell';
 
-// TODO(phase-0): replaced by the app shell in step 0.6.
 export function App(): JSX.Element {
 	return (
-		<TooltipProvider>
-			<DesignPlayground />
-			<Toaster />
-		</TooltipProvider>
+		<QueryClientProvider client={queryClient}>
+			<TooltipProvider>
+				<AppShell />
+				<Toaster />
+			</TooltipProvider>
+		</QueryClientProvider>
 	);
 }
