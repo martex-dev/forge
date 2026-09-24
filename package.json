@@ -1,0 +1,63 @@
+{
+	"name": "forge",
+	"productName": "Forge",
+	"version": "0.1.0",
+	"description": "Personal command center: code editor, trading desk, ML lab and knowledge hub.",
+	"private": true,
+	"author": "Marto",
+	"main": "./out/main/index.js",
+	"engines": {
+		"node": ">=22"
+	},
+	"scripts": {
+		"dev": "electron-vite dev",
+		"build": "electron-vite build",
+		"preview": "electron-vite preview",
+		"lint": "eslint .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"typecheck": "npm run typecheck:node && npm run typecheck:web",
+		"typecheck:node": "tsc --noEmit -p tsconfig.node.json",
+		"typecheck:web": "tsc --noEmit -p tsconfig.web.json",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:e2e": "electron-vite build && playwright test",
+		"dist": "electron-vite build && electron-builder --win",
+		"postinstall": "electron-builder install-app-deps",
+		"prepare": "simple-git-hooks"
+	},
+	"simple-git-hooks": {
+		"pre-commit": "npx lint-staged"
+	},
+	"lint-staged": {
+		"*.{ts,tsx,js,mjs,cjs}": [
+			"eslint --fix",
+			"prettier --write"
+		],
+		"*.{json,css,md,html,yml,yaml}": [
+			"prettier --write"
+		]
+	},
+	"dependencies": {
+		"electron-log": "5.4.4",
+		"react": "19.3.0",
+		"react-dom": "19.3.0",
+		"zod": "4.6.5"
+	},
+	"devDependencies": {
+		"@types/node": "24.13.6",
+		"@types/react": "19.3.0",
+		"@types/react-dom": "19.3.0",
+		"@vitejs/plugin-react": "5.2.0",
+		"electron": "44.4.5",
+		"electron-builder": "26.15.3",
+		"electron-vite": "5.0.0",
+		"typescript": "6.0.3",
+		"vite": "7.3.6"
+	},
+	"allowScripts": {
+		"electron-winstaller@5.4.0": true,
+		"esbuild@0.25.12": true,
+		"esbuild@0.28.2": true
+	}
+}
