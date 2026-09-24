@@ -17,13 +17,13 @@
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
-| Process | Trust level | Can do |
-|---|---|---|
+| Process      | Trust level                         | Can do                                                                                           |
+| ------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
 | **Renderer** | Untrusted (treated like a web page) | Draw UI, call `window.forge.*`. No Node, no filesystem, no secrets, no network to third parties. |
-| **Preload** | Bridge | Exposes a small typed API with `contextBridge`. Contains no business logic. |
-| **Main** | Trusted | Owns windows, filesystem, DB, secrets, PTYs, git, outbound API calls, webviews, the sidecar. |
-| **Sidecar** | Trusted, local only | Python-only work: data, ML, MT5, market feeds. Reachable only by main, with a token. |
-| **Webviews** | Untrusted third-party | One `WebContentsView` per service, own persistent partition, no preload, no Node. |
+| **Preload**  | Bridge                              | Exposes a small typed API with `contextBridge`. Contains no business logic.                      |
+| **Main**     | Trusted                             | Owns windows, filesystem, DB, secrets, PTYs, git, outbound API calls, webviews, the sidecar.     |
+| **Sidecar**  | Trusted, local only                 | Python-only work: data, ML, MT5, market feeds. Reachable only by main, with a token.             |
+| **Webviews** | Untrusted third-party               | One `WebContentsView` per service, own persistent partition, no preload, no Node.                |
 
 ## IPC
 

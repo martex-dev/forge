@@ -1,0 +1,11 @@
+out/
+dist/
+release/
+node_modules/
+package-lock.json
+sidecar/
+packages/
+drizzle/meta/
+playwright-report/
+test-results/
+CLAUDE.md
