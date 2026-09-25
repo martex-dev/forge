@@ -39,13 +39,16 @@ test('LSP (basedpyright): diagnostics, hover, go to definition, completion, rena
 		// Hover over `add` in line 5 shows its signature.
 		const line5 = editor.locator('.view-line').nth(4);
 		const addToken = line5.getByText('add', { exact: true });
-		await addToken.hover();
-		await expect(page.locator('.monaco-hover:not(.hidden)')).toContainText(
-			/def add\(\s*a: int,\s*b: int\) -> int/,
-			{
-				timeout: 20_000,
-			},
-		);
+		// Re-hover until it answers: a hover sent while the server is still analysing comes back
+		// empty, and Monaco doesn't ask again while the mouse stays put.
+		await expect(async () => {
+			await page.mouse.move(0, 0);
+			await addToken.hover();
+			await expect(page.locator('.monaco-hover:not(.hidden)')).toContainText(
+				/def add\(\s*a: int,\s*b: int\) -> int/,
+				{ timeout: 3_000 },
+			);
+		}).toPass({ timeout: 30_000 });
 
 		// Go to definition (F12) from the call jumps to line 1.
 		await addToken.click();
