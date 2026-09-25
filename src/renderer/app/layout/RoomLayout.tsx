@@ -129,7 +129,9 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 
 	return (
 		<div
-			className={active ? 'absolute inset-0' : 'invisible absolute inset-0'}
+			// display:none, not visibility:hidden — dockview sets `visibility: visible` on its own
+			// elements, which overrides an inherited hidden and let other rooms paint over this one.
+			className={active ? 'absolute inset-0' : 'hidden'}
 			aria-hidden={!active}
 			inert={!active}
 			data-room-layout={room}

@@ -2,12 +2,12 @@ import { FilePlus, FolderMinus, FolderPlus, RefreshCw, X } from 'lucide-react';
 import { type JSX, useRef } from 'react';
 
 import { useWorkspace } from '../../app/hooks/use-workspace';
-import { call } from '../../lib/ipc';
 import { ErrorState } from '../../ui/ErrorState';
 import { IconButton } from '../../ui/IconButton';
 import { Spinner } from '../../ui/Spinner';
 import { FileTree, type FileTreeHandle } from './FileTree';
 import { NoFolder } from './NoFolder';
+import { closeFolder } from './workspace-actions';
 
 export function ExplorerPanel(): JSX.Element {
 	const { info, isLoading, error } = useWorkspace();
@@ -66,7 +66,7 @@ export function ExplorerPanel(): JSX.Element {
 					size='sm'
 					label='Close Folder'
 					icon={<X size={13} />}
-					onClick={() => void call('workspace:close').catch(() => undefined)}
+					onClick={closeFolder}
 				/>
 			</div>
 			<div className='min-h-0 flex-1 overflow-auto'>

@@ -81,6 +81,26 @@ registered through the context is torn down when the module is disabled.
 - **Known limitations:** no drag-and-drop move yet; very large folders (10k+ entries in one
   directory) render without virtualization.
 
+### `editor` — Editor
+
+- **Room:** build · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Monaco on the VS Code service layer (ADR-009) with TextMate grammars (TS/JS,
+  Python, JSON, CSS, HTML, Markdown, YAML, PowerShell, shell, bat, SQL, XML, INI, Rust, Go,
+  Dockerfile) and "Default Dark Modern" recoloured from Forge tokens at runtime (accent follows
+  the room). Loaded lazily the first time a file opens.
+- **Panels:** `editor.main` — one editor with its own tab strip (stays mounted).
+- **Commands:** `Build: Save` (Ctrl+S), `Build: Save All` (Ctrl+Alt+S), `Build: Close Editor Tab`
+  (Ctrl+W), `Build: Show Editor`.
+- **Status bar:** `Ln x, Col y · language · LF/CRLF`.
+- **Behaviour:** dirty dot per tab; close asks Save / Don't Save / Cancel; save checks the disk
+  mtime and shows _Load Disk Version / Overwrite With Mine_ on conflict; clean files follow
+  external changes (undoable), dirty ones are flagged. Per-folder tab sessions restore on reopen.
+  Switching or closing the folder is blocked while files are unsaved.
+- **Secrets / settings / sidecar:** none (font size and reduce-motion come from General settings).
+- **Known limitations:** no split editors or diff view yet (diff arrives with the Git panel); LSP
+  features (hover, go-to-definition, diagnostics) are Phase 2; binary and >5 MB files show a
+  notice instead of content.
+
 ---
 
 ## Template

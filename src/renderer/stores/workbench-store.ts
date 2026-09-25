@@ -8,24 +8,37 @@ export interface OpenFileRequest {
 }
 
 type OpenFileHandler = (request: OpenFileRequest) => void;
+/** Returns a human-readable reason to block leaving the workspace, or null to allow it. */
+type LeaveGuard = () => string | null;
 
 interface WorkbenchState {
 	/** Workspace-relative path of the file focused in the editor, if any. */
 	activeFile: string | null;
 	openFileHandler: OpenFileHandler | null;
+	leaveGuards: ReadonlySet<LeaveGuard>;
 	setActiveFile: (path: string | null) => void;
 	setOpenFileHandler: (handler: OpenFileHandler | null) => void;
+	addLeaveGuard: (guard: LeaveGuard) => () => void;
 }
 
 /**
  * Tiny bus between modules that must not import each other: the explorer (or search, git…)
  * asks to open a file; whichever editor module is enabled registers the handler.
  */
-export const useWorkbenchStore = create<WorkbenchState>((set) => ({
+export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
 	activeFile: null,
 	openFileHandler: null,
+	leaveGuards: new Set(),
 	setActiveFile: (activeFile) => set({ activeFile }),
 	setOpenFileHandler: (openFileHandler) => set({ openFileHandler }),
+	addLeaveGuard: (guard) => {
+		set({ leaveGuards: new Set([...get().leaveGuards, guard]) });
+		return () => {
+			const next = new Set(get().leaveGuards);
+			next.delete(guard);
+			set({ leaveGuards: next });
+		};
+	},
 }));
 
 /** Returns false when no editor module is available to handle the request. */
@@ -34,4 +47,13 @@ export function requestOpenFile(request: OpenFileRequest): boolean {
 	if (!handler) return false;
 	handler(request);
 	return true;
+}
+
+/** Why the open folder can't be switched/closed right now (e.g. unsaved files), or null. */
+export function reasonNotToLeaveWorkspace(): string | null {
+	for (const guard of useWorkbenchStore.getState().leaveGuards) {
+		const reason = guard();
+		if (reason) return reason;
+	}
+	return null;
 }

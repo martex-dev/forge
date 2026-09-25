@@ -22,6 +22,26 @@ test('Ctrl+1…4 switch rooms and update data-room', async ({ page }) => {
 	}
 });
 
+test('only the active room is painted (inactive rooms never show through)', async ({ page }) => {
+	await page.locator('[data-room-layout="build"]').waitFor();
+	// What's actually on top at the center of the main area, not just what the DOM says.
+	const topRoom = (): Promise<string | null> =>
+		page.evaluate(() => {
+			const main = document.querySelector('main')?.getBoundingClientRect();
+			if (!main) return null;
+			const hit = document.elementFromPoint(
+				main.x + main.width / 2,
+				main.y + main.height / 2,
+			);
+			return hit?.closest('[data-room-layout]')?.getAttribute('data-room-layout') ?? null;
+		});
+	await expect.poll(topRoom).toBe('build');
+	await page.keyboard.press('Control+3');
+	await expect.poll(topRoom).toBe('lab');
+	await page.keyboard.press('Control+1');
+	await expect.poll(topRoom).toBe('build');
+});
+
 test('palette opens with Ctrl+K and Ctrl+Shift+P and lists commands from all rooms', async ({
 	page,
 }) => {
@@ -50,25 +70,24 @@ test('palette opens with Ctrl+K and Ctrl+Shift+P and lists commands from all roo
 });
 
 test('disabling a module removes its panel and command live', async ({ page }) => {
-	await page.locator('[data-room-layout="build"]').waitFor();
-	const welcome = page
+	const explorerTab = page
 		.locator('[data-room-layout="build"]')
-		.getByText('Write, run and ship code');
-	await expect(welcome).toBeVisible();
+		.getByRole('tab', { name: 'Explorer' });
+	await expect(explorerTab).toBeVisible();
 
 	await page.evaluate(() =>
-		window.forge.invoke('modules:setEnabled', { id: 'build-core', enabled: false }),
+		window.forge.invoke('modules:setEnabled', { id: 'explorer', enabled: false }),
 	);
-	await expect(welcome).toHaveCount(0);
+	await expect(explorerTab).toHaveCount(0);
 
 	await page.keyboard.press('Control+k');
-	await expect(page.getByRole('dialog').getByText('Build: Show Welcome')).toHaveCount(0);
+	await expect(page.getByRole('dialog').getByText('Build: Show Explorer')).toHaveCount(0);
 	await page.keyboard.press('Escape');
 
 	await page.evaluate(() =>
-		window.forge.invoke('modules:setEnabled', { id: 'build-core', enabled: true }),
+		window.forge.invoke('modules:setEnabled', { id: 'explorer', enabled: true }),
 	);
-	await expect(welcome).toBeVisible();
+	await expect(explorerTab).toBeVisible();
 });
 
 async function launch(dir: string): Promise<ElectronApplication> {
@@ -86,7 +105,7 @@ test('layout survives a restart', async () => {
 		apps.push(first);
 		const page1 = await first.firstWindow();
 		const build1 = page1.locator('[data-room-layout="build"]');
-		await expect(build1.getByText('Write, run and ship code')).toBeVisible();
+		await expect(build1.getByRole('tab', { name: 'Explorer' })).toBeVisible();
 		// Close every panel; the room should then show the empty watermark.
 		const closeButtons = build1.locator('.dv-default-tab-action');
 		while ((await closeButtons.count()) > 0) await closeButtons.first().click();
@@ -99,7 +118,7 @@ test('layout survives a restart', async () => {
 		const page2 = await second.firstWindow();
 		const build2 = page2.locator('[data-room-layout="build"]');
 		await expect(build2.getByText('No panels open')).toBeVisible();
-		await expect(build2.getByText('Write, run and ship code')).toHaveCount(0);
+		await expect(build2.getByRole('tab')).toHaveCount(0);
 	} finally {
 		for (const app of apps) await app.close().catch(() => undefined);
 		rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });

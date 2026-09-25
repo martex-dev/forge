@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 
+import importMetaUrlPlugin from '@codingame/esbuild-import-meta-url-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'electron-vite';
@@ -51,8 +52,20 @@ export default defineConfig({
 		root: resolve(__dirname, 'src/renderer'),
 		resolve: { alias },
 		plugins: [react(), tailwindcss(), cspPlugin()],
+		// monaco-vscode-api resolves assets (WASM, codicons, workers) with new URL(…, import.meta.url);
+		// esbuild's dev pre-bundling would break those URLs without this plugin.
+		optimizeDeps: {
+			esbuildOptions: { plugins: [importMetaUrlPlugin] },
+			include: ['vscode-textmate', 'vscode-oniguruma'],
+		},
+		worker: { format: 'es' },
 		build: {
 			rollupOptions: { input: { index: resolve(__dirname, 'src/renderer/index.html') } },
+			// The editor chunk is large by nature and loaded lazily; don't warn about it.
+			chunkSizeWarningLimit: 12_000,
+			// Never inline assets as data: URLs — editor extensions fetch() their files, and the
+			// CSP only allows connecting to our own origin (app://forge).
+			assetsInlineLimit: 0,
 		},
 	},
 });

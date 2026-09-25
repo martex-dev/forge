@@ -2,26 +2,13 @@ import { FolderOpen, History, X } from 'lucide-react';
 import type { JSX } from 'react';
 
 import { call } from '../../lib/ipc';
-import { toast } from '../../stores/toast-store';
 import { Button } from '../../ui/Button';
 import { EmptyState } from '../../ui/EmptyState';
 import { IconButton } from '../../ui/IconButton';
-
-export function openFolderDialog(): void {
-	call('workspace:openDialog').catch((error: unknown) =>
-		toast.error('Could not open folder', error instanceof Error ? error.message : undefined),
-	);
-}
+import { openFolderDialog, openRecentFolder } from './workspace-actions';
 
 export function NoFolder({ recent }: { recent: string[] }): JSX.Element {
-	const open = (path: string): void => {
-		call('workspace:open', path).catch((error: unknown) =>
-			toast.error(
-				'Could not open folder',
-				error instanceof Error ? error.message : undefined,
-			),
-		);
-	};
+	const open = openRecentFolder;
 	const forget = (path: string): void => {
 		call('workspace:forgetRecent', path).catch(() => undefined);
 	};
