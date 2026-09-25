@@ -73,6 +73,8 @@ export const CalibrationSchema = z.object({
 	n_bins: z.number().int(),
 	/** 'model' first, then any variants (e.g. isotonic) for the same labels. */
 	reports: z.record(z.string(), CalibrationReportSchema),
+	/** Rows skipped for a missing label or probability (file-based reports). */
+	dropped_rows: z.number().int().optional(),
 });
 export type Calibration = z.infer<typeof CalibrationSchema>;
 

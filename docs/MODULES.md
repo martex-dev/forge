@@ -638,6 +638,31 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `mltools` — CV & Calibration
+
+- **Room:** lab · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** cv-visualizer and calibrate as interactive tools (the probe hooks in the Run
+  Monitor cover training scripts).
+    - **CV folds:** PurgedKFold (purged-cv; label horizon + embargo %), KFold (shuffle) or
+      TimeSeriesSplit (gap) over N samples. The fold bands redraw as you change a setting.
+    - **Calibration:** a CSV/Parquet predictions file, a 0/1 label column and a probability
+      column (guessed from the usual names), and up to 4 comparison columns (e.g. isotonic
+      output). Gives the reliability diagram, ECE / MCE / Brier and calibrate's flag. Rows with
+      missing values are skipped and counted.
+- **Engines ("Run with"):** **Forge (bundled)** uses the sidecar's scikit-learn, purged-cv and
+  calibrate. A **kernel** or **Python interpreter** runs the same job source in one of Marto's
+  environments (a warm kernel is reused for 10 minutes), so results match his installed
+  versions. A missing library is reported with an install hint.
+- **Panels:** `mltools.panel` — CV & Calibration (tab next to the Run Monitor; settings saved
+  with the layout).
+- **Commands:** `Lab: CV Folds Playground`, `Lab: Calibration Report from File…`.
+- **Sidecar endpoints:** `POST /mltools/cv`, `POST /mltools/calibration`, `POST /mltools/columns`.
+- **Known limitations:** synthetic label windows (row i resolves at i + horizon) in the
+  playground; real `label_end_times` belong in a script with `probe.log_cv`. Binary
+  calibration only, as in calibrate.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

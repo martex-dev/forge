@@ -57,3 +57,12 @@ export function formatAge(fromMs: number, nowMs: number): string {
 export function shortAddress(address: string): string {
 	return address.length > 12 ? `${address.slice(0, 4)}…${address.slice(-4)}` : address;
 }
+
+/** Metric values: 4 decimals, scientific when tiny, grouped when large; null = NaN logged. */
+export function formatMetric(value: number | null | undefined): string {
+	if (value === null || value === undefined) return 'NaN';
+	const abs = Math.abs(value);
+	if (abs !== 0 && abs < 1e-3) return value.toExponential(3);
+	if (abs >= 1e4) return Math.round(value).toLocaleString('en-US');
+	return value.toFixed(4);
+}

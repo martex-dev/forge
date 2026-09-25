@@ -75,13 +75,8 @@ export function formatDuration(ms: number): string {
 }
 
 /** Compact metric readout: 0.000123 → "1.230e-4", 2.5 → "2.5000", 12345.6 → "12,346". */
-export function formatMetric(value: number | null | undefined): string {
-	if (value === null || value === undefined) return 'NaN';
-	const abs = Math.abs(value);
-	if (abs !== 0 && abs < 1e-3) return value.toExponential(3);
-	if (abs >= 1e4) return Math.round(value).toLocaleString('en-US');
-	return value.toFixed(4);
-}
+// Lives in lib/format so the shared ML views can use it too.
+export { formatMetric } from '../../lib/format';
 
 export function lastValue(
 	points: ReadonlyArray<[number, number | null]> | undefined,

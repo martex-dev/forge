@@ -178,7 +178,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] Notebook runner (jupyter_client): kernels from your environments, cells, rich outputs, autosave
 - [x] Experiment history + side-by-side comparison
 - [x] cv-visualizer and calibrate panels: probe hooks (`log_cv`, `log_calibration`) in the Run Monitor
-- [ ] cv-visualizer and calibrate standalone modes (splitter playground, calibration from a file): needs scikit-learn + purged-cv + calibrate in the sidecar (ask)
+- [x] cv-visualizer and calibrate standalone modes: splitter playground and calibration from a file, bundled or in your environment
 
 ## Phase 5 — Hub depth
 
@@ -192,7 +192,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 - [ ] Packaging note: language servers run from `node_modules` with Electron-as-Node; `typescript` (fallback tsserver) must ship as a runtime dependency
 - [ ] Packaging note: `asarUnpack` the ripgrep binary (`node_modules/@vscode/ripgrep-*/**`); `rgPath()` already maps `.asar` → `.asar.unpacked`.
-- [ ] PyInstaller sidecar bundled via electron-builder (NSIS)
+- [ ] PyInstaller sidecar bundled via electron-builder (NSIS). Mind the size: duckdb, polars, scikit-learn/SciPy, pyzmq; forge-probe is a path dependency and purged-cv/calibrate come from git
 - [ ] Auto-update (electron-updater, GitHub Releases)
 - [ ] Performance pass (measured before/after)
 - [ ] Settings backup/export (no secrets); first-launch onboarding

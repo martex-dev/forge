@@ -19,6 +19,7 @@ from forge_sidecar.routers import (
 	frames,
 	gpu,
 	health,
+	mltools,
 	mt5,
 	notebooks,
 	probe,
@@ -31,6 +32,7 @@ from forge_sidecar.services.dexscreener import DexScreener
 from forge_sidecar.services.earnings import EarningsService
 from forge_sidecar.services.frames import FrameStore
 from forge_sidecar.services.gpu import GpuMonitor
+from forge_sidecar.services.mltools import MlTools
 from forge_sidecar.services.mt5 import Mt5Service
 from forge_sidecar.services.notebooks import NotebookService
 from forge_sidecar.services.runs_store import RunsStore
@@ -101,6 +103,7 @@ def create_app(
 		app.state.earnings = EarningsService(client, cache_dir)
 		app.state.frames = FrameStore(cache_dir)
 		app.state.notebooks = NotebookService()
+		app.state.mltools = MlTools(app.state.notebooks)
 		probe_file = write_probe_file(data_dir, port, probe_token) if data_dir and port else None
 		try:
 			yield
@@ -112,6 +115,7 @@ def create_app(
 			app.state.runs.close()
 			app.state.frames.close()
 			# Kernels are child processes of their own: never leave them running after Forge.
+			await app.state.mltools.close()
 			await app.state.notebooks.shutdown_all()
 			if owned:
 				await client.aclose()
@@ -138,4 +142,5 @@ def create_app(
 	app.include_router(earnings.router)
 	app.include_router(frames.router)
 	app.include_router(notebooks.router)
+	app.include_router(mltools.router)
 	return app

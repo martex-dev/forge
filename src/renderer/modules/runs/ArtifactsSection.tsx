@@ -6,9 +6,9 @@ import type { RunDetail } from '@shared/ipc/channels/lab';
 import { SIDECAR_META } from '../../app/hooks/use-sidecar-recovery';
 import { call } from '../../lib/ipc';
 import { ErrorState } from '../../ui/ErrorState';
+import { CalibrationView } from '../../ui/ml/CalibrationView';
+import { CvFoldsView } from '../../ui/ml/CvFoldsView';
 import { Spinner } from '../../ui/Spinner';
-import { CalibrationView } from './CalibrationView';
-import { CvFoldsView } from './CvFoldsView';
 
 type Info = RunDetail['artifacts'][number];
 

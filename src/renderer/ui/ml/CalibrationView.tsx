@@ -3,9 +3,9 @@ import { type JSX, useMemo } from 'react';
 import type { Calibration } from '@shared/ipc/channels/lab';
 
 import { baseOption, chartColors } from '../../lib/echarts';
-import { EChart } from '../../ui/EChart';
+import { formatMetric } from '../../lib/format';
+import { EChart } from '../EChart';
 import { reliabilityPoints } from './artifacts-model';
-import { formatMetric } from './runs-model';
 
 export function CalibrationView({ name, data }: { name: string; data: Calibration }): JSX.Element {
 	const entries = useMemo(() => Object.entries(data.reports), [data]);

@@ -403,8 +403,8 @@ calibrate's metrics are its product. So Forge must call those libraries, not rei
 - The sidecar stores them as run artifacts (upsert by run, kind, name; 2 MB cap; NaN
   refused) and the Run Monitor renders fold bands (SVG, design tokens) and a reliability
   diagram (ECharts).
-- The standalone modes need scikit-learn, SciPy, purged-cv and calibrate inside Forge's
-  sidecar. That is outside the approved stack, so it waits for Marto's approval.
+- The standalone modes needed scikit-learn, SciPy, purged-cv and calibrate. Marto approved
+  them on 2026-09-25; see ADR-021.
 
 **Consequences:** No new dependencies now. The e2e test stubs a detailed splitter and the
 calibrate module; the real libraries were checked locally.
@@ -436,3 +436,29 @@ envs), not with Forge's own Python.
 
 **Consequences:** Adds jupyter_client, pyzmq, tornado and traitlets to the sidecar. Kernels
 are child processes: the sidecar shuts them all down on exit, and closing a tab shuts its own.
+
+---
+
+## ADR-021: Standalone CV/calibration tools with two engines
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Marto chose to run the standalone tools both inside Forge and in his own
+environments.
+
+**Decision:**
+
+- Sidecar dependencies (approved): `scikit-learn`, `purged-cv` and `calibrate` from
+  github.com/martex-dev (git sources, pinned by `uv.lock`; calibrate brings matplotlib), plus
+  `forge-probe` as an editable path dependency, so `forge_probe.artifacts` builds identical
+  payloads for the probe hooks and the tools.
+- The job functions live once in `mltool_jobs.py`, importing their libraries lazily. The
+  bundled engine calls them directly. The environment engine sends their source (with the
+  artifacts module) into a kernel from the notebook service; parameters travel as a JSON string
+  literal, never as code. The result is one marked JSON line on stdout.
+- One warm kernel per environment is reused for 10 minutes, so a playground slider doesn't pay
+  for Python startup each time.
+
+**Consequences:** The sidecar environment grows by about 150 MB (SciPy is the bulk), which
+matters for Phase 6 packaging. The ML views (`CvFoldsView`, `CalibrationView`) moved to
+`src/renderer/ui/ml/` because two modules render them.

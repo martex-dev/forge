@@ -14,6 +14,10 @@ dependencies = [
 	'duckdb>=1.5.5',
 	'polars>=1.44.2',
 	'jupyter-client>=8.10.0',
+	'scikit-learn>=1.9.1',
+	'purged-cv',
+	'calibrate',
+	'forge-probe',
 ]
 
 [dependency-groups]
@@ -53,3 +57,8 @@ ignore = ['W191', 'E101']
 testpaths = ['tests']
 # A local basetemp: tmp_path setup in the shared %TEMP% took ~60 s on Windows (AV / lock retries).
 addopts = '--basetemp=.pytest-tmp'
+
+[tool.uv.sources]
+purged-cv = { git = 'https://github.com/martex-dev/purged-cv' }
+calibrate = { git = 'https://github.com/martex-dev/calibrate' }
+forge-probe = { path = '../packages/forge-probe', editable = true }
