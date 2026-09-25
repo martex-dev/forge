@@ -24,15 +24,25 @@ class FakeSidecar:
 		self.messages: list[dict[str, Any]] = []
 		self.auth: list[str | None] = []
 		self.lock = threading.Lock()
+		# Set when a connection's handler has read everything: finish() returning only means the
+		# client sent and closed, not that this thread has processed the frames yet.
+		self.closed = threading.Event()
 		self.server: Server = serve(self._handle, '127.0.0.1', 0)
 		self.port = self.server.socket.getsockname()[1]
 		threading.Thread(target=self.server.serve_forever, daemon=True).start()
 
 	def _handle(self, ws: ServerConnection) -> None:
 		self.auth.append(ws.request.headers.get('Authorization') if ws.request else None)
-		for frame in ws:
-			with self.lock:
-				self.messages.extend(json.loads(frame))
+		try:
+			for frame in ws:
+				with self.lock:
+					self.messages.extend(json.loads(frame))
+		finally:
+			self.closed.set()
+
+	def drained(self) -> 'FakeSidecar':
+		assert self.closed.wait(5), 'the probe never closed its connection'
+		return self
 
 	def endpoint(self) -> Endpoint:
 		return Endpoint(url=f'ws://127.0.0.1:{self.port}/probe/ws', token=TOKEN)
@@ -59,6 +69,7 @@ def test_streams_start_logs_and_finish(sidecar: FakeSidecar) -> None:
 		probe.log(step=10, loss=1.0, label='x')  # non-numeric: skipped
 	probe.finish()
 
+	sidecar.drained()
 	assert sidecar.auth == [f'Bearer {TOKEN}']
 	assert sidecar.types() == ['start', 'log', 'log', 'log', 'finish']
 	start, first, second, third, finish = sidecar.messages
@@ -74,6 +85,7 @@ def test_context_manager_reports_failure(sidecar: FakeSidecar) -> None:
 		with forge_probe.run('crash', endpoint=sidecar.endpoint) as probe:
 			probe.log(loss=1.0)
 			raise RuntimeError('CUDA out of memory')
+	sidecar.drained()
 	assert sidecar.messages[-1]['status'] == 'failed'
 	assert sidecar.messages[-1]['error'] == 'RuntimeError: CUDA out of memory'
 
@@ -98,7 +110,7 @@ def test_buffers_until_forge_appears(sidecar: FakeSidecar) -> None:
 	available.set()
 	probe.log(loss=0.5)
 	probe.finish()
-	assert sidecar.types() == ['start', 'log', 'log', 'finish']
+	assert sidecar.drained().types() == ['start', 'log', 'log', 'finish']
 
 
 def test_buffer_is_bounded() -> None:
