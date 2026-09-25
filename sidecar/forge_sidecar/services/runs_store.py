@@ -38,7 +38,18 @@ CREATE TABLE IF NOT EXISTS metrics (
 	UNIQUE (run_id, key, step)
 );
 CREATE INDEX IF NOT EXISTS metrics_run_seq ON metrics(run_id, seq);
+CREATE TABLE IF NOT EXISTS artifacts (
+	run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+	kind TEXT NOT NULL,
+	name TEXT NOT NULL,
+	data TEXT NOT NULL,
+	created_at REAL NOT NULL,
+	PRIMARY KEY (run_id, kind, name)
+);
 """
+
+# CV folds and calibration reports are small summaries; anything bigger is a bug or abuse.
+MAX_ARTIFACT_BYTES = 2_000_000
 
 
 class Run(BaseModel):
@@ -57,8 +68,15 @@ class Run(BaseModel):
 	metric_keys: list[str]
 
 
+class ArtifactInfo(BaseModel):
+	kind: str
+	name: str
+	created_at: float
+
+
 class RunDetail(Run):
 	config: dict[str, Any]
+	artifacts: list[ArtifactInfo] = []
 
 
 class MetricPoint(BaseModel):
@@ -206,7 +224,17 @@ class RunsStore:
 			row = self._db.execute('SELECT * FROM runs WHERE id = ?', (run_id,)).fetchone()
 			if row is None:
 				return None
-			return RunDetail(**self._run(row), config=json.loads(row['config']))
+			artifacts = [
+				ArtifactInfo(kind=a['kind'], name=a['name'], created_at=a['created_at'])
+				for a in self._db.execute(
+					'SELECT kind, name, created_at FROM artifacts '
+					'WHERE run_id = ? ORDER BY kind, name',
+					(run_id,),
+				).fetchall()
+			]
+			return RunDetail(
+				**self._run(row), config=json.loads(row['config']), artifacts=artifacts
+			)
 
 	def metrics(self, run_id: str, after: int = 0) -> MetricsPage:
 		with self._lock:
@@ -222,6 +250,27 @@ class RunsStore:
 			cursor=rows[-1]['seq'] if rows else after,
 			more=more,
 		)
+
+	def put_artifact(self, run_id: str, kind: str, name: str, data: dict[str, Any]) -> bool:
+		"""Upsert by (run, kind, name): logging the same name again replaces it."""
+		text = json.dumps(data, allow_nan=False)
+		if len(text) > MAX_ARTIFACT_BYTES:
+			return False
+		with self._lock, self._db:
+			self._db.execute(
+				'INSERT OR REPLACE INTO artifacts (run_id, kind, name, data, created_at) '
+				'SELECT id, ?, ?, ?, ? FROM runs WHERE id = ?',
+				(kind, name, text, self.clock(), run_id),
+			)
+		return True
+
+	def artifact(self, run_id: str, kind: str, name: str) -> dict[str, Any] | None:
+		with self._lock:
+			row = self._db.execute(
+				'SELECT data FROM artifacts WHERE run_id = ? AND kind = ? AND name = ?',
+				(run_id, kind, name),
+			).fetchone()
+		return None if row is None else json.loads(row['data'])
 
 	def summary(self, run_ids: RunIds) -> Summaries:
 		"""Last, min and max of every metric per run: the comparison table's raw numbers."""

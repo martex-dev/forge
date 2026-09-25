@@ -5,6 +5,7 @@ import { app } from 'electron';
 import { z } from 'zod';
 
 import {
+	ArtifactSchema,
 	MetricsPageSchema,
 	type Run,
 	RunSeriesSchema,
@@ -80,6 +81,15 @@ export const mainModule: MainModule = {
 		);
 		ctx.ipc.handle('runs:metrics', ({ id, after }) =>
 			fetchParsed(ctx, `/runs/${id}/metrics?after=${after}`, MetricsPageSchema),
+		);
+		ctx.ipc.handle('runs:artifact', async ({ id, kind, name }) =>
+			ArtifactSchema.parse({
+				kind,
+				data: await ctx.sidecar(
+					'GET',
+					`/runs/${id}/artifacts/${kind}/${encodeURIComponent(name)}`,
+				),
+			}),
 		);
 		ctx.ipc.handle('runs:summary', async (ids) => {
 			const parsed = SidecarSummarySchema.safeParse(

@@ -24,9 +24,63 @@ export const RunSchema = z.object({
 });
 export type Run = z.infer<typeof RunSchema>;
 
+export const ArtifactKindSchema = z.enum(['cv_folds', 'calibration']);
+export type ArtifactKind = z.infer<typeof ArtifactKindSchema>;
+
 export const RunDetailSchema = RunSchema.extend({
 	config: z.record(z.string(), z.unknown()),
+	/** Logged with probe.log_cv / probe.log_calibration. */
+	artifacts: z.array(
+		z.object({ kind: ArtifactKindSchema, name: z.string(), createdAt: z.number() }),
+	),
 });
+
+export const CV_CATEGORIES = ['train', 'test', 'purged', 'embargoed', 'unused'] as const;
+
+export const CvFoldsSchema = z.object({
+	n: z.number().int().min(0),
+	splitter: z.string(),
+	/** The splitter reported purge/embargo (purged-cv's split_detail). */
+	detailed: z.boolean(),
+	/** Per fold: [category index, start, end) runs covering every row. */
+	folds: z.array(
+		z.array(z.tuple([z.number().int().min(0).max(4), z.number().int(), z.number().int()])),
+	),
+});
+export type CvFolds = z.infer<typeof CvFoldsSchema>;
+
+const Maybe = z.number().nullable();
+export const CalibrationReportSchema = z.object({
+	n_samples: z.number().int(),
+	brier: z.number(),
+	ece: z.number(),
+	mce: z.number(),
+	flag: z.string(),
+	bins: z.array(
+		z.object({
+			lower: z.number(),
+			upper: z.number(),
+			count: z.number().int(),
+			mean_predicted: Maybe,
+			observed_frequency: Maybe,
+			gap: Maybe,
+		}),
+	),
+});
+export type CalibrationReport = z.infer<typeof CalibrationReportSchema>;
+
+export const CalibrationSchema = z.object({
+	n_bins: z.number().int(),
+	/** 'model' first, then any variants (e.g. isotonic) for the same labels. */
+	reports: z.record(z.string(), CalibrationReportSchema),
+});
+export type Calibration = z.infer<typeof CalibrationSchema>;
+
+export const ArtifactSchema = z.discriminatedUnion('kind', [
+	z.object({ kind: z.literal('cv_folds'), data: CvFoldsSchema }),
+	z.object({ kind: z.literal('calibration'), data: CalibrationSchema }),
+]);
+export type Artifact = z.infer<typeof ArtifactSchema>;
 export type RunDetail = z.infer<typeof RunDetailSchema>;
 
 export const MetricPointSchema = z.object({
@@ -104,6 +158,14 @@ export const labChannels = defineChannels({
 		output: MetricsPageSchema,
 	},
 	'runs:delete': { input: RunIdSchema, output: z.void() },
+	'runs:artifact': {
+		input: z.object({
+			id: RunIdSchema,
+			kind: ArtifactKindSchema,
+			name: z.string().min(1).max(100),
+		}),
+		output: ArtifactSchema,
+	},
 	'runs:summary': {
 		input: z.array(RunIdSchema).min(1).max(12),
 		output: z.array(RunSummarySchema),

@@ -6,6 +6,7 @@ import { useNow } from '../../lib/use-now';
 import { Badge, type BadgeTone } from '../../ui/Badge';
 import { ErrorState } from '../../ui/ErrorState';
 import { Spinner } from '../../ui/Spinner';
+import { ArtifactsSection } from './ArtifactsSection';
 import { MetricChart } from './MetricChart';
 import { chartGroups, flattenConfig, formatDuration } from './runs-model';
 import { STATUS_LABEL } from './RunStatusDot';
@@ -76,6 +77,7 @@ export function RunView({ run }: { run: Run }): JSX.Element {
 				</pre>
 			)}
 			{charts}
+			<ArtifactsSection detail={detail} />
 			{config.length > 0 && (
 				<details className='mt-3 rounded-sm border border-border' open>
 					<summary className='cursor-default px-2 py-1 text-12 font-medium text-fg-1 focus-visible:shadow-glow focus-visible:outline-none'>

@@ -1,3 +1,5 @@
+from typing import Any, Literal
+
 from fastapi import APIRouter, HTTPException, Path, Query, Request
 from pydantic import BaseModel, Field
 
@@ -44,6 +46,19 @@ async def series(
 	max_points: int = Query(default=1500, ge=50, le=10000),
 ) -> Series:
 	return Series(series=_store(request).series(run_id, max_points))
+
+
+@router.get('/{run_id}/artifacts/{kind}/{name}')
+async def artifact(
+	request: Request,
+	kind: Literal['cv_folds', 'calibration'],
+	name: str = Path(min_length=1, max_length=100),
+	run_id: str = RunIdPath,
+) -> dict[str, Any]:
+	data = _store(request).artifact(run_id, kind, name)
+	if data is None:
+		raise HTTPException(status_code=404, detail='Artifact not found')
+	return data
 
 
 @router.get('/{run_id}', response_model=RunDetail)

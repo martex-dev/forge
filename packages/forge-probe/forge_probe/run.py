@@ -17,6 +17,7 @@ from typing import Any
 from websockets.exceptions import WebSocketException
 from websockets.sync.client import connect
 
+from forge_probe import artifacts
 from forge_probe.discovery import Endpoint, read_endpoint
 
 MAX_BATCH = 500
@@ -107,6 +108,33 @@ class Run:
 					'metrics': values,
 				}
 			)
+
+	def log_cv(
+		self, splitter: Any, X: Any, y: Any = None, groups: Any = None, name: str = 'cv'
+	) -> None:
+		"""
+		Show the splitter's folds in the Run Monitor: train / test / purged / embargoed / unused
+		per row. X may be the data or just its length.
+		"""
+		self._artifact('cv_folds', name, artifacts.cv_folds(splitter, X, y, groups))
+
+	def log_calibration(
+		self,
+		y_true: Any,
+		y_prob: Any,
+		name: str = 'calibration',
+		n_bins: int = 10,
+		variants: Mapping[str, Any] | None = None,
+	) -> None:
+		"""Reliability diagram + ECE/MCE/Brier (via the calibrate package) in the Run Monitor."""
+		self._artifact('calibration', name, artifacts.calibration(y_true, y_prob, n_bins, variants))
+
+	def _artifact(self, kind: str, name: str, data: dict[str, Any]) -> None:
+		if self._finished:
+			return
+		self._send(
+			{'type': 'artifact', 'run_id': self.id, 'kind': kind, 'name': name[:100], 'data': data}
+		)
 
 	def finish(self, status: str = 'finished', error: str | None = None) -> None:
 		"""Mark the run done and flush (waits at most `finish_timeout` seconds)."""

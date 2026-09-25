@@ -177,7 +177,8 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] DataFrame viewer (CSV/Parquet/Feather via DuckDB): virtualized, stats, filter/sort, SQL
 - [ ] Notebook runner (jupyter_client)
 - [x] Experiment history + side-by-side comparison
-- [ ] cv-visualizer and calibrate panels
+- [x] cv-visualizer and calibrate panels: probe hooks (`log_cv`, `log_calibration`) in the Run Monitor
+- [ ] cv-visualizer and calibrate standalone modes (splitter playground, calibration from a file): needs scikit-learn + purged-cv + calibrate in the sidecar (ask)
 
 ## Phase 5 — Hub depth
 

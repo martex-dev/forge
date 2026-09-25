@@ -238,6 +238,11 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
     - **Charts:** one overlay chart per metric, a colour per run, TensorBoard-style debiased
       EMA smoothing (slider, raw curve faint behind it). Series are thinned to about 1,500
       points per metric; live runs refresh every 5 s.
+- **CV folds and calibration:** `probe.log_cv(splitter, X)` and
+  `probe.log_calibration(y, p, variants=…)` add views under the charts: fold bands (train / test
+  / purged / embargoed / unused, from the splitter's own `split_detail()` or `split()`), and a
+  reliability diagram with bin counts, ECE / MCE / Brier and calibrate's flag per variant.
+  Stored as run artifacts (`artifacts` table, 2 MB cap, replaced by name).
 - **Panels:** `runs.monitor` — Run Monitor (centre, in front of Welcome); `runs.compare` —
   Compare Runs (params: run ids and smoothing, saved with the layout).
 - **Commands:** `Lab: Show Run Monitor`, `Lab: Compare Runs`,
@@ -246,7 +251,8 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 - **Sidecar endpoints:** `WS /probe/ws` (probe → sidecar, JSON-array batches of
   `start` / `log` / `finish`), `GET /runs`, `GET /runs/{id}`, `GET /runs/{id}/metrics?after=`
   (incremental by cursor, 50k points per page), `POST /runs/summary` (last/min/max per metric),
-  `GET /runs/{id}/series?max_points=` (every n-th point plus the last), `DELETE /runs/{id}`. Runs live in
+  `GET /runs/{id}/series?max_points=` (every n-th point plus the last),
+  `GET /runs/{id}/artifacts/{kind}/{name}`, `DELETE /runs/{id}`. Runs live in
   `userData/sidecar/lab/runs.db` (SQLite).
 - **External services / rate limits:** none (local only).
 - **Security:** the probe authenticates with a per-launch **probe token** that opens only

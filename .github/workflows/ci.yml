@@ -83,10 +83,10 @@ jobs:
         run: uv sync --locked
 
       - name: Ruff lint
-        run: uv run ruff check . ../../examples
+        run: uv run ruff check . ../../examples ../../e2e/scripts
 
       - name: Ruff format check
-        run: uv run ruff format --check . ../../examples
+        run: uv run ruff format --check . ../../examples ../../e2e/scripts
 
       - name: Tests
         run: uv run pytest -q

@@ -40,6 +40,33 @@ with forge_probe.run('mnist-cnn', config=cfg) as probe:
   crashed). A script that is killed shows up as **interrupted**.
 - `log()` never blocks: a background thread batches and sends every 250 ms.
 
+## CV folds and calibration
+
+Two extra views appear under the run's charts:
+
+```python
+from purged_cv import PurgedKFold
+
+cv = PurgedKFold(5, label_end_times=t1, embargo_pct=0.01)
+probe.log_cv(cv, X, name='purged 5-fold')  # X can also be just the number of rows
+```
+
+Each fold is drawn as a band of **train / test / purged / embargoed / unused** rows, exactly as the
+splitter reports them. Purge and embargo come from purged-cv's `split_detail()`; plain sklearn
+splitters (`KFold`, `TimeSeriesSplit`) have no such concept and show train/test only, like
+cv-visualizer.
+
+```python
+probe.log_calibration(y_val, p_val, name='holdout', variants={'isotonic': p_val_iso})
+```
+
+A reliability diagram with bin counts, ECE / MCE / Brier and calibrate's plain-language flag,
+for the model and any variants (fit calibrators on held-out data). This one needs Marto's
+[`calibrate`](https://github.com/martex-dev/calibrate) package in the training environment;
+forge-probe itself still only depends on `websockets`.
+
+Logging the same `name` again replaces the view.
+
 ## How it finds Forge
 
 While Forge runs, its sidecar writes `%APPDATA%\Forge\sidecar\probe.json` with a local WebSocket

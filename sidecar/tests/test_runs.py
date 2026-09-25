@@ -164,3 +164,46 @@ def test_summary_and_series_routes() -> None:
 		res = client.get(f'/runs/{RUN}/series?max_points=50', headers=AUTH)
 		assert res.json() == {'series': {'loss': [[1, 0.5]]}}
 		assert client.post('/runs/summary', json={'ids': []}, headers=AUTH).status_code == 422
+
+
+def test_store_artifacts_upsert_list_and_cascade() -> None:
+	store = RunsStore(None)
+	store.start(RUN, 'a', {}, 0.0)
+	assert store.put_artifact(RUN, 'cv_folds', 'cv', {'n': 3, 'folds': []})
+	assert store.put_artifact(RUN, 'cv_folds', 'cv', {'n': 4, 'folds': []})  # replaces
+	assert store.put_artifact(RUN, 'calibration', 'val', {'n_bins': 10})
+	detail = store.get(RUN)
+	assert detail and [(a.kind, a.name) for a in detail.artifacts] == [
+		('calibration', 'val'),
+		('cv_folds', 'cv'),
+	]
+	assert store.artifact(RUN, 'cv_folds', 'cv') == {'n': 4, 'folds': []}
+	# Unknown run: nothing stored. Oversized: refused. NaN: not JSON.
+	store.put_artifact('run-missing-00', 'cv_folds', 'cv', {})
+	assert store.artifact('run-missing-00', 'cv_folds', 'cv') is None
+	assert not store.put_artifact(RUN, 'cv_folds', 'big', {'x': 'y' * 2_100_000})
+	with pytest.raises(ValueError):
+		store.put_artifact(RUN, 'calibration', 'nan', {'ece': math.nan})
+	store.delete(RUN)
+	assert store.artifact(RUN, 'calibration', 'val') is None
+
+
+def test_probe_artifacts_over_the_socket() -> None:
+	artifact = {
+		'type': 'artifact',
+		'run_id': RUN,
+		'kind': 'cv_folds',
+		'name': 'purged',
+		'data': {'n': 2, 'folds': [[[0, 0, 1], [1, 1, 2]]]},
+	}
+	with _client() as client:
+		with client.websocket_connect('/probe/ws', headers=PROBE_AUTH) as ws:
+			ws.send_text(json.dumps([start(), artifact]))
+			ws.send_text(json.dumps([{**artifact, 'kind': 'weights'}]))  # unknown kind: dropped
+			ws.send_text(json.dumps([{'type': 'finish', 'run_id': RUN, 'status': 'finished'}]))
+		detail = client.get(f'/runs/{RUN}', headers=AUTH).json()
+		assert detail['artifacts'][0]['name'] == 'purged'
+		res = client.get(f'/runs/{RUN}/artifacts/cv_folds/purged', headers=AUTH)
+		assert res.json()['folds'] == [[[0, 0, 1], [1, 1, 2]]]
+		assert client.get(f'/runs/{RUN}/artifacts/calibration/x', headers=AUTH).status_code == 404
+		assert client.get(f'/runs/{RUN}/artifacts/weights/x', headers=AUTH).status_code == 422

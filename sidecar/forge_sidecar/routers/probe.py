@@ -42,12 +42,21 @@ class FinishMessage(BaseModel):
 	error: str | None = Field(default=None, max_length=4000)
 
 
-ProbeMessage = Annotated[StartMessage | LogMessage | FinishMessage, Field(discriminator='type')]
+class ArtifactMessage(BaseModel):
+	type: Literal['artifact']
+	run_id: RunId
+	kind: Literal['cv_folds', 'calibration']
+	name: str = Field(min_length=1, max_length=100)
+	data: dict[str, Any]
+
+
+Message = StartMessage | LogMessage | FinishMessage | ArtifactMessage
+ProbeMessage = Annotated[Message, Field(discriminator='type')]
 # The probe batches messages: each frame is a JSON array.
 Batch = TypeAdapter(list[ProbeMessage])
 
 
-def apply(store: RunsStore, message: StartMessage | LogMessage | FinishMessage) -> None:
+def apply(store: RunsStore, message: Message) -> None:
 	if isinstance(message, StartMessage):
 		store.start(
 			message.run_id,
@@ -61,6 +70,15 @@ def apply(store: RunsStore, message: StartMessage | LogMessage | FinishMessage) 
 		)
 	elif isinstance(message, LogMessage):
 		store.log(message.run_id, message.step, message.t, message.metrics)
+	elif isinstance(message, ArtifactMessage):
+		try:
+			stored = store.put_artifact(message.run_id, message.kind, message.name, message.data)
+		except ValueError:  # NaN/inf in the payload
+			stored = False
+		if not stored:
+			logger.warning(
+				'dropping %s artifact %r: too large or not JSON', message.kind, message.name
+			)
 	else:
 		store.finish(message.run_id, message.status, message.error)
 

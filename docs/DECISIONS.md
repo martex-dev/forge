@@ -382,3 +382,29 @@ filter, run SQL and see column statistics, without loading whole files into the 
 
 **Consequences:** About 60 MB more in the sidecar environment (duckdb + polars wheels), which
 matters for Phase 6 packaging. Arrow files cost one conversion per version of the file.
+
+---
+
+## ADR-019: CV folds and calibration as probe artifacts, computed by Marto's libraries
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Marto asked for cv-visualizer and calibrate panels, both as probe hooks and as
+standalone tools. purged-cv states that its boundary arithmetic "would drift if copied", and
+calibrate's metrics are its product. So Forge must call those libraries, not reimplement them.
+
+**Decision:**
+
+- Probe hooks run in the training environment, where the libraries already are:
+  `log_cv` calls the splitter's `split_detail()` (or `split()`) and only run-length encodes the
+  result, mirroring cv-visualizer's `fold_masks` rules (disjoint categories, remainder =
+  unused). `log_calibration` calls `calibrate.calibration_report` and ships its numbers.
+  forge-probe gains no dependency: calibrate is imported lazily with an install hint.
+- The sidecar stores them as run artifacts (upsert by run, kind, name; 2 MB cap; NaN
+  refused) and the Run Monitor renders fold bands (SVG, design tokens) and a reliability
+  diagram (ECharts).
+- The standalone modes need scikit-learn, SciPy, purged-cv and calibrate inside Forge's
+  sidecar. That is outside the approved stack, so it waits for Marto's approval.
+
+**Consequences:** No new dependencies now. The e2e test stubs a detailed splitter and the
+calibrate module; the real libraries were checked locally.

@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import { type Run, type RunDetail, RunStatusSchema } from '@shared/ipc/channels/lab';
+import {
+	ArtifactKindSchema,
+	type Run,
+	type RunDetail,
+	RunStatusSchema,
+} from '@shared/ipc/channels/lab';
 
 /** The sidecar's snake_case run, validated at the process boundary. Times are epoch seconds. */
 export const SidecarRunSchema = z.object({
@@ -20,6 +25,9 @@ export const SidecarRunSchema = z.object({
 });
 export const SidecarRunDetailSchema = SidecarRunSchema.extend({
 	config: z.record(z.string(), z.unknown()),
+	artifacts: z
+		.array(z.object({ kind: ArtifactKindSchema, name: z.string(), created_at: z.number() }))
+		.default([]),
 });
 
 const ms = (seconds: number): number => Math.round(seconds * 1000);
@@ -43,5 +51,13 @@ export function toRun(r: z.infer<typeof SidecarRunSchema>): Run {
 }
 
 export function toRunDetail(r: z.infer<typeof SidecarRunDetailSchema>): RunDetail {
-	return { ...toRun(r), config: r.config };
+	return {
+		...toRun(r),
+		config: r.config,
+		artifacts: r.artifacts.map((a) => ({
+			kind: a.kind,
+			name: a.name,
+			createdAt: ms(a.created_at),
+		})),
+	};
 }
