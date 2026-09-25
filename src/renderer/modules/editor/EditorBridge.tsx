@@ -8,6 +8,7 @@ import { useGeneralSettings } from '../../app/hooks/use-general-settings';
 import { useWorkspace, WORKSPACE_KEY } from '../../app/hooks/use-workspace';
 import { rlog } from '../../lib/log';
 import { loadMonaco, refreshEditorConfiguration } from '../../lib/monaco/load';
+import { setMonacoWorkspaceRoot } from '../../lib/monaco/workspace-root';
 import { useForgeEvent } from '../../lib/use-forge-event';
 import { toast } from '../../stores/toast-store';
 import { useUiStore } from '../../stores/ui-store';
@@ -24,6 +25,8 @@ import { loadSession, saveSession } from './session';
 export function EditorBridge(): JSX.Element | null {
 	const client = useQueryClient();
 	const { info } = useWorkspace();
+	// Language features read other files through Monaco's file service, scoped to this folder.
+	useEffect(() => setMonacoWorkspaceRoot(info.root), [info.root]);
 	const { settings } = useGeneralSettings();
 	const room = useUiStore((s) => s.room);
 	const cursor = useEditorStore((s) => s.cursor);

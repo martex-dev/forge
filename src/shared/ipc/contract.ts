@@ -8,6 +8,7 @@ import { dexChannels, dexEvents } from './channels/dex';
 import { fsChannels, fsEvents } from './channels/fs';
 import { gitChannels, gitEvents } from './channels/git';
 import { labChannels } from './channels/lab';
+import { lspChannels, lspEvents } from './channels/lsp';
 import { moduleChannels, moduleEvents } from './channels/modules';
 import { searchChannels } from './channels/search';
 import { secretChannels } from './channels/secrets';
@@ -39,6 +40,7 @@ export const ipcContract = {
 	...labChannels,
 	...vaultChannels,
 	...searchChannels,
+	...lspChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */
@@ -53,6 +55,7 @@ export const eventContract = defineEvents({
 	...gitEvents,
 	...dexEvents,
 	...vaultEvents,
+	...lspEvents,
 });
 
 export type IpcContract = typeof ipcContract;

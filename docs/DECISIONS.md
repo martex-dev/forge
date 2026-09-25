@@ -251,3 +251,32 @@ reach him when Forge isn't in front.
 
 **Consequences:** No Obsidian plugin to install and nothing proprietary to break; Obsidian and
 Forge can edit side by side. Plugin-specific syntax (Dataview, Excalidraw) isn't rendered.
+
+---
+
+## ADR-014: Language servers in main, relayed over the typed IPC contract
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Monaco needs Python and TypeScript language features. Language servers are separate
+programs speaking JSON-RPC over stdio. The renderer must not spawn processes or read files.
+
+**Decision:**
+
+- Main spawns `basedpyright` and `typescript-language-server` (runtime npm dependencies, no
+  install scripts) with `process.execPath` + `ELECTRON_RUN_AS_NODE`, so no system Node is needed.
+  A small `Content-Length` framer (unit tested) replaces a JSON-RPC runtime dependency.
+- Messages travel as `lsp:send` (renderer → main) and `lsp:message` events (main → renderer) on the
+  existing typed contract, not a separate MessagePort channel. Latency is well under a
+  millisecond per message and it keeps one audited IPC path.
+- The renderer runs `monaco-languageclient` 11 (matches the pinned monaco-vscode-api 37.1.0,
+  ADR-009). Monaco's `initialize()` gains the log, model, extensions, and editor service overrides
+  plus `vscode/localExtensionHost`, which the client needs.
+- A read-only file-system overlay backed by `fs:readFile`/`fs:list` lets VS Code's services load
+  other workspace files; an editor open handler routes cross-file navigation to Forge's editor.
+- One server per language per folder, started lazily on the first file of that language; a
+  renderer reload restarts it (an initialized server can't be re-initialized).
+
+**Consequences:** Real IntelliSense with no system Python/Node requirements beyond the project's
+own venv. basedpyright adds ~27 MB to node_modules. Packaging (Phase 6) must keep the server
+scripts and `typescript` available at runtime.

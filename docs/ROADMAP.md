@@ -157,7 +157,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 ## Phase 2 — Build depth
 
-- [ ] LSP: basedpyright + typescript-language-server
+- [x] LSP: basedpyright + typescript-language-server
 - [x] Workspace search (ripgrep)
 - [ ] GitHub: PRs, issues, Actions, diff review, inbox notifications
 - [ ] Vercel: projects, deployments, logs, promote/rollback with confirmation
@@ -189,6 +189,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 ## Phase 6 — Ship
 
+- [ ] Packaging note: language servers run from `node_modules` with Electron-as-Node; `typescript` (fallback tsserver) must ship as a runtime dependency
 - [ ] Packaging note: `asarUnpack` the ripgrep binary (`node_modules/@vscode/ripgrep-*/**`); `rgPath()` already maps `.asar` → `.asar.unpacked`.
 - [ ] PyInstaller sidecar bundled via electron-builder (NSIS)
 - [ ] Auto-update (electron-updater, GitHub Releases)

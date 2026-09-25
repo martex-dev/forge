@@ -42,12 +42,14 @@
 	},
 	"dependencies": {
 		"@vscode/ripgrep": "1.18.0",
+		"basedpyright": "1.40.1",
 		"better-sqlite3": "13.0.3",
 		"chokidar": "5.0.0",
 		"drizzle-orm": "0.45.3",
 		"electron-log": "5.4.4",
 		"node-pty": "1.1.0",
 		"simple-git": "3.36.0",
+		"typescript-language-server": "6.0.1",
 		"zod": "4.6.5"
 	},
 	"devDependencies": {
@@ -57,6 +59,9 @@
 		"@codingame/monaco-vscode-configuration-service-override": "37.1.0",
 		"@codingame/monaco-vscode-css-default-extension": "37.1.0",
 		"@codingame/monaco-vscode-docker-default-extension": "37.1.0",
+		"@codingame/monaco-vscode-editor-service-override": "37.1.0",
+		"@codingame/monaco-vscode-extensions-service-override": "37.1.0",
+		"@codingame/monaco-vscode-files-service-override": "37.1.0",
 		"@codingame/monaco-vscode-go-default-extension": "37.1.0",
 		"@codingame/monaco-vscode-html-default-extension": "37.1.0",
 		"@codingame/monaco-vscode-ini-default-extension": "37.1.0",
@@ -64,7 +69,9 @@
 		"@codingame/monaco-vscode-json-default-extension": "37.1.0",
 		"@codingame/monaco-vscode-keybindings-service-override": "37.1.0",
 		"@codingame/monaco-vscode-languages-service-override": "37.1.0",
+		"@codingame/monaco-vscode-log-service-override": "37.1.0",
 		"@codingame/monaco-vscode-markdown-basics-default-extension": "37.1.0",
+		"@codingame/monaco-vscode-model-service-override": "37.1.0",
 		"@codingame/monaco-vscode-powershell-default-extension": "37.1.0",
 		"@codingame/monaco-vscode-python-default-extension": "37.1.0",
 		"@codingame/monaco-vscode-rust-default-extension": "37.1.0",
@@ -111,6 +118,7 @@
 		"lucide-react": "1.48.0",
 		"markdown-it": "15.0.2",
 		"monaco-editor": "npm:@codingame/monaco-vscode-editor-api@37.1.0",
+		"monaco-languageclient": "11.0.2",
 		"motion": "13.4.3",
 		"prettier": "3.9.9",
 		"radix-ui": "1.6.7",
@@ -122,6 +130,7 @@
 		"typescript-eslint": "8.70.1",
 		"vite": "7.3.6",
 		"vitest": "5.0.1",
+		"vscode-jsonrpc": "9.0.3",
 		"zustand": "5.0.15"
 	},
 	"allowScripts": {

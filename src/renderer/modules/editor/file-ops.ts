@@ -68,7 +68,11 @@ export async function openFile(monaco: MonacoApi, root: string, path: string): P
 			});
 			return;
 		}
-		const model = monaco.editor.createModel(file.content, undefined, toUri(monaco, root, path));
+		const uri = toUri(monaco, root, path);
+		// Language features (go to definition) may already have loaded this file as a model.
+		const existing = monaco.editor.getModel(uri);
+		if (existing && existing.getValue() !== file.content) existing.setValue(file.content);
+		const model = existing ?? monaco.editor.createModel(file.content, undefined, uri);
 		model.setEOL(
 			file.eol === '\r\n'
 				? monaco.editor.EndOfLineSequence.CRLF

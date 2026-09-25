@@ -325,6 +325,31 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `lsp` — Language Servers
+
+- **Room:** build · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Real language intelligence in the editor. Python via basedpyright
+  (diagnostics, hover, completion, go to definition, rename, inlay type hints), using the
+  folder's `.venv`/`venv` when present. TypeScript/JavaScript via typescript-language-server,
+  using the project's own `typescript` if installed. A server starts the first time a file of its
+  language is opened and stops when the folder closes. Go to definition across files opens the
+  target in Forge's editor at the right line.
+- **Status bar:** `{} Python TS/JS` with a dot per server (starting / ready / error); click to
+  restart.
+- **Commands:** `Build: Restart Language Servers`.
+- **Main:** each server is a child process run with Electron's own Node
+  (`ELECTRON_RUN_AS_NODE`), framed LSP over stdio; the process tree is killed on stop.
+- **Renderer:** `monaco-languageclient` with an IPC transport (`lsp:send` / `lsp:message`). Monaco
+  gained the log, model, extensions and editor service overrides it needs, plus a read-only file
+  provider for the open folder (so other files can be loaded for definitions).
+- **Security:** renderer reads other files only through main's path-guarded `fs:` channels;
+  nothing outside the open folder is visible to the editor.
+- **Known limitations:** definitions in libraries outside the folder (site-packages, typeshed,
+  node_modules types) don't open yet; no Problems panel (diagnostics show inline); no
+  per-project server settings UI.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>
