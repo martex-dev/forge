@@ -17,6 +17,7 @@ import { labChannels } from './channels/lab';
 import { lspChannels, lspEvents } from './channels/lsp';
 import { moduleChannels, moduleEvents } from './channels/modules';
 import { mt5Channels } from './channels/mt5';
+import { notebookChannels } from './channels/notebooks';
 import { searchChannels } from './channels/search';
 import { secretChannels, secretEvents } from './channels/secrets';
 import { sidecarChannels, sidecarEvents } from './channels/sidecar';
@@ -59,6 +60,7 @@ export const ipcContract = {
 	...journalChannels,
 	...earningsChannels,
 	...framesChannels,
+	...notebookChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

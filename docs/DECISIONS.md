@@ -408,3 +408,31 @@ calibrate's metrics are its product. So Forge must call those libraries, not rei
 
 **Consequences:** No new dependencies now. The e2e test stubs a detailed splitter and the
 calibrate module; the real libraries were checked locally.
+
+---
+
+## ADR-020: Notebook runner: kernels in the sidecar, files in main, outputs polled
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Lab should run `.ipynb` notebooks with Marto's real environments (his CUDA/torch
+envs), not with Forge's own Python.
+
+**Decision:**
+
+- The sidecar gains `jupyter_client` (named in the roadmap for this feature) and starts
+  kernels from registered kernelspecs, or from any interpreter via
+  `python -m ipykernel_launcher`. `ipykernel` is a dev-only dependency, for tests.
+- Main reads and writes the `.ipynb` files (atomic, Jupyter formatting). The renderer never
+  touches the file system.
+- Outputs are kept per execution in the sidecar and polled (150 ms) by the panel, the same
+  pattern as the Run Monitor. No new streaming channel is needed, and a window reload
+  reattaches to the kernel (the session id is saved in the panel's params).
+- Reliability: every (re)start waits until iopub has echoed a `kernel_info` probe (ZMQ's
+  slow-joiner problem otherwise loses a fast cell's first output). The shell `execute_reply`
+  also settles an execution if its idle status was missed.
+- `stop_on_error=False` in the kernel. The panel's Run All stops at the first error instead,
+  so a single failing cell never silently aborts cells run on their own.
+
+**Consequences:** Adds jupyter_client, pyzmq, tornado and traitlets to the sidecar. Kernels
+are child processes: the sidecar shuts them all down on exit, and closing a tab shuts its own.

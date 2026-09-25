@@ -604,6 +604,40 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `notebooks` — Notebooks
+
+- **Room:** lab · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Opens and runs Jupyter notebooks (`.ipynb`, nbformat 4) with kernels from
+  Marto's own environments. One tab per notebook; closing the tab shuts its kernel down.
+    - **Kernels:** any registered kernelspec (`python -m ipykernel install --user --name env`),
+      or pick a `python.exe` directly (needs `ipykernel` in that environment). The choice is
+      stored in the notebook's metadata, and the kernel starts by itself the next time. Kernels
+      run with the notebook's folder as cwd.
+    - **Cells:** code, Markdown (rendered; double-click or Enter to edit) and raw. Shift+Enter
+      runs and moves on (adding a cell at the end), Ctrl+Enter runs in place, Alt+Enter runs and
+      inserts below, Tab indents four spaces, Esc leaves the cell. Move, delete and change type
+      from the cell's toolbar. **Run all** stops at the first error, like Jupyter.
+    - **Outputs:** stdout/stderr (with `
+` progress bars like tqdm collapsed, ANSI colours
+      stripped), results, errors with tracebacks, PNG/JPEG/SVG images, Markdown. HTML-only
+      output isn't rendered (pandas and most libraries also send text).
+    - **Autosave** 1.5 s after the last change, written the way Jupyter writes it (1-space
+      indent, line lists), atomically.
+- **Panels:** `notebooks.panel` (multi-instance, tab next to the Run Monitor; empty state has
+  Open / New and recent notebooks).
+- **Commands:** `Lab: Open Notebook…`, `Lab: New Notebook…`, `Lab: Notebooks`.
+- **Settings:** `notebooks:recent`.
+- **Sidecar endpoints:** `GET /nb/kernelspecs`, `POST /nb/sessions`,
+  `POST /nb/sessions/{id}/execute`, `GET /nb/sessions/{id}/executions/{exec}?after=`,
+  `POST …/interrupt`, `POST …/restart`, `DELETE /nb/sessions/{id}`. Outputs are polled every
+  150 ms while a cell runs.
+- **Known limitations:** no `input()` (stdin is off, so it fails instead of hanging). On
+  Windows, Interrupt stops Python code but not a blocking C call such as `time.sleep`; use
+  Restart. No widgets (ipywidgets) and no HTML rendering. Cells are plain text areas, without
+  LSP or completion (yet). Outputs over 8 MB per cell are truncated.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>
