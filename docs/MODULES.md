@@ -350,6 +350,34 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `github` — GitHub
+
+- **Room:** build · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** For the open folder's GitHub repo (from the `origin`/`upstream` remote):
+  pull requests (open/closed/all, "review" badge when you're a requested reviewer), issues and
+  Actions runs, refreshed every couple of minutes while the Build room is visible (runs every 15 s
+  while CI is going). Click a PR for its detail: state, head → base, size, checks (Actions check
+  runs + legacy commit statuses, failing ones counted), the description rendered as Markdown, and
+  every changed file as a numbered unified diff (large files start collapsed). Issues and runs
+  open on github.com.
+- **Notifications (inbox):** main polls every 90 s: a CI run that fails while you're watching it
+  (error → Windows toast when Forge is in the background), your own runs passing (success), and
+  new review requests (click opens that PR). The first poll only records a baseline.
+- **Panels:** `github.panel` — GitHub (tab next to Source Control), `github.pr` — Pull request
+  (centre, next to the editor).
+- **Commands:** `Build: Show GitHub Pull Requests`, `Build: Show GitHub Actions`.
+- **Secrets:** `github.token` — a fine-grained personal access token with read access to
+  Metadata, Contents, Pull requests, Issues, Actions and Commit statuses. Settings → Secrets; the
+  panel shows a connect button until it's set and refreshes as soon as it's saved.
+- **External services / rate limits:** GitHub REST via `@octokit/rest` (5 000 requests/h per
+  token; Forge uses well under 200/h). 401 / rate limit / no access are explained in the panel.
+- **Security:** read-only. The token lives in SecretsService; the renderer only learns whether it
+  exists. The remote is read with `git remote -v` without credential helpers.
+- **Known limitations:** no commenting, reviewing, merging or issue editing yet (write actions
+  will need confirmation dialogs); PR files capped at 300; GitHub Enterprise hosts not supported.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

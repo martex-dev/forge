@@ -2,11 +2,11 @@ import { Link2 } from 'lucide-react';
 import { type JSX, type MouseEvent, useMemo } from 'react';
 
 import { call } from '../../lib/ipc';
+import { renderMarkdown } from '../../lib/markdown/markdown';
 import { toast } from '../../stores/toast-store';
-import { renderMarkdown } from './markdown';
 import { followWikilink, openNote, useBacklinks, useVaultUi } from './use-vault';
 
-import './markdown.css';
+import '../../lib/markdown/markdown.css';
 
 function onLinkClick(e: MouseEvent<HTMLElement>, from: string): void {
 	const anchor = (e.target as HTMLElement).closest('a');

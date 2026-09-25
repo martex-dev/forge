@@ -41,6 +41,7 @@
 		]
 	},
 	"dependencies": {
+		"@octokit/rest": "22.0.1",
 		"@vscode/ripgrep": "1.18.0",
 		"basedpyright": "1.40.1",
 		"better-sqlite3": "13.0.3",

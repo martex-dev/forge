@@ -7,11 +7,12 @@ import { dataChannels, dataEvents } from './channels/data';
 import { dexChannels, dexEvents } from './channels/dex';
 import { fsChannels, fsEvents } from './channels/fs';
 import { gitChannels, gitEvents } from './channels/git';
+import { githubChannels } from './channels/github';
 import { labChannels } from './channels/lab';
 import { lspChannels, lspEvents } from './channels/lsp';
 import { moduleChannels, moduleEvents } from './channels/modules';
 import { searchChannels } from './channels/search';
-import { secretChannels } from './channels/secrets';
+import { secretChannels, secretEvents } from './channels/secrets';
 import { sidecarChannels, sidecarEvents } from './channels/sidecar';
 import { terminalChannels, terminalEvents } from './channels/terminal';
 import { vaultChannels, vaultEvents } from './channels/vault';
@@ -41,6 +42,7 @@ export const ipcContract = {
 	...vaultChannels,
 	...searchChannels,
 	...lspChannels,
+	...githubChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */
@@ -56,6 +58,7 @@ export const eventContract = defineEvents({
 	...dexEvents,
 	...vaultEvents,
 	...lspEvents,
+	...secretEvents,
 });
 
 export type IpcContract = typeof ipcContract;

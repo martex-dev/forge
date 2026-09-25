@@ -4,7 +4,7 @@ import { app, safeStorage } from 'electron';
 
 import { MANIFESTS } from '@shared/modules';
 
-import { router } from '../ipc';
+import { emitEvent, router } from '../ipc';
 import { SecretsService } from './secrets-service';
 
 /** Keys any module manifest declares; e2e runs additionally get a throwaway key. */
@@ -24,6 +24,13 @@ export function createSecretsService(): SecretsService {
 export function registerSecretsHandlers(secrets: SecretsService): void {
 	router.handle('secrets:has', (key) => secrets.has(key));
 	router.handle('secrets:listSaved', () => secrets.savedKeys());
-	router.handle('secrets:set', ({ key, value }) => secrets.set(key, value));
-	router.handle('secrets:delete', (key) => secrets.delete(key));
+	// Panels that depend on a secret (e.g. GitHub) refresh as soon as it's saved or removed.
+	router.handle('secrets:set', async ({ key, value }) => {
+		await secrets.set(key, value);
+		emitEvent('secrets:changed', { key, saved: true });
+	});
+	router.handle('secrets:delete', async (key) => {
+		await secrets.delete(key);
+		emitEvent('secrets:changed', { key, saved: false });
+	});
 }
