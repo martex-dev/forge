@@ -107,12 +107,11 @@ test('layout survives a restart', async () => {
 		const build1 = page1.locator('[data-room-layout="build"]');
 		await expect(build1.getByRole('tab', { name: 'Explorer' })).toBeVisible();
 		// Close every panel; the room should then show the empty watermark.
-		// Inactive tabs hide their close button, so activate each tab before closing it.
-		const tabs = build1.getByRole('tab');
-		while ((await tabs.count()) > 0) {
-			const tab = tabs.first();
-			await tab.click();
-			await tab.locator('.dv-default-tab-action').click();
+		// Tabs in an overflowing group are clipped (not clickable), so fire each close button's
+		// click directly; that's the event dockview listens to.
+		const tabs = build1.locator('.dv-tab');
+		for (let guard = 0; (await tabs.count()) > 0 && guard < 50; guard++) {
+			await tabs.first().locator('.dv-default-tab-action').dispatchEvent('click');
 		}
 		await expect(build1.getByText('No panels open')).toBeVisible();
 		await page1.waitForTimeout(1000); // debounce + write

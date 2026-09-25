@@ -118,7 +118,13 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 
 			const applyDefault = (): void => {
 				applyDefaultLayout(api, panelsRef.current);
-				sizesPendingRef.current = !activeRef.current;
+				if (activeRef.current) {
+					// dockview doesn't honour initialWidth for every root-level split; size them
+					// once the grid has laid out.
+					requestAnimationFrame(() => applyInitialSizes(api, panelsRef.current));
+				} else {
+					sizesPendingRef.current = true;
+				}
 			};
 			void (async () => {
 				try {
