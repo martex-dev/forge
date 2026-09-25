@@ -3,6 +3,8 @@ import { join } from 'node:path';
 import { app, BrowserWindow } from 'electron';
 import log from 'electron-log/main';
 
+import { APP_ID } from '@shared/constants';
+
 import { registerAppHandlers } from './core/app-handlers';
 import { registerAppScheme, serveRenderer } from './core/app-protocol';
 import { createDataServices, registerDataHandlers } from './core/data-handlers';
@@ -25,6 +27,8 @@ import type { WorkspaceWatcher } from './core/workspace/watcher';
 log.transports.file.resolvePathFn = () => join(app.getPath('userData'), 'logs', 'main.log');
 log.initialize();
 registerAppScheme();
+// Without this, Windows shows toasts as "electron.app.Electron" (or drops them in dev).
+if (process.platform === 'win32') app.setAppUserModelId(APP_ID);
 
 let db: DbHandle | null = null;
 let modules: ModuleRegistry | null = null;
@@ -39,7 +43,7 @@ async function start(): Promise<void> {
 	db = openDatabase(join(app.getPath('userData'), 'forge.db'));
 	const data = createDataServices(db);
 	const secrets = createSecretsService();
-	const notify = createNotifier(data.notifications);
+	const notify = createNotifier(data.notifications, () => mainWindow);
 
 	registerAppHandlers();
 	registerDataHandlers(data, notify);

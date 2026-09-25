@@ -2,7 +2,7 @@
 
 Source of truth for progress. Tick boxes as work lands. Only the current phase is worked on.
 
-**Current phase: 1 — Vertical slice.** Build, Trade and Lab rooms done. Next: Hub.
+**Current phase: 2 — Build depth.** Phase 1 (all four rooms) is done.
 
 ---
 
@@ -152,8 +152,8 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] **Lab:** `forge-probe` package + Run Monitor (ECharts)
 - [x] **Lab:** GPU monitor (pynvml, graceful fallback)
 - [x] **Lab:** `examples/train_mnist_probe.py`
-- [ ] **Hub:** Obsidian vault (tree, editor/preview, wikilinks, tags, search, quick note)
-- [ ] **Hub:** notification inbox + Windows toasts for warn/error
+- [x] **Hub:** Obsidian vault (tree, editor/preview, wikilinks, tags, search, quick note)
+- [x] **Hub:** notification inbox + Windows toasts for warn/error
 
 ## Phase 2 — Build depth
 

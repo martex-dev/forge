@@ -21,4 +21,6 @@ export const notifications = sqliteTable('notifications', {
 	level: text('level', { enum: ['info', 'success', 'warn', 'error'] }).notNull(),
 	read: integer('read', { mode: 'boolean' }).notNull().default(false),
 	createdAt: integer('created_at', { mode: 'timestamp_ms' }).notNull(),
+	/** NotificationTarget as JSON, validated on read. */
+	target: text('target', { mode: 'json' }),
 });

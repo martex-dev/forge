@@ -6,6 +6,7 @@ import {
 	type ForgeNotification,
 	type NewNotification,
 	NewNotificationSchema,
+	NotificationTargetSchema,
 } from '@shared/notifications';
 
 import type { Db } from './client';
@@ -14,7 +15,13 @@ import { notifications } from './schema';
 type Row = typeof notifications.$inferSelect;
 
 function toDto(row: Row): ForgeNotification {
-	return { ...row, createdAt: row.createdAt.getTime() };
+	// A target written by an older/newer build that no longer validates just isn't clickable.
+	const target = NotificationTargetSchema.safeParse(row.target);
+	return {
+		...row,
+		createdAt: row.createdAt.getTime(),
+		target: target.success ? target.data : null,
+	};
 }
 
 export class NotificationsRepo {
@@ -46,6 +53,10 @@ export class NotificationsRepo {
 
 	markAllRead(): void {
 		this.db.update(notifications).set({ read: true }).run();
+	}
+
+	deleteRead(): number {
+		return this.db.delete(notifications).where(eq(notifications.read, true)).run().changes;
 	}
 
 	unreadCount(): number {

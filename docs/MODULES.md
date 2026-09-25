@@ -259,6 +259,54 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `inbox` — Inbox
+
+- **Room:** hub · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Every notification any module raised (`ctx.notify`), newest first, grouped
+  by day. Filter by level (error / warning / success / info), module and unread; mark all read;
+  clear read ones. Clicking a notification marks it read and jumps to its target panel (switching
+  rooms), e.g. a finished training run opens that run in the Run Monitor. The status-bar bell
+  shows the unread count and opens the inbox.
+- **Toasts:** warn/error notifications show an in-app toast while Forge is focused and a Windows
+  toast when it isn't; clicking the Windows toast brings Forge forward and opens the target.
+- **Panels:** `inbox.main` — Inbox (docked right).
+- **Commands:** `Hub: Show Inbox`, `Hub: Mark All Notifications Read`.
+- **Settings:** none. Notifications live in the app DB (`notifications` table, `target` column).
+- **Producers so far:** sidecar crashes/restarts (core) and `runs` (run finished / failed /
+  interrupted, polled by main every 5 s so it works with the Lab room closed).
+- **Known limitations:** no per-module mute yet; GitHub/Vercel/alerts join in Phases 2–5.
+
+---
+
+### `vault` — Obsidian Vault
+
+- **Room:** hub · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Works directly on the vault's Markdown files; Obsidian can stay open next to
+  it. Pick the vault folder once (remembered). Sidebar: file tree (folders first, natural sort,
+  reveals the open note), full-text search (all words, title hits first, line snippets) and tags
+  (frontmatter + inline `#tags`, counts, notes per tag). Note panel: Monaco Markdown editor with
+  autosave (800 ms) and Ctrl+S, or preview (Ctrl+E) with clickable `[[wikilinks]]`
+  (aliases/headings; unresolved links create the note, like Obsidian), `#tags`, task lists,
+  tables, https images, and a "Linked mentions" backlinks list. Changes made on disk
+  (Obsidian, sync) are followed live; with unsaved edits you get a "Use disk version / Keep mine"
+  choice instead of a silent overwrite.
+- **Quick note:** `Hub: Quick Note` (Ctrl+Alt+N, from any room) appends `- HH:mm text` to today's
+  daily note, using Obsidian's daily-notes folder and date format when configured.
+- **Panels:** `vault.sidebar` — Vault (docked left), `vault.note` — Note (centre, reused).
+- **Commands:** `Hub: Quick Note`, `Hub: New Note`, `Hub: Search Notes`,
+  `Hub: Open Obsidian Vault…`.
+- **Settings:** `vault:root` (the vault folder).
+- **Main services:** `VaultService` (path guard shared with the workspace, chokidar watcher,
+  conflict-checked writes) and `VaultIndex` (titles, tags, links, text; up to 20k notes).
+- **Security:** every path is resolved inside the vault (no `..`, no junction escapes). The
+  preview is rendered by markdown-it with raw HTML disabled and unsafe link schemes refused;
+  links open in the system browser, never inside Forge.
+- **Known limitations:** embeds (`![[...]]`) and local images show as chips, not inline; no
+  rename/move/delete from Forge yet; no graph view; Obsidian plugin syntax (Dataview…) renders
+  as plain text.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

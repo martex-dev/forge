@@ -220,3 +220,34 @@ main token must never leave main.
 **Consequences:** Any process running as Marto can read `probe.json` and push fake runs. It
 cannot call any other sidecar endpoint, which is acceptable for a single-user machine. A future
 push channel (MessagePort relay) can replace polling without touching the probe.
+
+---
+
+## ADR-013: Obsidian vault as plain files; notification click-through and toasts
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Marto's notes live in an Obsidian vault that Obsidian (and possibly a sync service)
+keeps editing. Obsidian has no local API for other apps. Notifications need to lead somewhere and
+reach him when Forge isn't in front.
+
+**Decision:**
+
+- The `vault` module reads and writes the vault's Markdown files directly and keeps an in-memory
+  index in main (titles, tags, wikilinks, text), refreshed by a chokidar watcher. Link resolution
+  follows Obsidian's rules. Writes carry the mtime the editor loaded; a different mtime on disk
+  is a conflict the user resolves, never a silent overwrite.
+- The preview uses `markdown-it` (renderer-only devDependency, 6 small deps) with `html: false`,
+  plus small inline rules for wikilinks, tags and tasks. That keeps the output safe to inject
+  without a sanitizer dependency, unlike `marked` + DOMPurify or the ~50-package
+  `react-markdown`/unified stack.
+- The editor is the same Monaco build as the Build room (Markdown grammar already bundled).
+- Notifications gain an optional `target` (`panelId` + params, a DB migration). warn/error raise
+  an in-app toast when Forge is focused and a Windows toast otherwise; the Windows toast click
+  focuses Forge and opens the target. `app.setAppUserModelId('dev.marto.forge')` makes Windows
+  attribute toasts to Forge (electron-builder's `appId` must match in Phase 6).
+- Modules can contribute `overlays` (components mounted once while enabled), so commands like
+  Quick Note can open a dialog from any room without touching the shell.
+
+**Consequences:** No Obsidian plugin to install and nothing proprietary to break; Obsidian and
+Forge can edit side by side. Plugin-specific syntax (Dataview, Excalidraw) isn't rendered.

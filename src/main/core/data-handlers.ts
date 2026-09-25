@@ -55,5 +55,10 @@ export function registerDataHandlers(
 		notifications.markAllRead();
 		changed();
 	});
+	router.handle('notifications:deleteRead', () => {
+		const removed = notifications.deleteRead();
+		changed();
+		return removed;
+	});
 	router.handle('notifications:add', (input) => notify(input));
 }

@@ -31,6 +31,7 @@
 - Renderer calls `window.forge.invoke(channel, input)`. Preload forwards it with `ipcRenderer.invoke`.
 - Main's router looks up the handler, validates input with zod (invalid input never reaches the handler), runs it, and returns `Result<T> = { ok: true, data } | { ok: false, error: { code, message } }`. Errors are logged in main with context.
 - Push events (sidecar status, notifications) go main → renderer and are subscribed with `window.forge.on(event, handler)`, which returns an unsubscribe function.
+- Notifications: modules call `ctx.notify({ level, title, body, target })`. Main stores them (SQLite), emits `notifications:changed` / `notifications:added`, and raises a Windows toast for warn/error when Forge isn't focused. The renderer shows in-app toasts, and `openNotification()` marks read and opens `target.panelId` (switching rooms).
 - Streams from the sidecar (for example live training metrics) are relayed over a `MessagePort`.
 
 ## Sidecar lifecycle

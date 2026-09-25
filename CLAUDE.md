@@ -98,6 +98,8 @@ export interface RendererModule {
 	manifest: ModuleManifest
 	panels?: PanelDefinition[]         // registered into dockview for its room
 	commands?: CommandDefinition[]     // registered into the command palette
+	statusItems?: StatusItemDefinition[]  // small components in the status bar
+	overlays?: ComponentType[]         // mounted once while enabled (dialogs its commands open)
 }
 
 export interface MainModule {

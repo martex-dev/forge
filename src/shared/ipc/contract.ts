@@ -12,6 +12,7 @@ import { moduleChannels, moduleEvents } from './channels/modules';
 import { secretChannels } from './channels/secrets';
 import { sidecarChannels, sidecarEvents } from './channels/sidecar';
 import { terminalChannels, terminalEvents } from './channels/terminal';
+import { vaultChannels, vaultEvents } from './channels/vault';
 import { webviewChannels, webviewEvents } from './channels/webview';
 import { workspaceChannels, workspaceEvents } from './channels/workspace';
 import { defineEvents } from './define';
@@ -35,6 +36,7 @@ export const ipcContract = {
 	...dexChannels,
 	...chartChannels,
 	...labChannels,
+	...vaultChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */
@@ -48,6 +50,7 @@ export const eventContract = defineEvents({
 	...terminalEvents,
 	...gitEvents,
 	...dexEvents,
+	...vaultEvents,
 });
 
 export type IpcContract = typeof ipcContract;

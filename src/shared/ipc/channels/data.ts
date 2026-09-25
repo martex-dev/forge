@@ -30,10 +30,16 @@ export const dataChannels = defineChannels({
 	'notifications:unreadCount': { input: z.void(), output: z.number().int() },
 	'notifications:markRead': { input: z.string(), output: z.void() },
 	'notifications:markAllRead': { input: z.void(), output: z.void() },
+	/** Removes read notifications; returns how many. */
+	'notifications:deleteRead': { input: z.void(), output: z.number().int() },
 	'notifications:add': { input: NewNotificationSchema, output: NotificationSchema },
 });
 
 export const dataEvents = {
 	'settings:generalChanged': GeneralSettingsSchema,
 	'notifications:changed': z.object({ unreadCount: z.number().int() }),
+	/** A module raised a notification (the renderer may show an in-app toast). */
+	'notifications:added': NotificationSchema,
+	/** The user clicked a Windows toast: the renderer navigates to the notification. */
+	'notifications:activated': NotificationSchema,
 };

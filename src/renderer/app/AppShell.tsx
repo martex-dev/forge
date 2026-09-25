@@ -15,6 +15,7 @@ import { useApplyGeneralSettings } from './hooks/use-general-settings';
 import { useModules } from './hooks/use-modules';
 import { useSidecarRecovery } from './hooks/use-sidecar-recovery';
 import { RoomLayout } from './layout/RoomLayout';
+import { useNotificationEvents } from './notifications';
 import { RoomRail } from './RoomRail';
 import { SettingsDialog } from './settings/SettingsDialog';
 import { StatusBar } from './StatusBar';
@@ -32,12 +33,20 @@ export function AppShell(): JSX.Element {
 	useApplyGeneralSettings();
 	useFsInvalidation();
 	useSidecarRecovery();
+	useNotificationEvents();
 
 	useEffect(() => {
 		document.documentElement.dataset['room'] = room;
 	}, [room]);
 
 	const enabledPanels = useMemo(() => panelsFor(RENDERER_MODULES, enabled), [enabled]);
+	const overlays = useMemo(
+		() =>
+			RENDERER_MODULES.filter((m) => enabled.has(m.manifest.id)).flatMap((m) =>
+				(m.overlays ?? []).map((Overlay, i) => ({ key: `${m.manifest.id}:${i}`, Overlay })),
+			),
+		[enabled],
+	);
 
 	return (
 		<div className='flex h-full flex-col bg-bg-0'>
@@ -77,6 +86,9 @@ export function AppShell(): JSX.Element {
 			<StatusBar />
 			<CommandPalette commands={commands} />
 			<SettingsDialog />
+			{overlays.map(({ key, Overlay }) => (
+				<Overlay key={key} />
+			))}
 		</div>
 	);
 }

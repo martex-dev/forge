@@ -4,12 +4,16 @@ import { join } from 'node:path';
 import { app } from 'electron';
 import type { z } from 'zod';
 
-import { MetricsPageSchema } from '@shared/ipc/channels/lab';
+import { MetricsPageSchema, type Run, type RunStatus } from '@shared/ipc/channels/lab';
 import { manifest } from '@shared/modules/runs.manifest';
 
 import { ForgeError } from '../../core/errors';
 import type { MainModule, MainModuleContext } from '../../core/modules/types';
 import { SidecarRunDetailSchema, SidecarRunSchema, toRun, toRunDetail } from './map-run';
+import { endedRuns, runNotification } from './run-watch';
+
+// How often main checks for runs that ended, to notify even when the Lab room is closed.
+const WATCH_MS = 5_000;
 
 async function fetchParsed<S extends z.ZodType>(
 	ctx: MainModuleContext,
@@ -27,9 +31,29 @@ async function fetchParsed<S extends z.ZodType>(
 export const mainModule: MainModule = {
 	manifest,
 	activate(ctx) {
-		ctx.ipc.handle('runs:list', async () =>
-			(await fetchParsed(ctx, '/runs', SidecarRunSchema.array())).map(toRun),
-		);
+		const listRuns = async (): Promise<Run[]> =>
+			(await fetchParsed(ctx, '/runs', SidecarRunSchema.array())).map(toRun);
+		ctx.ipc.handle('runs:list', listRuns);
+
+		let known: Map<string, RunStatus> | null = null;
+		let lastError = '';
+		const watch = setInterval(() => {
+			listRuns()
+				.then((runs) => {
+					for (const run of endedRuns(known, runs)) ctx.notify(runNotification(run));
+					known = new Map(runs.map((r) => [r.id, r.status]));
+					lastError = '';
+				})
+				.catch((error: unknown) => {
+					// The sidecar restarting is normal; log other failures once, not every 5 s.
+					const code = error instanceof ForgeError ? error.code : String(error);
+					if (code !== 'SIDECAR_UNAVAILABLE' && code !== lastError) {
+						ctx.log.warn('run watch failed', { error: String(error) });
+					}
+					lastError = code;
+				});
+		}, WATCH_MS);
+		ctx.onDispose(() => clearInterval(watch));
 		ctx.ipc.handle('runs:get', async (id) =>
 			toRunDetail(await fetchParsed(ctx, `/runs/${id}`, SidecarRunDetailSchema)),
 		);

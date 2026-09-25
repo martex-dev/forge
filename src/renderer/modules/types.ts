@@ -90,4 +90,6 @@ export interface RendererModule {
 	panels?: PanelDefinition[];
 	commands?: CommandDefinition[];
 	statusItems?: StatusItemDefinition[];
+	/** Mounted once while the module is enabled: dialogs its commands open (e.g. Quick Note). */
+	overlays?: ComponentType[];
 }

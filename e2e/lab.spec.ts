@@ -75,7 +75,11 @@ test('forge-probe streams a run into the Run Monitor; failures and GPU are shown
 		const crashed = page.locator('[data-run]', { hasText: 'e2e-crash' });
 		await expect(crashed).toHaveAttribute('data-run-status', 'failed', { timeout: 60_000 });
 		await crashed.click();
-		await expect(page.getByText('RuntimeError: simulated failure at step 5')).toBeVisible();
+		await expect(
+			page.locator('[data-run-view]').getByText('RuntimeError: simulated failure at step 5'),
+		).toBeVisible();
+		// Main noticed both runs ending and posted inbox notifications (finished + failed).
+		await expect(page.locator('footer [data-unread="2"]')).toBeVisible({ timeout: 15_000 });
 
 		// GPU panel: real numbers on a machine with an NVIDIA GPU, a clear empty state otherwise.
 		await expect(

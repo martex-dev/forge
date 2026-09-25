@@ -6,7 +6,9 @@ import { call } from '../lib/ipc';
 import { useForgeEvent } from '../lib/use-forge-event';
 import { RENDERER_MODULES } from '../modules/registry';
 import type { StatusItemDefinition } from '../modules/types';
+import { commandContext } from './commands/use-commands';
 import { useModules } from './hooks/use-modules';
+import { INBOX_PANEL } from './notifications';
 import { SidecarIndicator } from './SidecarIndicator';
 
 const UNREAD_KEY = ['notifications', 'unread'] as const;
@@ -64,13 +66,20 @@ export function StatusBar(): JSX.Element {
 			<ModuleItems items={left} />
 			<div className='flex-1' />
 			<ModuleItems items={right} />
-			<span
-				className='flex items-center gap-1'
-				title={unread.isError ? 'Could not load notifications' : 'Unread notifications'}
+			<button
+				type='button'
+				onClick={() => commandContext.openPanel(INBOX_PANEL)}
+				className='flex items-center gap-1 rounded-sm px-1 hover:bg-bg-3 hover:text-fg-0 focus-visible:shadow-glow focus-visible:outline-none'
+				title={
+					unread.isError
+						? 'Could not load notifications'
+						: 'Unread notifications (open inbox)'
+				}
+				data-unread={unread.data ?? 0}
 			>
 				<Bell size={12} className={(unread.data ?? 0) > 0 ? 'text-accent' : undefined} />
 				<span className='num'>{unread.isError ? '!' : (unread.data ?? 0)}</span>
-			</span>
+			</button>
 			<Clock />
 		</footer>
 	);

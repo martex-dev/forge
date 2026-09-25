@@ -1,0 +1,190 @@
+import { BellOff, CheckCheck, Trash2 } from 'lucide-react';
+import { type JSX, type ReactNode, useMemo, useState } from 'react';
+
+import { getManifest } from '@shared/modules';
+import type { NotificationLevel } from '@shared/notifications';
+
+import { cn } from '../../lib/cn';
+import { useNow } from '../../lib/use-now';
+import { Button } from '../../ui/Button';
+import { EmptyState } from '../../ui/EmptyState';
+import { ErrorState } from '../../ui/ErrorState';
+import { Select } from '../../ui/Select';
+import { Spinner } from '../../ui/Spinner';
+import {
+	DEFAULT_FILTERS,
+	filterNotifications,
+	groupByDay,
+	type InboxFilters,
+	LEVELS,
+	modulesIn,
+} from './inbox-model';
+import { LEVEL_STYLE, NotificationRow } from './NotificationRow';
+import { useInboxActions, useNotifications } from './use-inbox';
+
+const ALL = '__all__';
+// Core sources (sidecar, app) have no manifest: show their id, capitalised.
+const moduleName = (id: string): string =>
+	getManifest(id)?.name ?? id.charAt(0).toUpperCase() + id.slice(1);
+
+function Chip({
+	pressed,
+	onClick,
+	children,
+}: {
+	pressed: boolean;
+	onClick: () => void;
+	children: ReactNode;
+}): JSX.Element {
+	return (
+		<button
+			type='button'
+			aria-pressed={pressed}
+			onClick={onClick}
+			className={cn(
+				'flex h-6 items-center gap-1 rounded-sm border px-1.5 text-11 transition-colors transition-fast',
+				'focus-visible:shadow-glow focus-visible:outline-none',
+				pressed
+					? 'border-accent/50 bg-accent-soft text-fg-0'
+					: 'border-border text-fg-2 hover:border-border-strong hover:text-fg-1',
+			)}
+		>
+			{children}
+		</button>
+	);
+}
+
+export function InboxPanel(): JSX.Element {
+	const { list, isLoading, error, refetch } = useNotifications();
+	const { markAllRead, clearRead } = useInboxActions();
+	const [filters, setFilters] = useState<InboxFilters>(DEFAULT_FILTERS);
+	const now = useNow(30_000);
+	const visible = useMemo(() => filterNotifications(list, filters), [list, filters]);
+	const groups = useMemo(() => groupByDay(visible, now), [visible, now]);
+	const modules = useMemo(() => modulesIn(list), [list]);
+	const unread = list.filter((n) => !n.read).length;
+
+	const toggleLevel = (level: NotificationLevel): void =>
+		setFilters((f) => ({
+			...f,
+			levels: f.levels.includes(level)
+				? f.levels.filter((l) => l !== level)
+				: [...f.levels, level],
+		}));
+
+	let body: JSX.Element;
+	if (isLoading) {
+		body = (
+			<div className='flex h-full items-center justify-center'>
+				<Spinner label='Loading notifications' />
+			</div>
+		);
+	} else if (error) {
+		body = <ErrorState title='Inbox unavailable' message={error.message} onRetry={refetch} />;
+	} else if (list.length === 0) {
+		body = (
+			<EmptyState
+				icon={<BellOff size={20} />}
+				title='All caught up'
+				description='Modules post here: finished or failed training runs, sidecar problems, and more.'
+			/>
+		);
+	} else if (groups.length === 0) {
+		body = (
+			<EmptyState
+				title='Nothing matches'
+				description='Try another level or module filter.'
+				action={
+					<Button size='sm' onClick={() => setFilters(DEFAULT_FILTERS)}>
+						Reset filters
+					</Button>
+				}
+			/>
+		);
+	} else {
+		body = (
+			<div className='min-h-0 flex-1 overflow-y-auto'>
+				{groups.map((g) => (
+					<section key={g.label} aria-label={g.label}>
+						<h3 className='sticky top-0 z-10 border-b border-border bg-bg-1 px-3 py-1 text-11 font-medium tracking-wide text-fg-2 uppercase'>
+							{g.label}
+						</h3>
+						<ul>
+							{g.items.map((n) => (
+								<NotificationRow
+									key={n.id}
+									n={n}
+									moduleName={moduleName(n.module)}
+									now={now}
+								/>
+							))}
+						</ul>
+					</section>
+				))}
+			</div>
+		);
+	}
+
+	return (
+		<div className='flex h-full flex-col bg-bg-1' data-inbox>
+			<div
+				className='flex flex-wrap items-center gap-1 border-b border-border px-2 py-1.5'
+				role='toolbar'
+				aria-label='Inbox filters'
+			>
+				{LEVELS.map((level) => {
+					const { icon: Icon, className, label } = LEVEL_STYLE[level];
+					return (
+						<Chip
+							key={level}
+							pressed={filters.levels.includes(level)}
+							onClick={() => toggleLevel(level)}
+						>
+							<Icon size={11} className={className} aria-hidden />
+							{label}
+						</Chip>
+					);
+				})}
+				<Chip
+					pressed={filters.unreadOnly}
+					onClick={() => setFilters((f) => ({ ...f, unreadOnly: !f.unreadOnly }))}
+				>
+					Unread ({unread})
+				</Chip>
+				<Select
+					aria-label='Module'
+					className='h-6 w-36'
+					value={filters.module ?? ALL}
+					options={[
+						{ value: ALL, label: 'All modules' },
+						...modules.map((m) => ({ value: m, label: moduleName(m) })),
+					]}
+					onValueChange={(v) =>
+						setFilters((f) => ({ ...f, module: v === ALL ? null : v }))
+					}
+				/>
+				<div className='ml-auto flex gap-1'>
+					<Button
+						size='sm'
+						variant='ghost'
+						icon={<CheckCheck size={12} />}
+						disabled={unread === 0}
+						onClick={markAllRead}
+					>
+						Mark all read
+					</Button>
+					<Button
+						size='sm'
+						variant='ghost'
+						icon={<Trash2 size={12} />}
+						disabled={list.length === unread}
+						onClick={clearRead}
+					>
+						Clear read
+					</Button>
+				</div>
+			</div>
+			{body}
+		</div>
+	);
+}
