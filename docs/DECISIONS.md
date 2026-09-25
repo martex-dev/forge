@@ -354,3 +354,31 @@ Market Calendar deployment, and Finnhub.
 **Consequences:** No new dependencies (stdlib `html.parser` instead of an HTML library). The
 NASDAQ endpoint is unofficial and may break; the cache keeps the last good week and the source
 is one setting away.
+
+---
+
+## ADR-018: DataFrame viewer on DuckDB, read-only SQL
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Lab needs to open training outputs (CSV, Parquet, Feather) of any size, sort,
+filter, run SQL and see column statistics, without loading whole files into the renderer.
+
+**Decision:**
+
+- Sidecar dependencies: `duckdb` (queries files in place, `SUMMARIZE`, fast CSV sniffing) and
+  `polars` (reads Feather/Arrow IPC, which DuckDB only reads through an extension it would
+  download at runtime). Both were already in the stack list.
+- Each file gets its own in-memory DuckDB database with a view `t` over the file, so queries
+  always see the current file and SQL can say `FROM t`.
+- Read-only policy: every query must parse as exactly one `SELECT`. The user's SQL is checked
+  alone and again after wrapping (for paging, WHERE and sort). Extension auto-install/load,
+  community extensions and Python replacement scans are off and `lock_configuration` is on.
+  30 s timeout with interrupt. Ruff's S608 is ignored for `frames.py` only, with this rationale.
+- The renderer knows files by path; main maps paths to sidecar frame ids and re-opens on
+  `FRAME_NOT_FOUND` (sidecar restart or eviction).
+- The grid is virtualized in-house (fixed 24 px rows, 200-row blocks via TanStack Query) rather
+  than adding a grid library.
+
+**Consequences:** About 60 MB more in the sidecar environment (duckdb + polars wheels), which
+matters for Phase 6 packaging. Arrow files cost one conversion per version of the file.

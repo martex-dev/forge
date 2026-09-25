@@ -8,6 +8,7 @@ import { chartChannels } from './channels/chart';
 import { dataChannels, dataEvents } from './channels/data';
 import { dexChannels, dexEvents } from './channels/dex';
 import { earningsChannels } from './channels/earnings';
+import { framesChannels } from './channels/frames';
 import { fsChannels, fsEvents } from './channels/fs';
 import { gitChannels, gitEvents } from './channels/git';
 import { githubChannels } from './channels/github';
@@ -57,6 +58,7 @@ export const ipcContract = {
 	...alertChannels,
 	...journalChannels,
 	...earningsChannels,
+	...framesChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

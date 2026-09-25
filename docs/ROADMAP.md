@@ -174,7 +174,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 ## Phase 4 — Lab depth
 
-- [ ] DataFrame viewer (CSV/Parquet/Feather via DuckDB): virtualized, stats, filter/sort, SQL
+- [x] DataFrame viewer (CSV/Parquet/Feather via DuckDB): virtualized, stats, filter/sort, SQL
 - [ ] Notebook runner (jupyter_client)
 - [ ] Experiment history + side-by-side comparison
 - [ ] cv-visualizer and calibrate panels

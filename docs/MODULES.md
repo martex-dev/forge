@@ -558,6 +558,33 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `frames` — DataFrame Viewer
+
+- **Room:** lab · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Opens CSV/TSV, Parquet, JSON/JSONL and Feather/Arrow files in place with
+  DuckDB in the sidecar, never loading them whole. One tab per file.
+    - **Data:** a virtualized grid that loads 200-row blocks as you scroll (millions of rows
+      stay smooth). Click a header to sort (Shift+click adds keys). The **WHERE** box takes a
+      DuckDB expression, e.g. `loss < 0.1 AND split = 'val'`. Arrow keys, PgUp/PgDn, Home/End
+      move the selection; Ctrl+C copies a cell.
+    - **SQL:** any single `SELECT` over `t` (the file): aggregates, window functions, joins
+      against other files with `read_parquet('…')`. Ctrl+Enter runs it; results are paged and
+      sortable.
+    - **Stats:** DuckDB `SUMMARIZE` (type, count, null %, ≈ unique, min/quartiles/max, mean,
+      std). Click a column for its histogram (numeric) or top 20 values.
+- **Read-only by design:** the sidecar runs one `SELECT` only (no `COPY`, `ATTACH`, `INSTALL`,
+  `SET` or a second statement), with extension auto-install off and configuration locked.
+  Queries time out after 30 s. See ADR-018.
+- **Panels:** `frames.viewer` (multi-instance, tab next to the Run Monitor; empty state lists
+  recent files).
+- **Commands:** `Lab: Open Data File…` (Ctrl+Alt+O), `Lab: DataFrame Viewer`.
+- **Settings:** `frames:recent` (last 12 files).
+- **Known limitations:** Feather/Arrow files are converted once to a cached Parquet copy
+  (`<sidecar data>/cache/frames/`); editing cells isn't supported; very wide text is cut at
+  2,000 characters per cell.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

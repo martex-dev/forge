@@ -1,4 +1,4 @@
-import { LineChart } from 'echarts/charts';
+import { BarChart, LineChart } from 'echarts/charts';
 import {
 	DataZoomComponent,
 	GridComponent,
@@ -12,6 +12,7 @@ import { resolveToken } from './resolve-color';
 
 // Only what we draw: keeps ECharts' bundle share small (the full build is ~1 MB).
 echarts.use([
+	BarChart,
 	LineChart,
 	GridComponent,
 	TooltipComponent,

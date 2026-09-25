@@ -11,6 +11,8 @@ dependencies = [
 	'websockets>=17.1',
 	'nvidia-ml-py>=13.610.43',
 	'metatrader5>=5.0.6180 ; sys_platform == "win32"',
+	'duckdb>=1.5.5',
+	'polars>=1.44.2',
 ]
 
 [dependency-groups]
@@ -41,6 +43,9 @@ ignore = ['W191', 'E101']
 
 [tool.ruff.lint.per-file-ignores]
 'tests/**' = ['S101', 'S105', 'S106']
+# The DataFrame viewer builds SQL on purpose (Marto's own queries). Identifiers are quoted,
+# values are bound, and every query must pass check_select (one SELECT, locked config).
+'forge_sidecar/services/frames.py' = ['S608']
 
 [tool.pytest.ini_options]
 testpaths = ['tests']

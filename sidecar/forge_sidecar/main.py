@@ -16,6 +16,7 @@ from forge_sidecar.routers import (
 	chart,
 	dex,
 	earnings,
+	frames,
 	gpu,
 	health,
 	mt5,
@@ -27,6 +28,7 @@ from forge_sidecar.services.cache import TtlCache
 from forge_sidecar.services.charts import ChartData
 from forge_sidecar.services.dexscreener import DexScreener
 from forge_sidecar.services.earnings import EarningsService
+from forge_sidecar.services.frames import FrameStore
 from forge_sidecar.services.gpu import GpuMonitor
 from forge_sidecar.services.mt5 import Mt5Service
 from forge_sidecar.services.runs_store import RunsStore
@@ -95,6 +97,7 @@ def create_app(
 		app.state.mt5 = Mt5Service()
 		app.state.solana = SolanaClient(client)
 		app.state.earnings = EarningsService(client, cache_dir)
+		app.state.frames = FrameStore(cache_dir)
 		probe_file = write_probe_file(data_dir, port, probe_token) if data_dir and port else None
 		try:
 			yield
@@ -104,6 +107,7 @@ def create_app(
 			app.state.gpu.close()
 			app.state.mt5.close()
 			app.state.runs.close()
+			app.state.frames.close()
 			if owned:
 				await client.aclose()
 
@@ -127,4 +131,5 @@ def create_app(
 	app.include_router(mt5.router)
 	app.include_router(solana.router)
 	app.include_router(earnings.router)
+	app.include_router(frames.router)
 	return app
