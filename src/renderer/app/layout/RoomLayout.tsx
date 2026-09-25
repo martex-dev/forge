@@ -18,6 +18,7 @@ import { useOverlayStore } from '../../stores/overlay-store';
 import { toast } from '../../stores/toast-store';
 import {
 	applyDefaultLayout,
+	applyInitialSizes,
 	definitionIdOf,
 	openPanelIn,
 	pruneDisabledPanels,
@@ -47,10 +48,25 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 	const panelsRef = useRef(panels);
 	const prevEnabledRef = useRef(new Set(panels.map((p) => p.id)));
 	const enabledIds = useMemo(() => new Set(panels.map((p) => p.id)), [panels]);
+	const hostRef = useRef<HTMLDivElement>(null);
+	const activeRef = useRef(active);
+	// Default layout built while this room was hidden: its sizes need fixing on first show.
+	const sizesPendingRef = useRef(false);
 
 	useEffect(() => {
 		panelsRef.current = panels;
 	}, [panels]);
+
+	useEffect(() => {
+		activeRef.current = active;
+		const api = apiRef.current;
+		const host = hostRef.current;
+		if (!active || !sizesPendingRef.current || !api || !host) return;
+		sizesPendingRef.current = false;
+		// Lay the grid out at its real size first, then restore each docked panel's width/height.
+		api.layout(host.clientWidth, host.clientHeight, true);
+		applyInitialSizes(api, panelsRef.current);
+	}, [active]);
 
 	const onReady = useCallback(
 		(event: DockviewReadyEvent) => {
@@ -100,13 +116,17 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 			window.addEventListener('dragend', endDrag, true);
 			window.addEventListener('drop', endDrag, true);
 
+			const applyDefault = (): void => {
+				applyDefaultLayout(api, panelsRef.current);
+				sizesPendingRef.current = !activeRef.current;
+			};
 			void (async () => {
 				try {
 					const saved = await call('layouts:get', room);
 					if (saved && typeof saved === 'object') {
 						api.fromJSON(saved as SerializedDockview);
 					} else {
-						applyDefaultLayout(api, panelsRef.current);
+						applyDefault();
 					}
 				} catch (error) {
 					rlog.warn('layout', `restore failed for ${room}, using default`, error);
@@ -114,7 +134,7 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 						`Couldn't restore the ${room} layout`,
 						'Falling back to the default layout.',
 					);
-					applyDefaultLayout(api, panelsRef.current);
+					applyDefault();
 				}
 				pruneDisabledPanels(api, new Set(panelsRef.current.map((p) => p.id)));
 				readyRef.current = true;
@@ -152,6 +172,7 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 
 	return (
 		<div
+			ref={hostRef}
 			// display:none, not visibility:hidden — dockview sets `visibility: visible` on its own
 			// elements, which overrides an inherited hidden and let other rooms paint over this one.
 			className={active ? 'absolute inset-0' : 'hidden'}

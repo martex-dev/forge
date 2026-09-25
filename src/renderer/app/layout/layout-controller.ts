@@ -68,7 +68,6 @@ export function nextInstanceId(api: DockviewApi, definitionId: string): string {
 	}
 }
 
-/** Clears the room and opens every default panel of its enabled modules. */
 /**
  * Order in which default panels must be added: centre panels first (the first one fills the
  * room, so a docked panel added first would lose its docking), then docked ones, then panels
@@ -84,10 +83,25 @@ export function defaultLayoutOrder(panels: readonly PanelDefinition[]): PanelDef
 		.map(({ def }) => def);
 }
 
+/** Clears the room and opens every default panel of its enabled modules. */
 export function applyDefaultLayout(api: DockviewApi, panels: readonly PanelDefinition[]): void {
 	api.clear();
 	for (const def of defaultLayoutOrder(panels)) {
 		openPanelIn(api, def, { background: def.tabWith !== undefined });
+	}
+}
+
+/**
+ * Gives docked default panels their `initialSize` again. A room that is hidden (display:none)
+ * when its default layout is built has a 0×0 grid, so every split ends up proportional.
+ */
+export function applyInitialSizes(api: DockviewApi, panels: readonly PanelDefinition[]): void {
+	for (const def of panels) {
+		if (!def.initialSize || !def.position || def.position === 'tab') continue;
+		const group = api.getPanel(def.id)?.group;
+		if (!group) continue;
+		const horizontal = def.position === 'left' || def.position === 'right';
+		group.api.setSize(horizontal ? { width: def.initialSize } : { height: def.initialSize });
 	}
 }
 
