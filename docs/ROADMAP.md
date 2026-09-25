@@ -2,7 +2,7 @@
 
 Source of truth for progress. Tick boxes as work lands. Only the current phase is worked on.
 
-**Current phase: 1 — Vertical slice.** Build room done (explorer, editor, terminals, git). Next: Trade → Lab → Hub.
+**Current phase: 1 — Vertical slice.** Build and Trade rooms done. Next: Lab → Hub.
 
 ---
 
@@ -145,10 +145,10 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] **Build:** Monaco (local), tabs, dirty state, Ctrl+S, theme from tokens
 - [x] **Build:** terminals (xterm.js + node-pty), tabs, presets: PowerShell, Python venv, Claude Code, Codex, Gemini CLI
 - [x] **Build:** Git panel (branch, changes, diff, stage, commit, pull/push); branch in StatusBar
-- [ ] **Trade:** economic calendar (Forex Factory feed, impact/currency filter, countdown)
-- [ ] **Trade:** DexScreener watchlist + token detail, price flashes
-- [ ] **Trade:** chart panel (data source to be agreed)
-- [ ] **Trade:** webview tabs: TradingView, Axiom, Fomo, Forex Factory
+- [x] **Trade:** economic calendar (Forex Factory feed, impact/currency filter, countdown)
+- [x] **Trade:** DexScreener watchlist + token detail, price flashes
+- [x] **Trade:** chart panel (lightweight-charts; Binance spot + GeckoTerminal DEX pools)
+- [x] **Trade:** webview tabs: TradingView, Axiom, Fomo, Forex Factory
 - [ ] **Lab:** `forge-probe` package + Run Monitor (ECharts)
 - [ ] **Lab:** GPU monitor (pynvml, graceful fallback)
 - [ ] **Lab:** `examples/train_mnist_probe.py`

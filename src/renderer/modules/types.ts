@@ -12,6 +12,8 @@ export interface PanelProps {
 	room: RoomId;
 	/** Serialized with the layout, so a restored panel gets the same params back. */
 	params: PanelParams;
+	/** Merges into params (an `undefined` value removes the key); saved with the layout. */
+	setParams(patch: PanelParams): void;
 }
 
 export interface PanelDefinition {

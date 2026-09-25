@@ -1,5 +1,6 @@
 import {
 	type DockviewApi,
+	type DockviewIDisposable,
 	DockviewReact,
 	type DockviewReadyEvent,
 	type SerializedDockview,
@@ -71,7 +72,15 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 				}, SAVE_DEBOUNCE_MS);
 			};
 			const sub = api.onDidLayoutChange(persist);
+			// dockview doesn't count a params change (e.g. a chart's symbol) as a layout change.
+			const paramSubs = new Map<string, DockviewIDisposable>();
+			const addSub = api.onDidAddPanel((panel) => {
+				paramSubs.get(panel.id)?.dispose();
+				paramSubs.set(panel.id, panel.api.onDidParametersChange(persist));
+			});
 			const removeSub = api.onDidRemovePanel((panel) => {
+				paramSubs.get(panel.id)?.dispose();
+				paramSubs.delete(panel.id);
 				const def = ALL_PANELS.find((p) => p.id === definitionIdOf(panel.id));
 				try {
 					def?.onClose?.((panel.params ?? {}) as PanelParams, panel.id);
@@ -115,7 +124,9 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 			cleanupRef.current = () => {
 				clearTimeout(timer);
 				sub.dispose();
+				addSub.dispose();
 				removeSub.dispose();
+				for (const d of paramSubs.values()) d.dispose();
 				for (const d of dragSubs) d.dispose();
 				window.removeEventListener('dragend', endDrag, true);
 				window.removeEventListener('drop', endDrag, true);

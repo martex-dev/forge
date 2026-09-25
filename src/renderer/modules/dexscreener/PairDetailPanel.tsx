@@ -1,8 +1,9 @@
-import { Copy, ExternalLink } from 'lucide-react';
+import { ChartCandlestick, Copy, ExternalLink } from 'lucide-react';
 import type { JSX, ReactNode } from 'react';
 
 import type { PairId } from '@shared/ipc/channels/dex';
 
+import { commandContext } from '../../app/commands/use-commands';
 import { cn } from '../../lib/cn';
 import { formatAge, formatPercent, formatUsdCompact, shortAddress } from '../../lib/format';
 import { call } from '../../lib/ipc';
@@ -161,6 +162,25 @@ export function PairDetailPanel({ params }: PanelProps): JSX.Element {
 					onClick={() => (watched ? unwatch(pair) : watch(pair))}
 				>
 					{watched ? 'Remove from watchlist' : 'Add to watchlist'}
+				</Button>
+				<Button
+					size='sm'
+					icon={<ChartCandlestick size={12} />}
+					onClick={() =>
+						// Loose coupling by panel id: the chart module owns the panel.
+						commandContext.openPanel('chart.main', {
+							params: {
+								source: {
+									kind: 'pool',
+									chainId: pair.chainId,
+									pairAddress: pair.pairAddress,
+								},
+								label: `${pair.base.symbol}/${pair.quote.symbol}`,
+							},
+						})
+					}
+				>
+					Chart
 				</Button>
 				<Button
 					size='sm'

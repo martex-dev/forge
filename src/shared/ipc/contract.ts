@@ -2,6 +2,7 @@ import type { z } from 'zod';
 
 import { appChannels } from './channels/app';
 import { calendarChannels } from './channels/calendar';
+import { chartChannels } from './channels/chart';
 import { dataChannels, dataEvents } from './channels/data';
 import { dexChannels, dexEvents } from './channels/dex';
 import { fsChannels, fsEvents } from './channels/fs';
@@ -31,6 +32,7 @@ export const ipcContract = {
 	...gitChannels,
 	...calendarChannels,
 	...dexChannels,
+	...chartChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

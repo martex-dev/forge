@@ -7,8 +7,9 @@ from fastapi import FastAPI
 
 from forge_sidecar import __version__
 from forge_sidecar.auth import TokenAuthMiddleware
-from forge_sidecar.routers import calendar, dex, health
+from forge_sidecar.routers import calendar, chart, dex, health
 from forge_sidecar.services.cache import TtlCache
+from forge_sidecar.services.charts import ChartData
 from forge_sidecar.services.dexscreener import DexScreener
 
 USER_AGENT = f'Forge/{__version__} (personal desktop app)'
@@ -34,6 +35,7 @@ def create_app(
 			ttl=30 * 60, max_stale=24 * 3600, persist_dir=cache_dir, fail_cooldown=5 * 60
 		)
 		app.state.dex = DexScreener(client)
+		app.state.charts = ChartData(client)
 		try:
 			yield
 		finally:
@@ -53,4 +55,5 @@ def create_app(
 	app.include_router(health.router)
 	app.include_router(calendar.router)
 	app.include_router(dex.router)
+	app.include_router(chart.router)
 	return app

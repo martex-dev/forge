@@ -192,6 +192,29 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `chart` — Charts
+
+- **Room:** trade · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Candlestick + volume chart (lightweight-charts) for a Binance spot symbol
+  (e.g. `BTCUSDT`) or a DEX pool from the watchlist (via GeckoTerminal). Intervals 1m, 5m, 15m,
+  1h, 4h, 1D; 500 bars; OHLCV legend follows the crosshair; local-time axis; memecoin prices use
+  the same `0.0₅3688` notation as the watchlist. Polls every 5 s (Binance) or 30 s (pools) and
+  only updates the moving bars, so zoom/scroll survive refreshes. The Token panel's **Chart**
+  button opens its pool here. Source, symbol and interval are saved with the layout.
+- **Panels:** `chart.main` — Chart (tab next to TradingView).
+- **Commands:** `Trade: Show Chart`.
+- **Settings:** none (state lives in the panel's layout params).
+- **Sidecar endpoints:** `GET /chart/binance?symbol=&interval=&limit=`,
+  `GET /chart/gecko?chain=&pool=&interval=&limit=` → `{ candles, stale }`.
+- **External services / rate limits:** Binance `data-api.binance.vision` (market-data-only
+  host, no keys; bucket 10 burst, 5/s, 5 s cache). GeckoTerminal free API (~30 req/min; bucket
+  5 burst, 0.4/s, 30 s cache). Failed refreshes serve the last good copy for up to 10 min, marked
+  _stale_. DexScreener chain ids are mapped to GeckoTerminal network ids (`ethereum` → `eth`, …).
+- **Security:** read-only public market data; no exchange account, keys or order endpoints.
+- **Known limitations:** no drawing tools or indicators (TradingView tab covers that); no
+  history paging beyond 500 bars; one chart per panel (multi-chart layouts are Phase 3). The
+  pool picker is the DexScreener watchlist, so it needs that module enabled.
+
 ## Template
 
 ### `<module-id>` — <Name>

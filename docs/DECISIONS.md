@@ -168,3 +168,23 @@ bus (`requestOpenFile`) that the editor module registers with.
 
 **Consequences:** Modules stay independent. Disabling the editor just makes "open file" show a
 toast instead of breaking the explorer.
+
+---
+
+## ADR-011: Chart data from Binance's market-data host and GeckoTerminal
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** The Trade chart needs OHLCV for both CEX markets and DEX pools, without API keys.
+DexScreener has no public candles endpoint. Marto chose "Gecko + Binance".
+
+**Decision:** The sidecar fetches Binance spot klines from `data-api.binance.vision` (the
+public market-data-only host: no keys, no account or order endpoints) and DEX pool OHLCV from
+GeckoTerminal's free API, each behind its own token bucket and a short `TtlCache` with stale
+fallback. The renderer draws with `lightweight-charts` (already in the stack; Apache-2.0, its
+TradingView attribution logo stays on). Chart state is kept in dockview panel params, which are
+now saved with the layout (`PanelProps.setParams`).
+
+**Consequences:** No secrets needed and nothing can place orders. GeckoTerminal's ~30 req/min
+limit means pool charts refresh every 30 s at best. Swapping a source means touching only
+`sidecar/forge_sidecar/services/charts.py`.

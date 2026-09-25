@@ -17,7 +17,12 @@ export const PANEL_COMPONENTS: Record<
 		const Component = def.component;
 		const Wrapped: FunctionComponent<IDockviewPanelProps<PanelParams>> = (props) => (
 			<PanelErrorBoundary title={def.title}>
-				<Component panelId={props.api.id} room={def.room} params={props.params} />
+				<Component
+					panelId={props.api.id}
+					room={def.room}
+					params={props.params}
+					setParams={(patch) => props.api.updateParameters(patch)}
+				/>
 			</PanelErrorBoundary>
 		);
 		Wrapped.displayName = `Panel(${def.id})`;
