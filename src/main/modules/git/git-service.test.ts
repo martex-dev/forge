@@ -19,9 +19,11 @@ beforeEach(() => {
 	run('config', 'user.name', 'Forge Test');
 	run('config', 'core.autocrlf', 'false');
 });
-afterEach(() => rmSync(repo, { recursive: true, force: true, maxRetries: 5 }));
+// git.exe can hold the folder for a moment after exiting on Windows runners.
+afterEach(() => rmSync(repo, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }));
 
-describe('GitService', () => {
+// Real git processes: each spawn costs ~0.5 s on CI runners, so 5 s is too tight.
+describe('GitService', { timeout: 30_000 }, () => {
 	it('reports "not a repo" for plain folders', async () => {
 		const plain = mkdtempSync(join(tmpdir(), 'forge-plain-'));
 		try {
