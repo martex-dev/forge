@@ -36,7 +36,8 @@ function start(language: LspLanguage): {
 	const received: Rpc[] = [];
 	const waiters: Array<() => void> = [];
 	const launch = serverLaunch(language, root);
-	const session = new LspSession(`test-${language}`, launch, root, {
+	// Neutral cwd, as in production: Windows locks a process's cwd, which broke cleanup here.
+	const session = new LspSession(`test-${language}`, launch, tmpdir(), {
 		message: (m) => {
 			const msg = m as Rpc;
 			// Answer server → client requests the way a minimal client would.
