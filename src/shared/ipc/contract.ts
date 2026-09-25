@@ -20,6 +20,7 @@ import { mlChannels } from './channels/mltools';
 import { moduleChannels, moduleEvents } from './channels/modules';
 import { mt5Channels } from './channels/mt5';
 import { notebookChannels } from './channels/notebooks';
+import { notionChannels } from './channels/notion';
 import { searchChannels } from './channels/search';
 import { secretChannels, secretEvents } from './channels/secrets';
 import { sidecarChannels, sidecarEvents } from './channels/sidecar';
@@ -65,6 +66,7 @@ export const ipcContract = {
 	...notebookChannels,
 	...mlChannels,
 	...discordChannels,
+	...notionChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

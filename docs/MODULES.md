@@ -703,6 +703,28 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `notion` — Notion
+
+- **Room:** hub · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Notion through its official API (version pinned to `2022-06-28`), for pages
+  shared with Marto's internal integration.
+    - **Search** pages, or list the most recently edited ones.
+    - **Read** a page as Markdown: headings, lists (nested two levels), to-dos, quotes,
+      callouts, code, dividers, toggles, links, bookmarks. Files and images are links (Notion's
+      file URLs expire). Unsupported blocks show as a marker instead of vanishing. Pages over
+      400 blocks are cut, with a note.
+    - **Append** a to-do, paragraph or bullet to the end of the page.
+    - **Create** a sub-page and open it.
+    - **Open in Notion** in the system browser (the `hub-web` Notion tab is there for full editing).
+- **Panels:** `notion.panel` — Notion (a Hub tab; the selected page is saved with the layout).
+- **Commands:** `Hub: Notion Pages`.
+- **Secrets:** `notion.token` (internal integration secret). Pages must be shared with it
+  (••• → Connections); a 404 says so.
+- **Known limitations:** no editing of existing blocks, no databases (rows/properties) yet. One
+  retry on 429 (Notion allows ~3 requests/s).
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>
