@@ -39,6 +39,7 @@ export function openPanelIn(
 	const direction = def.position && def.position !== 'tab' ? def.position : null;
 	const horizontal = direction === 'left' || direction === 'right';
 	const sibling = def.tabWith ? api.getPanel(def.tabWith) : undefined;
+	const near = options.near ? api.getPanel(options.near.panelId) : undefined;
 	api.addPanel({
 		id: instanceId,
 		component: def.id,
@@ -46,11 +47,13 @@ export function openPanelIn(
 		params: { ...options.params, room: def.room },
 		...(def.renderer ? { renderer: def.renderer } : {}),
 		...(options.background ? { inactive: true } : {}),
-		...(sibling
-			? { position: { referencePanel: sibling, direction: 'within' as const } }
-			: direction && api.panels.length > 0
-				? { position: { direction } }
-				: {}),
+		...(near && options.near
+			? { position: { referencePanel: near, direction: options.near.direction } }
+			: sibling
+				? { position: { referencePanel: sibling, direction: 'within' as const } }
+				: direction && api.panels.length > 0
+					? { position: { direction } }
+					: {}),
 		...(direction && def.initialSize
 			? horizontal
 				? { initialWidth: def.initialSize }

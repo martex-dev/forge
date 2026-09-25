@@ -14,6 +14,8 @@ export interface PanelProps {
 	params: PanelParams;
 	/** Merges into params (an `undefined` value removes the key); saved with the layout. */
 	setParams(patch: PanelParams): void;
+	/** Tab title, e.g. a chart's symbol; saved with the layout. */
+	setTitle(title: string): void;
 }
 
 export interface PanelDefinition {
@@ -50,6 +52,8 @@ export interface OpenPanelOptions {
 	params?: PanelParams;
 	/** Add without activating (keeps the group's current tab in front). */
 	background?: boolean;
+	/** Place next to a specific open panel instead of the definition's default spot. */
+	near?: { panelId: string; direction: 'left' | 'right' | 'above' | 'below' | 'within' };
 }
 
 /** Everything a command may do; implemented by the shell. */

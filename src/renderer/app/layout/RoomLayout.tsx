@@ -88,11 +88,18 @@ export function RoomLayout({ room, active, panels }: RoomLayoutProps): JSX.Eleme
 				}, SAVE_DEBOUNCE_MS);
 			};
 			const sub = api.onDidLayoutChange(persist);
-			// dockview doesn't count a params change (e.g. a chart's symbol) as a layout change.
+			// dockview doesn't count a params or title change (e.g. a chart's symbol) as a layout change.
 			const paramSubs = new Map<string, DockviewIDisposable>();
 			const addSub = api.onDidAddPanel((panel) => {
 				paramSubs.get(panel.id)?.dispose();
-				paramSubs.set(panel.id, panel.api.onDidParametersChange(persist));
+				const params = panel.api.onDidParametersChange(persist);
+				const title = panel.api.onDidTitleChange(persist);
+				paramSubs.set(panel.id, {
+					dispose: () => {
+						params.dispose();
+						title.dispose();
+					},
+				});
 			});
 			const removeSub = api.onDidRemovePanel((panel) => {
 				paramSubs.get(panel.id)?.dispose();

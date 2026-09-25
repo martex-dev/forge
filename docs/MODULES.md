@@ -201,8 +201,12 @@ registered through the context is torn down when the module is disabled.
   the same `0.0₅3688` notation as the watchlist. Polls every 5 s (Binance) or 30 s (pools) and
   only updates the moving bars, so zoom/scroll survive refreshes. The Token panel's **Chart**
   button opens its pool here. Source, symbol and interval are saved with the layout.
-- **Panels:** `chart.main` — Chart (tab next to TradingView).
-- **Commands:** `Trade: Show Chart`.
+- **Multi-chart:** `Trade: New Chart` opens another chart beside the active one; `Trade: Chart
+Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart keeps its own
+  source and interval, its tab reads e.g. `ETHUSDT · 4h`, and the arrangement is saved with the
+  layout (drag tabs to rearrange like any panel).
+- **Panels:** `chart.main` — Chart (tab next to TradingView; extra instances `chart.main#n`).
+- **Commands:** `Trade: Show Chart`, `Trade: New Chart`, `Trade: Chart Grid (2×2)`.
 - **Settings:** none (state lives in the panel's layout params).
 - **Sidecar endpoints:** `GET /chart/binance?symbol=&interval=&limit=`,
   `GET /chart/gecko?chain=&pool=&interval=&limit=` → `{ candles, stale }`.

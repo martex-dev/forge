@@ -20,7 +20,7 @@ async function openChart(page: Page): Promise<void> {
 	await page.locator('[data-room-layout="trade"]').waitFor({ state: 'attached' });
 	await page.keyboard.press('Control+2');
 	await expect(page.locator('[data-room-layout="trade"]')).toBeVisible();
-	await page.locator('[data-room-layout="trade"] .dv-tab', { hasText: /^Chart$/ }).click();
+	await page.locator('[data-room-layout="trade"] .dv-tab', { hasText: /USDT · / }).click();
 	await expect(page.getByRole('toolbar', { name: 'Chart controls' })).toBeVisible();
 }
 

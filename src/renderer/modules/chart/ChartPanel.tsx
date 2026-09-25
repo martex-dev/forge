@@ -1,5 +1,5 @@
 import { Bell, ChartCandlestick } from 'lucide-react';
-import { type JSX, useState } from 'react';
+import { type JSX, useEffect, useState } from 'react';
 
 import { commandContext } from '../../app/commands/use-commands';
 import { cn } from '../../lib/cn';
@@ -22,9 +22,12 @@ import {
 import { type ChartMode, ChartToolbar } from './ChartToolbar';
 import { useCandles } from './use-candles';
 
-export function ChartPanel({ params: rawParams, setParams }: PanelProps): JSX.Element {
+export function ChartPanel({ params: rawParams, setParams, setTitle }: PanelProps): JSX.Element {
 	const params = readParams(rawParams);
 	const { source, interval, label } = params;
+	// Tab reads e.g. "ETHUSDT · 4h", so several charts side by side stay tellable apart.
+	const title = `${sourceLabel(source, label)} · ${interval}`;
+	useEffect(() => setTitle(title), [title, setTitle]);
 	const [mode, setMode] = useState<ChartMode>(source.kind);
 	const [shownKind, setShownKind] = useState(source.kind);
 	// Opening a pool from the Token panel switches the source under us: follow it.

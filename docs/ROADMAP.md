@@ -169,7 +169,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] Solana wallet watch (public address only)
 - [x] Alerts: price thresholds and calendar events → inbox + toasts
 - [ ] Earnings calendar (source to be agreed; possibly Market Calendar project)
-- [ ] Multi-chart layouts
+- [x] Multi-chart layouts
 - [ ] Trade journal (entries, screenshots, tags, notes, stats)
 
 ## Phase 4 — Lab depth
