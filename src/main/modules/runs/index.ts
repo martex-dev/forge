@@ -2,15 +2,36 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { app } from 'electron';
-import type { z } from 'zod';
+import { z } from 'zod';
 
-import { MetricsPageSchema, type Run, type RunStatus } from '@shared/ipc/channels/lab';
+import {
+	MetricsPageSchema,
+	type Run,
+	RunSeriesSchema,
+	type RunStatus,
+} from '@shared/ipc/channels/lab';
 import { manifest } from '@shared/modules/runs.manifest';
 
 import { ForgeError } from '../../core/errors';
 import type { MainModule, MainModuleContext } from '../../core/modules/types';
 import { SidecarRunDetailSchema, SidecarRunSchema, toRun, toRunDetail } from './map-run';
 import { endedRuns, runNotification } from './run-watch';
+
+const SidecarSummarySchema = z.array(
+	z.object({
+		id: z.string(),
+		metrics: z.record(
+			z.string(),
+			z.object({
+				last: z.number().nullable(),
+				last_step: z.number().int(),
+				min: z.number().nullable(),
+				max: z.number().nullable(),
+				count: z.number().int(),
+			}),
+		),
+	}),
+);
 
 // How often main checks for runs that ended, to notify even when the Lab room is closed.
 const WATCH_MS = 5_000;
@@ -59,6 +80,40 @@ export const mainModule: MainModule = {
 		);
 		ctx.ipc.handle('runs:metrics', ({ id, after }) =>
 			fetchParsed(ctx, `/runs/${id}/metrics?after=${after}`, MetricsPageSchema),
+		);
+		ctx.ipc.handle('runs:summary', async (ids) => {
+			const parsed = SidecarSummarySchema.safeParse(
+				await ctx.sidecar('POST', '/runs/summary', { ids }),
+			);
+			if (!parsed.success) {
+				throw new ForgeError('RUNS_BAD_DATA', 'The run store returned unexpected data');
+			}
+			return parsed.data.map((r) => ({
+				id: r.id,
+				metrics: Object.fromEntries(
+					Object.entries(r.metrics).map(([key, m]) => [
+						key,
+						{
+							last: m.last,
+							lastStep: m.last_step,
+							min: m.min,
+							max: m.max,
+							count: m.count,
+						},
+					]),
+				),
+			}));
+		});
+		ctx.ipc.handle(
+			'runs:series',
+			async ({ id, maxPoints }) =>
+				(
+					await fetchParsed(
+						ctx,
+						`/runs/${id}/series?max_points=${maxPoints}`,
+						z.object({ series: RunSeriesSchema }),
+					)
+				).series,
 		);
 		ctx.ipc.handle('runs:delete', async (id) => {
 			await ctx.sidecar('DELETE', `/runs/${id}`);

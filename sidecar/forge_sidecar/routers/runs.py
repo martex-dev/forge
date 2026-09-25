@@ -1,6 +1,13 @@
 from fastapi import APIRouter, HTTPException, Path, Query, Request
+from pydantic import BaseModel, Field
 
-from forge_sidecar.services.runs_store import MetricsPage, Run, RunDetail, RunsStore
+from forge_sidecar.services.runs_store import (
+	MetricsPage,
+	Run,
+	RunDetail,
+	RunsStore,
+	RunSummary,
+)
 
 router = APIRouter(prefix='/runs', tags=['runs'])
 
@@ -14,6 +21,29 @@ def _store(request: Request) -> RunsStore:
 @router.get('', response_model=list[Run])
 async def list_runs(request: Request) -> list[Run]:
 	return _store(request).list()
+
+
+class SummaryRequest(BaseModel):
+	ids: list[str] = Field(min_length=1, max_length=12)
+
+
+class Series(BaseModel):
+	series: dict[str, list[tuple[int, float | None]]]
+
+
+# Declared before /{run_id} so 'summary' isn't taken for a run id.
+@router.post('/summary', response_model=list[RunSummary])
+async def summary(request: Request, body: SummaryRequest) -> list[RunSummary]:
+	return _store(request).summary(body.ids)
+
+
+@router.get('/{run_id}/series', response_model=Series)
+async def series(
+	request: Request,
+	run_id: str = RunIdPath,
+	max_points: int = Query(default=1500, ge=50, le=10000),
+) -> Series:
+	return Series(series=_store(request).series(run_id, max_points))
 
 
 @router.get('/{run_id}', response_model=RunDetail)

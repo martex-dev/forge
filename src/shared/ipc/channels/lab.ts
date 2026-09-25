@@ -45,6 +45,29 @@ export const MetricsPageSchema = z.object({
 });
 export type MetricsPage = z.infer<typeof MetricsPageSchema>;
 
+export const MetricSummarySchema = z.object({
+	/** null = the last logged value was NaN/inf. */
+	last: z.number().nullable(),
+	lastStep: z.number().int(),
+	min: z.number().nullable(),
+	max: z.number().nullable(),
+	count: z.number().int(),
+});
+export type MetricSummary = z.infer<typeof MetricSummarySchema>;
+
+export const RunSummarySchema = z.object({
+	id: RunIdSchema,
+	metrics: z.record(z.string(), MetricSummarySchema),
+});
+export type RunSummary = z.infer<typeof RunSummarySchema>;
+
+/** Per metric key: [step, value] thinned for overlays. */
+export const RunSeriesSchema = z.record(
+	z.string(),
+	z.array(z.tuple([z.number().int(), z.number().nullable()])),
+);
+export type RunSeries = z.infer<typeof RunSeriesSchema>;
+
 export const ProbeSetupSchema = z.object({
 	/** Absolute path of packages/forge-probe when running from the repo, else null. */
 	packageDir: z.string().nullable(),
@@ -81,6 +104,14 @@ export const labChannels = defineChannels({
 		output: MetricsPageSchema,
 	},
 	'runs:delete': { input: RunIdSchema, output: z.void() },
+	'runs:summary': {
+		input: z.array(RunIdSchema).min(1).max(12),
+		output: z.array(RunSummarySchema),
+	},
+	'runs:series': {
+		input: z.object({ id: RunIdSchema, maxPoints: z.number().int().min(50).max(10000) }),
+		output: RunSeriesSchema,
+	},
 	'runs:setup': { input: z.void(), output: ProbeSetupSchema },
 	'gpu:snapshot': { input: z.void(), output: GpuSnapshotSchema },
 });

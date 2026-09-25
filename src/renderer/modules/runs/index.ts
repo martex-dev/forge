@@ -1,10 +1,11 @@
-import { Activity, Copy } from 'lucide-react';
+import { Activity, Copy, GitCompareArrows } from 'lucide-react';
 
 import { manifest } from '@shared/modules/runs.manifest';
 
 import { call } from '../../lib/ipc';
 import { toast } from '../../stores/toast-store';
 import type { RendererModule } from '../types';
+import { RunComparePanel } from './RunComparePanel';
 import { RunMonitorPanel } from './RunMonitorPanel';
 
 export const rendererModule: RendererModule = {
@@ -20,6 +21,14 @@ export const rendererModule: RendererModule = {
 			// A tab in the centre group, in front of Welcome (tabWith would open it in the background).
 			position: 'tab',
 		},
+		{
+			id: 'runs.compare',
+			title: 'Compare Runs',
+			room: 'lab',
+			icon: GitCompareArrows,
+			component: RunComparePanel,
+			tabWith: 'runs.monitor',
+		},
 	],
 	commands: [
 		{
@@ -29,6 +38,14 @@ export const rendererModule: RendererModule = {
 			keywords: ['training', 'metrics', 'loss', 'probe', 'experiment'],
 			icon: Activity,
 			run: (ctx) => ctx.openPanel('runs.monitor'),
+		},
+		{
+			id: 'runs.compare',
+			title: 'Lab: Compare Runs',
+			room: 'lab',
+			keywords: ['experiment', 'diff', 'config', 'overlay', 'history', 'ablation'],
+			icon: GitCompareArrows,
+			run: (ctx) => ctx.openPanel('runs.compare'),
 		},
 		{
 			id: 'runs.copyInstall',

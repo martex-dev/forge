@@ -130,3 +130,37 @@ def test_probe_file_written_on_start_and_removed_on_shutdown(tmp_path: Path) -> 
 		assert data['url'] == 'ws://127.0.0.1:45678/probe/ws' and data['token'] == PROBE
 		assert (tmp_path / 'lab' / 'runs.db').exists()
 	assert not path.exists()
+
+
+def test_store_summary_and_thinned_series() -> None:
+	store = RunsStore(None)
+	other = 'run-abcdefghij'
+	store.start(RUN, 'a', {}, 0.0)
+	store.start(other, 'b', {}, 0.0)
+	for step in range(1000):
+		store.log(RUN, step, 0.0, {'loss': 1.0 / (step + 1)})
+	store.log(RUN, 5, 0.0, {'acc': math.nan})
+	store.log(other, 0, 0.0, {'loss': 3.0})
+	[a, b] = store.summary([RUN, other])
+	assert a.metrics['loss'].last == pytest.approx(1 / 1000)
+	assert (a.metrics['loss'].min, a.metrics['loss'].max) == (pytest.approx(0.001), 1.0)
+	assert a.metrics['loss'].count == 1000 and a.metrics['loss'].last_step == 999
+	assert a.metrics['acc'].last is None  # a NaN stays visible as "no value"
+	assert b.metrics['loss'].last == 3.0
+	series = store.series(RUN, 100)
+	loss = series['loss']
+	assert len(loss) <= 101
+	assert loss[0][0] == 0 and loss[-1][0] == 999  # first and last points always kept
+	assert series['acc'] == [(5, None)]
+
+
+def test_summary_and_series_routes() -> None:
+	with _client() as client:
+		client.app.state.runs.start(RUN, 'a', {}, 0.0)  # type: ignore[attr-defined]
+		client.app.state.runs.log(RUN, 1, 0.0, {'loss': 0.5})  # type: ignore[attr-defined]
+		res = client.post('/runs/summary', json={'ids': [RUN]}, headers=AUTH)
+		assert res.status_code == 200
+		assert res.json()[0]['metrics']['loss']['last'] == 0.5
+		res = client.get(f'/runs/{RUN}/series?max_points=50', headers=AUTH)
+		assert res.json() == {'series': {'loss': [[1, 0.5]]}}
+		assert client.post('/runs/summary', json={'ids': []}, headers=AUTH).status_code == 422

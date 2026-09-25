@@ -67,6 +67,25 @@ class MetricPoint(BaseModel):
 	value: float | None  # None = NaN/inf was logged (a diverged loss is worth seeing)
 
 
+# Module level: inside RunsStore, `list` is the method of that name.
+SeriesMap = dict[str, list[tuple[int, float | None]]]
+RunIds = list[str]
+Summaries = list['RunSummary']
+
+
+class MetricSummary(BaseModel):
+	last: float | None
+	last_step: int
+	min: float | None
+	max: float | None
+	count: int
+
+
+class RunSummary(BaseModel):
+	id: str
+	metrics: dict[str, MetricSummary]
+
+
 class MetricsPage(BaseModel):
 	points: list[MetricPoint]
 	cursor: int
@@ -203,6 +222,63 @@ class RunsStore:
 			cursor=rows[-1]['seq'] if rows else after,
 			more=more,
 		)
+
+	def summary(self, run_ids: RunIds) -> Summaries:
+		"""Last, min and max of every metric per run: the comparison table's raw numbers."""
+		out: Summaries = []
+		with self._lock:
+			for run_id in run_ids:
+				agg = self._db.execute(
+					'SELECT key, count(*) AS n, min(value) AS lo, max(value) AS hi, max(step) AS s '
+					'FROM metrics WHERE run_id = ? GROUP BY key',
+					(run_id,),
+				).fetchall()
+				last = {
+					r['key']: r['value']
+					for r in self._db.execute(
+						'SELECT m.key, m.value FROM metrics m JOIN (SELECT key, max(step) AS s '
+						'FROM metrics WHERE run_id = ? GROUP BY key) l '
+						'ON m.key = l.key AND m.step = l.s WHERE m.run_id = ?',
+						(run_id, run_id),
+					).fetchall()
+				}
+				out.append(
+					RunSummary(
+						id=run_id,
+						metrics={
+							r['key']: MetricSummary(
+								last=last.get(r['key']),
+								last_step=r['s'],
+								min=r['lo'],
+								max=r['hi'],
+								count=r['n'],
+							)
+							for r in agg
+						},
+					)
+				)
+		return out
+
+	def series(self, run_id: str, max_points: int) -> SeriesMap:
+		"""
+		Every metric, thinned to at most ~max_points per key by keeping every n-th point (and the
+		last one). Enough to overlay several long runs; the Run Monitor still shows every point.
+		"""
+		with self._lock:
+			rows = self._db.execute(
+				'SELECT key, step, value FROM ('
+				'  SELECT key, step, value,'
+				'    row_number() OVER (PARTITION BY key ORDER BY step) AS rn,'
+				'    count(*) OVER (PARTITION BY key) AS n'
+				'  FROM metrics WHERE run_id = ?'
+				') WHERE (rn - 1) % max(1, (n + ? - 1) / ?) = 0 OR rn = n '
+				'ORDER BY key, step',
+				(run_id, max_points, max_points),
+			).fetchall()
+		series: SeriesMap = {}
+		for r in rows:
+			series.setdefault(r['key'], []).append((r['step'], r['value']))
+		return series
 
 	def delete(self, run_id: str) -> bool:
 		with self._lock, self._db:

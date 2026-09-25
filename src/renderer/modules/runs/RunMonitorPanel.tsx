@@ -1,8 +1,12 @@
+import { GitCompareArrows } from 'lucide-react';
 import type { JSX } from 'react';
 
+import { commandContext } from '../../app/commands/use-commands';
 import { ErrorState } from '../../ui/ErrorState';
+import { IconButton } from '../../ui/IconButton';
 import { Spinner } from '../../ui/Spinner';
 import type { PanelProps } from '../types';
+import { defaultComparison } from './compare-model';
 import { ProbeSetup } from './ProbeSetup';
 import { RunList } from './RunList';
 import { RunView } from './RunView';
@@ -34,8 +38,21 @@ export function RunMonitorPanel({ params, setParams }: PanelProps): JSX.Element 
 	return (
 		<div className='flex h-full bg-bg-1'>
 			<div className='flex w-64 shrink-0 flex-col border-r border-border'>
-				<div className='border-b border-border px-3 py-1.5 text-11 font-medium tracking-wide text-fg-2 uppercase'>
-					Runs ({runs.length})
+				<div className='flex items-center border-b border-border py-0.5 pr-1 pl-3'>
+					<span className='flex-1 text-11 font-medium tracking-wide text-fg-2 uppercase'>
+						Runs ({runs.length})
+					</span>
+					<IconButton
+						label='Compare with an earlier run…'
+						size='sm'
+						icon={<GitCompareArrows size={12} />}
+						disabled={runs.length < 2}
+						onClick={() =>
+							commandContext.openPanel('runs.compare', {
+								params: { ids: defaultComparison(runs, selected) },
+							})
+						}
+					/>
 				</div>
 				<RunList
 					runs={runs}

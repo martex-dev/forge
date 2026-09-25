@@ -229,19 +229,32 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
   (`train/loss` and `val/loss` share a "loss" chart; wheel to zoom; LTTB sampling for long runs)
   and the flattened config. Follows the newest run unless you pin another one (saved with the
   layout). The empty state shows the exact `pip install -e` command for this checkout.
-- **Panels:** `runs.monitor` — Run Monitor (centre, in front of Welcome).
-- **Commands:** `Lab: Show Run Monitor`, `Lab: Copy forge-probe Install Command`.
+- **Compare runs:** the compare button in the run list opens the selected run next to the
+  closest earlier run of the same project; add up to 8 runs.
+    - **Summary:** final value of every metric (min … max below). The best run is highlighted
+      when the name says which way is better (`loss`, `err`, `rmse`… lower; `acc`, `f1`, `auc`…
+      higher; ties have no winner).
+    - **Config:** flattened config diff, only the differing keys by default.
+    - **Charts:** one overlay chart per metric, a colour per run, TensorBoard-style debiased
+      EMA smoothing (slider, raw curve faint behind it). Series are thinned to about 1,500
+      points per metric; live runs refresh every 5 s.
+- **Panels:** `runs.monitor` — Run Monitor (centre, in front of Welcome); `runs.compare` —
+  Compare Runs (params: run ids and smoothing, saved with the layout).
+- **Commands:** `Lab: Show Run Monitor`, `Lab: Compare Runs`,
+  `Lab: Copy forge-probe Install Command`.
 - **Settings:** none.
 - **Sidecar endpoints:** `WS /probe/ws` (probe → sidecar, JSON-array batches of
   `start` / `log` / `finish`), `GET /runs`, `GET /runs/{id}`, `GET /runs/{id}/metrics?after=`
-  (incremental by cursor, 50k points per page), `DELETE /runs/{id}`. Runs live in
+  (incremental by cursor, 50k points per page), `POST /runs/summary` (last/min/max per metric),
+  `GET /runs/{id}/series?max_points=` (every n-th point plus the last), `DELETE /runs/{id}`. Runs live in
   `userData/sidecar/lab/runs.db` (SQLite).
 - **External services / rate limits:** none (local only).
 - **Security:** the probe authenticates with a per-launch **probe token** that opens only
   `/probe/ws`; it reads it from `userData/sidecar/probe.json` and only connects to `127.0.0.1`.
   The renderer reads runs through main like every other module.
-- **Known limitations:** one run at a time (side-by-side comparison is Phase 4). Metrics are
-  polled every 1 s while a run is live rather than pushed. No per-run GPU attribution yet.
+- **Known limitations:** metrics are polled every 1 s while a run is live rather than pushed.
+  No per-run GPU attribution yet. The comparison's thinning keeps every n-th point, so a
+  one-step spike can fall between samples (the Run Monitor shows every point).
 
 ---
 
