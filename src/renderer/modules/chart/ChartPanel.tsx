@@ -1,11 +1,13 @@
-import { ChartCandlestick } from 'lucide-react';
+import { Bell, ChartCandlestick } from 'lucide-react';
 import { type JSX, useState } from 'react';
 
+import { commandContext } from '../../app/commands/use-commands';
 import { cn } from '../../lib/cn';
 import { formatPercent, formatPrice } from '../../lib/format';
 import { Badge } from '../../ui/Badge';
 import { EmptyState } from '../../ui/EmptyState';
 import { ErrorState } from '../../ui/ErrorState';
+import { IconButton } from '../../ui/IconButton';
 import { Spinner } from '../../ui/Spinner';
 import type { PanelProps } from '../types';
 import { CandleChart } from './CandleChart';
@@ -41,9 +43,35 @@ export function ChartPanel({ params: rawParams, setParams }: PanelProps): JSX.El
 	};
 
 	const summary = series ? summarize(series.candles) : null;
+	// Loose coupling by panel id: the alerts module owns the form; this just prefills it.
+	const newAlert = (): void => {
+		if (!active) return;
+		const source =
+			active.kind === 'binance'
+				? { kind: 'binance', symbol: active.symbol }
+				: {
+						kind: 'dex',
+						chainId: active.chainId,
+						pairAddress: active.pairAddress,
+						label: sourceLabel(active, label),
+					};
+		commandContext.openPanel('alerts.panel', {
+			params: {
+				draft: { kind: 'price', source, ...(summary ? { value: summary.last } : {}) },
+			},
+		});
+	};
 	const status = (
 		<>
 			{isFetching && !isLoading && <Spinner size={12} label='Updating chart' />}
+			{active && (
+				<IconButton
+					label='Price alert…'
+					size='sm'
+					icon={<Bell size={12} />}
+					onClick={newAlert}
+				/>
+			)}
 			{series?.stale && (
 				<span title='Upstream refresh failed; showing the last good data'>
 					<Badge tone='warn'>stale</Badge>

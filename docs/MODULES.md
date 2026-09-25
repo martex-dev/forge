@@ -473,6 +473,30 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `alerts` — Alerts
+
+- **Room:** trade · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Two kinds of alerts, evaluated by main every 15 s in any room:
+    - **Price** — a Binance symbol or a watched DEX pair _crosses above/below_ a value (crossing
+      semantics like TradingView: an alert created while the price is already past the value waits
+      for the next cross). Once, or every cross. Optional note.
+    - **Calendar** — "N minutes before" high/medium/low-impact events, optionally only for chosen
+      currencies; each event is announced once per alert (remembered across restarts for 8 days).
+      Fired alerts are `warn` notifications: in-app toast when Forge is focused, Windows toast when
+      not, and in the inbox; clicking opens the chart (price) or the calendar.
+- **Quick create:** the Chart toolbar's bell and the Token panel's **Alert…** prefill the source
+  and current price.
+- **Panels:** `alerts.panel` — Alerts (tab next to the Economic Calendar): rules with live price,
+  armed / fired / off state, enable switch, edit, delete.
+- **Commands:** `Trade: New Price Alert`, `Trade: New Calendar Alert`.
+- **Settings:** `alerts:rules`, `alerts:firedCalendar`.
+- **Data:** prices through the sidecar's existing chart (Binance) and DexScreener endpoints (DEX
+  pairs batched into one call); events from the cached Forex Factory week.
+- **Known limitations:** 15 s granularity (a spike that reverts within a check can be missed);
+  no percent-move or volume alerts yet; alerts run only while Forge is open.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

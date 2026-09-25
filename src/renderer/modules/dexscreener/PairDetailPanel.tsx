@@ -1,4 +1,4 @@
-import { ChartCandlestick, Copy, ExternalLink } from 'lucide-react';
+import { Bell, ChartCandlestick, Copy, ExternalLink } from 'lucide-react';
 import type { JSX, ReactNode } from 'react';
 
 import type { PairId } from '@shared/ipc/channels/dex';
@@ -181,6 +181,28 @@ export function PairDetailPanel({ params }: PanelProps): JSX.Element {
 					}
 				>
 					Chart
+				</Button>
+				<Button
+					size='sm'
+					icon={<Bell size={12} />}
+					onClick={() =>
+						commandContext.openPanel('alerts.panel', {
+							params: {
+								draft: {
+									kind: 'price',
+									source: {
+										kind: 'dex',
+										chainId: pair.chainId,
+										pairAddress: pair.pairAddress,
+										label: `${pair.base.symbol}/${pair.quote.symbol}`,
+									},
+									...(pair.priceUsd ? { value: pair.priceUsd } : {}),
+								},
+							},
+						})
+					}
+				>
+					Alert…
 				</Button>
 				<Button
 					size='sm'
