@@ -2,7 +2,7 @@
 
 Source of truth for progress. Tick boxes as work lands. Only the current phase is worked on.
 
-**Current phase: 4 — Lab depth.** Phases 1–3 are done.
+**Current phase: 6 — Ship.** Phases 1–5 are done.
 
 ---
 
@@ -186,7 +186,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] Discord: webhooks (post + notification forwarding) + webview
 - [x] Social webview tabs (Discord, LinkedIn, X, Notion)
 - [x] Unified inbox (GitHub, Vercel, alerts, calendar): source chips, search, collapsed repeats, keyboard
-- [ ] "Today" dashboard
+- [x] "Today" dashboard
 
 ## Phase 6 — Ship
 

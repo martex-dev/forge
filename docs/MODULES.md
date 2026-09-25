@@ -729,6 +729,29 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `today` — Today
+
+- **Room:** hub · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** The day at a glance, built only from modules that are on. Each card opens its
+  source panel:
+    - **Macro today:** today's high/medium-impact events (past ones faded), with a countdown to the next.
+    - **Earnings today:** today's reports ranked by impact and market cap.
+    - **Trading today:** trades closed today, their net P/L, wins, and open trades (journal P/L math shared
+      via `@shared/journal-math`).
+    - **Alerts:** armed count, and what fired today.
+    - **Lab:** runs training now (with step), finished/failed in the last 24 h, GPU utilisation.
+    - **Build:** open pull requests, workflows whose latest run failed, and production deploys
+      that aren't ready (or what's missing: folder, remote, tokens).
+    - **Inbox:** unread count and the latest unread (click to open).
+    - **Notes:** Quick note into today's daily note.
+- A card that can't load (sidecar down, no token) says so without taking the dashboard down.
+  Sources refresh every minute while the Hub is on screen and each time you come back to it.
+- **Panels:** `today.panel` — Today (in the Hub's default layout).
+- **Commands:** `Hub: Today` (Ctrl+Shift+T, from anywhere).
+- **Known limitations:** read-only summary; no per-card hide/reorder yet.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

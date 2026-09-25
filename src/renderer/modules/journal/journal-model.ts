@@ -1,14 +1,8 @@
 import type { JournalEntry } from '@shared/ipc/channels/journal';
+import { entryPnl } from '@shared/journal-math';
 
-/** Net P/L of a closed trade: the explicit figure when given, else derived from prices × size. */
-export function entryPnl(e: JournalEntry): number | null {
-	if (e.status !== 'closed') return null;
-	if (e.pnl !== null) return e.pnl - e.fees;
-	if (e.entry === null || e.exit === null || e.size === null) return null;
-	const sign = e.side === 'long' ? 1 : -1;
-	// Rounded so price-math float noise (1.085 - 1.08) doesn't turn a scratch into a win or loss.
-	return Math.round(((e.exit - e.entry) * e.size * sign - e.fees) * 1e6) / 1e6;
-}
+// Shared so the Today dashboard computes P/L the same way.
+export { entryPnl };
 
 /** Result in R (multiples of the stop distance). Uses prices, so it works without P/L too. */
 export function entryR(e: JournalEntry): number | null {

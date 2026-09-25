@@ -58,6 +58,13 @@ export async function runCommand(command: CommandDefinition): Promise<void> {
 	}
 }
 
+/** Runs a command by id (e.g. a dashboard button reusing another module's command). */
+export function runCommandById(id: string): void {
+	const command = RENDERER_MODULES.flatMap((m) => m.commands ?? []).find((c) => c.id === id);
+	if (command) void runCommand(command);
+	else toast.error('Unknown command', id);
+}
+
 /** Built-in commands plus commands of every currently enabled module. */
 export function useCommands(): CommandDefinition[] {
 	const { enabled } = useModules();
