@@ -9,6 +9,7 @@ import { fsChannels, fsEvents } from './channels/fs';
 import { gitChannels, gitEvents } from './channels/git';
 import { labChannels } from './channels/lab';
 import { moduleChannels, moduleEvents } from './channels/modules';
+import { searchChannels } from './channels/search';
 import { secretChannels } from './channels/secrets';
 import { sidecarChannels, sidecarEvents } from './channels/sidecar';
 import { terminalChannels, terminalEvents } from './channels/terminal';
@@ -37,6 +38,7 @@ export const ipcContract = {
 	...chartChannels,
 	...labChannels,
 	...vaultChannels,
+	...searchChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

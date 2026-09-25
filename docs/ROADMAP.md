@@ -158,7 +158,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 ## Phase 2 — Build depth
 
 - [ ] LSP: basedpyright + typescript-language-server
-- [ ] Workspace search (ripgrep)
+- [x] Workspace search (ripgrep)
 - [ ] GitHub: PRs, issues, Actions, diff review, inbox notifications
 - [ ] Vercel: projects, deployments, logs, promote/rollback with confirmation
 - [ ] AI chat (Claude / OpenAI / Gemini) from main, file/selection/diff context, streaming, diff-preview apply
@@ -189,6 +189,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 ## Phase 6 — Ship
 
+- [ ] Packaging note: `asarUnpack` the ripgrep binary (`node_modules/@vscode/ripgrep-*/**`); `rgPath()` already maps `.asar` → `.asar.unpacked`.
 - [ ] PyInstaller sidecar bundled via electron-builder (NSIS)
 - [ ] Auto-update (electron-updater, GitHub Releases)
 - [ ] Performance pass (measured before/after)

@@ -307,6 +307,24 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `search` — Search
+
+- **Room:** build · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Find in files across the open folder with ripgrep: literal or regex,
+  match case, whole word, include/exclude globs (comma-separated). Results are grouped by file
+  with highlighted matches; click one to open the file at that line. `.gitignore` is honoured and
+  heavy folders (node_modules, .venv, dist…) are always skipped. Each file contributes at most
+  200 matches and a search stops at 2 000 (it says so). Typing cancels the previous search.
+  Query and options are saved with the layout.
+- **Panels:** `search.files` — Search (tab next to Explorer).
+- **Commands:** `Build: Search in Files` (Ctrl+Shift+F, focuses the input).
+- **Settings:** none.
+- **Main:** `Ripgrep` runs the bundled `rg` (`@vscode/ripgrep`, per-platform binary package, no
+  install script) with `--json`; the parser converts rg's UTF-8 byte offsets to string indices.
+- **Known limitations:** no replace yet; files over 2 MB are skipped.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>
