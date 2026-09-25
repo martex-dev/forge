@@ -16,7 +16,9 @@ import { useModules } from './hooks/use-modules';
 import { useSidecarRecovery } from './hooks/use-sidecar-recovery';
 import { RoomLayout } from './layout/RoomLayout';
 import { useNotificationEvents } from './notifications';
+import { OnboardingDialog } from './OnboardingDialog';
 import { RoomRail } from './RoomRail';
+import { RestoreHost } from './settings/BackupSetting';
 import { SettingsDialog } from './settings/SettingsDialog';
 import { StatusBar } from './StatusBar';
 import { TitleBar } from './TitleBar';
@@ -86,6 +88,8 @@ export function AppShell(): JSX.Element {
 			<StatusBar />
 			<CommandPalette commands={commands} />
 			<SettingsDialog />
+			<OnboardingDialog />
+			<RestoreHost />
 			{overlays.map(({ key, Overlay }) => (
 				<Overlay key={key} />
 			))}

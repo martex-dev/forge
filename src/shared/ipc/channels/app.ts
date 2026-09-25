@@ -21,6 +21,9 @@ export const appChannels = defineChannels({
 		]),
 	},
 	'app:reloadWindow': { input: z.void(), output: z.void() },
+	/** Whether to show the first-launch guide (never in test runs). */
+	'app:onboarding': { input: z.void(), output: z.object({ show: z.boolean() }) },
+	'app:onboardingDone': { input: z.void(), output: z.void() },
 	'app:openExternal': { input: z.url({ protocol: /^https$/ }), output: z.void() },
 	/** Renderer has no file logger; it forwards warnings/errors to main's electron-log. */
 	'app:log': {

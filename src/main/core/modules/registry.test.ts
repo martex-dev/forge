@@ -56,6 +56,7 @@ function setup(platform = 'win32', manifests: ModuleManifest[] = [always, optIn,
 			getSecret: vi.fn(() => null),
 			setSecret: vi.fn(),
 			onNotification: vi.fn(),
+			registerBackup: vi.fn(),
 			sidecar: vi.fn(),
 			workspace: { root: () => null, onChange: vi.fn() },
 			settings: {

@@ -13,6 +13,7 @@ export const mainModule: MainModule = {
 	activate(ctx) {
 		const store = new JournalStore(join(app.getPath('userData'), 'journal'));
 		ctx.onDispose(() => store.close());
+		ctx.registerBackup({ folder: 'journal', flush: () => store.checkpoint() });
 
 		ctx.ipc.handle('journal:list', () => store.list());
 		ctx.ipc.handle('journal:save', (entry) => store.save(entry));

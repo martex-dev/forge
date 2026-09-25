@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { aiChannels, aiEvents } from './channels/ai';
 import { alertChannels, alertEvents } from './channels/alerts';
 import { appChannels } from './channels/app';
+import { backupChannels } from './channels/backup';
 import { calendarChannels } from './channels/calendar';
 import { chartChannels } from './channels/chart';
 import { dataChannels, dataEvents } from './channels/data';
@@ -69,6 +70,7 @@ export const ipcContract = {
 	...discordChannels,
 	...notionChannels,
 	...updateChannels,
+	...backupChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

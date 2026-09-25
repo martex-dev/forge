@@ -5,6 +5,7 @@ import type { Channel } from '@shared/ipc/contract';
 import type { ModuleManifest } from '@shared/modules/types';
 import type { ForgeNotification, NewNotification } from '@shared/notifications';
 
+import type { BackupProvider } from '../backup/backup-service';
 import type { Handler } from '../ipc-router';
 
 export interface ModuleLogger {
@@ -29,6 +30,11 @@ export interface MainModuleContext {
 	getSecret(key: string): string | null;
 	/** Saves (or with null, deletes) a declared secret; emits `secrets:changed` without the value. */
 	setSecret(key: string, value: string | null): void;
+	/**
+	 * Include a folder under userData in backups (e.g. the journal); `flush` runs before the copy.
+	 * Restores swap it in at the next start, before modules open their files.
+	 */
+	registerBackup(provider: BackupProvider): void;
 	/** Every new notification (from any module), after it's stored. Removed on disable. */
 	onNotification(listener: (notification: ForgeNotification) => void): void;
 	/** Persistent, zod-validated settings, namespaced per module (`<moduleId>:<key>` in the DB). */

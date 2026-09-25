@@ -13,7 +13,8 @@ never requires editing another module or the shell:
 | Sidecar (optional)   | `sidecar/forge_sidecar/routers/<id>.py`                         | included in `forge_sidecar/main.py`                 |
 
 A main module's `activate(ctx)` gets `ctx.ipc.handle`, `ctx.emit`, `ctx.notify`, `ctx.getSecret`
-(only keys it declared), `ctx.sidecar(method, path, body)` and `ctx.onDispose`. Everything
+(only keys it declared), `ctx.sidecar(method, path, body)`, `ctx.registerBackup({ folder, flush })` (include a folder under
+userData in backups, see ADR-024) and `ctx.onDispose`. Everything
 registered through the context is torn down when the module is disabled.
 
 ---
@@ -545,7 +546,8 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
   `Trade: Journal Stats`. In the editor, Ctrl+Enter saves.
 - **Settings / secrets:** none.
 - **Data:** `%APPDATA%/forge/journal/` — `journal.db` (SQLite, one JSON document per entry) and
-  `images/<entry id>/`. Copy the folder to back it up (see ADR-016).
+  `images/<entry id>/`. Included in **Settings → General → Backup** (ADR-024); the WAL is
+  checkpointed first so the copy is complete.
 - **Known limitations:** no import from exchanges/CSV yet; P/L is in one account currency (no FX
   conversion); prices × size assumes a linear contract, so use the P/L override for lots,
   futures multipliers or inverse contracts.

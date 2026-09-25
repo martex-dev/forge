@@ -8,6 +8,8 @@ import { DEFAULT_GENERAL, GeneralSettingsSchema } from '@shared/settings';
 
 import { registerAppHandlers } from './core/app-handlers';
 import { registerAppScheme, serveRenderer } from './core/app-protocol';
+import { registerBackupHandlers } from './core/backup/backup-handlers';
+import { applyStaged, BackupService } from './core/backup/backup-service';
 import { createDataServices, registerDataHandlers } from './core/data-handlers';
 import { type DbHandle, openDatabase } from './core/db/client';
 import { attachIpc } from './core/ipc';
@@ -43,11 +45,21 @@ async function start(): Promise<void> {
 	attachIpc();
 
 	db = openDatabase(join(app.getPath('userData'), 'forge.db'));
+	// A restore staged module folders (journal…); swap them in before any module opens them.
+	const restored = applyStaged(app.getPath('userData'));
+	if (restored.length) log.info('[backup] applied staged restore', { restored });
 	const data = createDataServices(db);
+	const backup = new BackupService(
+		app.getPath('userData'),
+		data.settings,
+		data.layouts,
+		app.getVersion(),
+	);
+	registerBackupHandlers(backup);
 	const secrets = createSecretsService();
 	const notify = createNotifier(data.notifications, () => mainWindow);
 
-	registerAppHandlers();
+	registerAppHandlers(data.settings);
 	registerDataHandlers(data, notify);
 	registerSecretsHandlers(secrets);
 	registerUpdater(
@@ -66,6 +78,7 @@ async function start(): Promise<void> {
 		notify,
 		sidecar,
 		workspace: ws.workspace,
+		backup,
 	});
 	await modules.start();
 

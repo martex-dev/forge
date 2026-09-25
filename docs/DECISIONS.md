@@ -519,3 +519,42 @@ only builds, keeping the source private.
 **Consequences:** The installer is ~260 MB and the install ~900 MB (Electron ~250 MB, sidecar
 ~420 MB, of which SciPy/scikit-learn is the bulk). `e2e/packaged.spec.ts` runs the unpacked
 build to prove the installed layout: bundled sidecar, SQLite, ripgrep, basedpyright and the PTY.
+
+## ADR-024: Backups hold settings, layouts and module folders, never secrets
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Phase 6 asks for backup/export of settings. After a reinstall, or on a second
+machine, Forge should come back the way Marto had it. The valuable state is:
+
+- the settings table (module switches, alert rules, watchlists, wallets, preferences);
+- the per-room layouts;
+- the trade journal.
+
+Secrets are DPAPI-encrypted for one Windows account, so they can't move anyway.
+
+**Decision:**
+
+- A backup is a plain folder `forge-backup-YYYY-MM-DD-HHmm` in a location Marto picks. It holds
+  `forge-backup.json` (format version, app version, every settings row, every layout) plus a copy
+  of each registered module folder. No zip: the folder stays inspectable and needs no new
+  dependency.
+- Modules opt in with `ctx.registerBackup({ folder, flush })`. The journal registers `journal`
+  and checkpoints its WAL in `flush`. The core stays ignorant of module files.
+- Secrets are never included. The restore dialog says so.
+- Restore replaces settings and layouts immediately.
+- Module folders are handled differently, because the journal keeps its SQLite file open. They
+  are copied to `userData/.restore-staged`, then `applyStaged` swaps them in at the next start,
+  before any module opens its files. The replaced folder is kept as
+  `<folder>.before-restore-<time>`, so a restore can't lose data.
+- Backup and restore are reachable from Settings → General → Backup, from the palette
+  (`Export Backup…` / `Restore from Backup…`) and from the first-launch guide.
+- The first-launch guide shows once (setting `onboarded`). It never shows in e2e runs, and
+  `Show Welcome Guide` reopens it any time.
+
+**Consequences:**
+
+- A restore that includes the journal needs a restart, which the dialog offers.
+- Old `.before-restore-*` folders are left for Marto to delete.
+- `e2e/backup.spec.ts` exports from one profile and restores into a fresh one through the
+  palette.

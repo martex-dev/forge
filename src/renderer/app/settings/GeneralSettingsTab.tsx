@@ -5,6 +5,7 @@ import { Select } from '../../ui/Select';
 import { Spinner } from '../../ui/Spinner';
 import { Switch } from '../../ui/Switch';
 import { useGeneralSettings } from '../hooks/use-general-settings';
+import { BackupSetting } from './BackupSetting';
 import { SettingRow } from './SettingRow';
 import { UpdatesSetting } from './UpdatesSetting';
 
@@ -54,6 +55,7 @@ export function GeneralSettingsTab(): JSX.Element {
 				autoUpdate={settings.autoUpdate}
 				onChange={(autoUpdate) => update({ autoUpdate })}
 			/>
+			<BackupSetting />
 		</div>
 	);
 }

@@ -1,4 +1,6 @@
 import {
+	Archive,
+	ArchiveRestore,
 	CandlestickChart,
 	Code2,
 	Download,
@@ -11,6 +13,7 @@ import {
 	RotateCw,
 	Search,
 	Settings,
+	Sparkles,
 } from 'lucide-react';
 
 import { ROOMS } from '@shared/rooms';
@@ -18,6 +21,8 @@ import { ROOMS } from '@shared/rooms';
 import { call } from '../../lib/ipc';
 import type { CommandDefinition } from '../../modules/types';
 import { toast } from '../../stores/toast-store';
+import { useOnboarding } from '../OnboardingDialog';
+import { exportBackup, pickRestore } from '../settings/BackupSetting';
 
 export const ROOM_ICONS: Record<string, LucideIcon> = {
 	build: Code2,
@@ -126,6 +131,33 @@ export const BUILTIN_COMMANDS: readonly CommandDefinition[] = [
 			if (status.state === 'ready') await call('update:install');
 			else toast.info('No update downloaded yet', 'Use "Check for Updates" first.');
 		},
+	},
+	{
+		id: 'core.welcome',
+		title: 'Show Welcome Guide',
+		room: 'global',
+		keywords: ['onboarding', 'getting started', 'help', 'shortcuts', 'tour'],
+		icon: Sparkles,
+		run: () => useOnboarding.getState().setOpen(true),
+	},
+	{
+		id: 'core.exportBackup',
+		title: 'Export Backup…',
+		room: 'global',
+		keywords: ['backup', 'export', 'settings', 'journal', 'save'],
+		icon: Archive,
+		run: () =>
+			exportBackup().catch((e: unknown) =>
+				toast.error('Backup failed', e instanceof Error ? e.message : undefined),
+			),
+	},
+	{
+		id: 'core.restoreBackup',
+		title: 'Restore from Backup…',
+		room: 'global',
+		keywords: ['backup', 'restore', 'import', 'migrate'],
+		icon: ArchiveRestore,
+		run: () => pickRestore(),
 	},
 	{
 		id: 'core.togglePlayground',

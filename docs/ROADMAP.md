@@ -195,7 +195,8 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] PyInstaller sidecar (one folder, ~420 MB) bundled via electron-builder (NSIS, unsigned); `npm run dist`; packaged-app e2e (`e2e/packaged.spec.ts`)
 - [x] Auto-update (electron-updater) from the public `forge-releases` repo; tag-driven release workflow (docs/RELEASING.md)
 - [x] Performance pass (measured before/after): idle memory −46% (lazy webviews), sidecar ready −52% (lazy polars/DuckDB); docs/PERFORMANCE.md
-- [ ] Settings backup/export (no secrets); first-launch onboarding
+- [x] Settings backup/export (no secrets): settings, layouts and the journal to a folder; restore from Settings, the palette or onboarding (ADR-024)
+- [x] First-launch onboarding: rooms and shortcuts, connect a folder / Secrets / vault / Discord / backup
 
 ## Parking lot (not scheduled — discuss before adding)
 

@@ -3,6 +3,7 @@ import log from 'electron-log/main';
 import { MANIFESTS } from '@shared/modules';
 import { ModuleTogglesSchema } from '@shared/settings';
 
+import type { BackupService } from '../backup/backup-service';
 import type { SettingsRepo } from '../db/settings-repo';
 import { ForgeError } from '../errors';
 import { emitEvent, router } from '../ipc';
@@ -25,10 +26,11 @@ export interface CoreServices {
 	notify: Notifier;
 	sidecar: SidecarManager | null;
 	workspace: WorkspaceService;
+	backup: BackupService;
 }
 
 export function createModuleRegistry(services: CoreServices): ModuleRegistry {
-	const { settings, secrets, notify, sidecar, workspace } = services;
+	const { settings, secrets, notify, sidecar, workspace, backup } = services;
 	const mainModules = new Map(Object.values(found).map((m) => [m.manifest.id, m]));
 
 	const registry = new ModuleRegistry({
@@ -75,6 +77,7 @@ export function createModuleRegistry(services: CoreServices): ModuleRegistry {
 					emitEvent('secrets:changed', { key, saved: value !== null });
 				},
 				onNotification: (listener) => disposers.push(notify.subscribe(listener)),
+				registerBackup: (provider) => disposers.push(backup.register(provider)),
 				settings: {
 					get: (key, schema, fallback) =>
 						settings.get(`${manifest.id}:${key}`, schema, fallback),

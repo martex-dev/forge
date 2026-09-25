@@ -41,6 +41,11 @@ export class JournalStore {
 		this.db.close();
 	}
 
+	/** Folds the WAL into journal.db so a file copy (backup) is complete on its own. */
+	checkpoint(): void {
+		this.db.pragma('wal_checkpoint(TRUNCATE)');
+	}
+
 	list(): JournalEntry[] {
 		const rows = this.db
 			.prepare('SELECT data FROM entries ORDER BY updated_at DESC')

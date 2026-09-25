@@ -43,4 +43,17 @@ export class SettingsRepo {
 	delete(key: string): void {
 		this.db.delete(settings).where(eq(settings.key, key)).run();
 	}
+
+	/** Every stored value, unvalidated: for backups, which restore them as they were. */
+	all(): Array<{ key: string; value: unknown }> {
+		return this.db.select().from(settings).all();
+	}
+
+	/** Replaces every setting at once (a restore): all or nothing. */
+	replaceAll(rows: ReadonlyArray<{ key: string; value: unknown }>): void {
+		this.db.transaction((tx) => {
+			tx.delete(settings).run();
+			for (const row of rows) tx.insert(settings).values(row).run();
+		});
+	}
 }
