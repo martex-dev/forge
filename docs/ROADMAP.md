@@ -165,7 +165,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 ## Phase 3 — Trade depth
 
-- [ ] MT5 read-only: account, positions with live P/L, history
+- [x] MT5 read-only: account, positions with live P/L, history
 - [ ] Solana wallet watch (public address only)
 - [ ] Alerts: price thresholds and calendar events → inbox + toasts
 - [ ] Earnings calendar (source to be agreed; possibly Market Calendar project)

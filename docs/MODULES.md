@@ -430,6 +430,26 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `mt5` — MetaTrader 5
+
+- **Room:** trade · **Platforms:** win32 only · **Enabled by default:** yes
+- **What it does:** Read-only view of the running MetaTrader 5 terminal: account strip (login,
+  demo/real badge, server, leverage, balance, equity, floating P/L, free margin, margin level),
+  open positions with live P/L (refreshed every 2 s while the Trade room is visible) and the last
+  30 days of deals with net P/L (deposits excluded), closed trades and win rate.
+- **Panels:** `mt5.panel` — MT5 (tab next to the Watchlist).
+- **Commands:** `Trade: Show MetaTrader 5 Account`.
+- **Sidecar endpoints:** `GET /mt5/status`, `/mt5/positions`, `/mt5/history?days=` via the
+  official `MetaTrader5` Python package (Windows-only dependency marker).
+- **Security / trading rules (CLAUDE.md §7):** strictly read-only. There is no code path to
+  `order_send` or any account-changing call, and no IPC channel for it. Forge only _attaches_ to
+  a terminal that is already running (checked with `tasklist`), so it never launches MT5 or logs
+  in by itself; credentials stay in the terminal.
+- **Known limitations:** needs MT5 open and logged in; times are the broker server's; one
+  terminal (the default installation) at a time.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

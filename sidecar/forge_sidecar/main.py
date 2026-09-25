@@ -11,11 +11,12 @@ from fastapi import FastAPI
 
 from forge_sidecar import __version__
 from forge_sidecar.auth import TokenAuthMiddleware
-from forge_sidecar.routers import calendar, chart, dex, gpu, health, probe, runs
+from forge_sidecar.routers import calendar, chart, dex, gpu, health, mt5, probe, runs
 from forge_sidecar.services.cache import TtlCache
 from forge_sidecar.services.charts import ChartData
 from forge_sidecar.services.dexscreener import DexScreener
 from forge_sidecar.services.gpu import GpuMonitor
+from forge_sidecar.services.mt5 import Mt5Service
 from forge_sidecar.services.runs_store import RunsStore
 
 USER_AGENT = f'Forge/{__version__} (personal desktop app)'
@@ -78,6 +79,7 @@ def create_app(
 		app.state.charts = ChartData(client)
 		app.state.runs = RunsStore(data_dir / 'lab' / 'runs.db' if data_dir else None)
 		app.state.gpu = GpuMonitor()
+		app.state.mt5 = Mt5Service()
 		probe_file = write_probe_file(data_dir, port, probe_token) if data_dir and port else None
 		try:
 			yield
@@ -85,6 +87,7 @@ def create_app(
 			if probe_file:
 				remove_probe_file(probe_file, probe_token)
 			app.state.gpu.close()
+			app.state.mt5.close()
 			app.state.runs.close()
 			if owned:
 				await client.aclose()
@@ -106,4 +109,5 @@ def create_app(
 	app.include_router(probe.router)
 	app.include_router(runs.router)
 	app.include_router(gpu.router)
+	app.include_router(mt5.router)
 	return app
