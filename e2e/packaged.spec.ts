@@ -33,6 +33,17 @@ test('packaged app: bundled sidecar, ripgrep, terminal, SQLite and the Python la
 			},
 		);
 
+		// Updates are live in an installed build; the releases repo has nothing published yet.
+		expect(await page.evaluate(() => window.forge.invoke('update:status'))).toMatchObject({
+			ok: true,
+			data: { state: 'idle' },
+		});
+		const checked = await page.evaluate(() => window.forge.invoke('update:check'));
+		expect(checked).toMatchObject({
+			ok: true,
+			data: { state: 'error', message: 'No release published yet' },
+		});
+
 		// SQLite (better-sqlite3 built for Electron).
 		const added = await page.evaluate(() =>
 			window.forge.invoke('notifications:add', {

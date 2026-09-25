@@ -193,7 +193,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] Language servers and `typescript` ship asar-unpacked as runtime dependencies (paths mapped to `.asar.unpacked`)
 - [x] ripgrep asar-unpacked
 - [x] PyInstaller sidecar (one folder, ~420 MB) bundled via electron-builder (NSIS, unsigned); `npm run dist`; packaged-app e2e (`e2e/packaged.spec.ts`)
-- [ ] Auto-update (electron-updater, GitHub Releases)
+- [x] Auto-update (electron-updater) from the public `forge-releases` repo; tag-driven release workflow (docs/RELEASING.md)
 - [ ] Performance pass (measured before/after)
 - [ ] Settings backup/export (no secrets); first-launch onboarding
 

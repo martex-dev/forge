@@ -1,11 +1,13 @@
 import {
 	CandlestickChart,
 	Code2,
+	Download,
 	FlaskConical,
 	LayoutGrid,
 	Library,
 	type LucideIcon,
 	Palette,
+	RefreshCcw,
 	RotateCw,
 	Search,
 	Settings,
@@ -13,7 +15,9 @@ import {
 
 import { ROOMS } from '@shared/rooms';
 
+import { call } from '../../lib/ipc';
 import type { CommandDefinition } from '../../modules/types';
+import { toast } from '../../stores/toast-store';
 
 export const ROOM_ICONS: Record<string, LucideIcon> = {
 	build: Code2,
@@ -97,6 +101,31 @@ export const BUILTIN_COMMANDS: readonly CommandDefinition[] = [
 		keywords: ['python', 'backend', 'uv', 'fastapi'],
 		icon: RotateCw,
 		run: (ctx) => ctx.restartSidecar(),
+	},
+	{
+		id: 'core.checkUpdates',
+		title: 'Check for Updates',
+		room: 'global',
+		keywords: ['update', 'upgrade', 'version', 'release'],
+		icon: Download,
+		run: async () => {
+			const status = await call('update:check');
+			if (status.state === 'disabled') toast.info('Updates are off', status.reason);
+			else if (status.state === 'idle') toast.success('Forge is up to date');
+			else if (status.state === 'error') toast.warn('Update check failed', status.message);
+		},
+	},
+	{
+		id: 'core.installUpdate',
+		title: 'Restart to Update',
+		room: 'global',
+		keywords: ['update', 'install', 'restart'],
+		icon: RefreshCcw,
+		run: async () => {
+			const status = await call('update:status');
+			if (status.state === 'ready') await call('update:install');
+			else toast.info('No update downloaded yet', 'Use "Check for Updates" first.');
+		},
 	},
 	{
 		id: 'core.togglePlayground',

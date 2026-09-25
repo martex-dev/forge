@@ -511,6 +511,10 @@ only builds, keeping the source private.
 - forge-probe ships in `resources/forge-probe`, so the Run Monitor's install hint works when
   installed.
 - `publish` points at `github.com/martex-dev/forge-releases` (public, installers only).
+  `electron-updater` (runtime dependency) checks it a minute after start and every 6 hours,
+  downloads in the background, and installs on "Restart to update" or the next quit. Disabled in
+  development and e2e runs. A tag-driven workflow publishes with a PAT scoped to that repo
+  (`RELEASES_TOKEN`, created by Marto; see docs/RELEASING.md).
 
 **Consequences:** The installer is ~260 MB and the install ~900 MB (Electron ~250 MB, sidecar
 ~420 MB, of which SciPy/scikit-learn is the bulk). `e2e/packaged.spec.ts` runs the unpacked

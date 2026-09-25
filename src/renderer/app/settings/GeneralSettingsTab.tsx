@@ -6,6 +6,7 @@ import { Spinner } from '../../ui/Spinner';
 import { Switch } from '../../ui/Switch';
 import { useGeneralSettings } from '../hooks/use-general-settings';
 import { SettingRow } from './SettingRow';
+import { UpdatesSetting } from './UpdatesSetting';
 
 export function GeneralSettingsTab(): JSX.Element {
 	const { settings, isLoading, error, update } = useGeneralSettings();
@@ -49,6 +50,10 @@ export function GeneralSettingsTab(): JSX.Element {
 					onCheckedChange={(reduceMotion) => update({ reduceMotion })}
 				/>
 			</SettingRow>
+			<UpdatesSetting
+				autoUpdate={settings.autoUpdate}
+				onChange={(autoUpdate) => update({ autoUpdate })}
+			/>
 		</div>
 	);
 }

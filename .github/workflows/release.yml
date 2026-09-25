@@ -1,0 +1,57 @@
+name: Release
+
+# Push a tag like v0.2.0 (matching package.json "version") to build the Windows installer and
+# publish it to the public releases repo, where installed copies of Forge find it (ADR-023).
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Build and publish (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: sidecar/uv.lock
+
+      - name: Check the tag matches package.json
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          [ "v$version" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME != v$version"; exit 1; }
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: |
+          npm run typecheck
+          npm test
+
+      - name: Build app
+        run: npm run build
+
+      - name: Build sidecar
+        working-directory: sidecar
+        run: |
+          uv sync --locked
+          uv run pyinstaller forge-sidecar.spec --noconfirm --log-level WARN
+
+      # RELEASES_TOKEN: a fine-grained PAT with Contents read/write on martex-dev/forge-releases
+      # only (the default GITHUB_TOKEN can't write to another repository).
+      - name: Package and publish
+        run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}

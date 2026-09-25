@@ -10,6 +10,7 @@ import { commandContext } from './commands/use-commands';
 import { useModules } from './hooks/use-modules';
 import { INBOX_PANEL } from './notifications';
 import { SidecarIndicator } from './SidecarIndicator';
+import { UpdateIndicator } from './UpdateIndicator';
 
 const UNREAD_KEY = ['notifications', 'unread'] as const;
 
@@ -66,6 +67,7 @@ export function StatusBar(): JSX.Element {
 			<ModuleItems items={left} />
 			<div className='flex-1' />
 			<ModuleItems items={right} />
+			<UpdateIndicator />
 			<button
 				type='button'
 				onClick={() => commandContext.openPanel(INBOX_PANEL)}

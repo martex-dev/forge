@@ -43,6 +43,7 @@ describe('SettingsRepo', () => {
 		expect(repo.get('general', GeneralSettingsSchema, DEFAULT_GENERAL)).toEqual({
 			fontSize: 14,
 			reduceMotion: true,
+			autoUpdate: true,
 		});
 	});
 
@@ -77,6 +78,7 @@ describe('SettingsRepo', () => {
 		).toEqual({
 			fontSize: 12,
 			reduceMotion: false,
+			autoUpdate: true,
 		});
 		second.close();
 		rmSync(dir, { recursive: true, force: true });

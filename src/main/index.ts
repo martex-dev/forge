@@ -4,6 +4,7 @@ import { app, BrowserWindow } from 'electron';
 import log from 'electron-log/main';
 
 import { APP_ID } from '@shared/constants';
+import { DEFAULT_GENERAL, GeneralSettingsSchema } from '@shared/settings';
 
 import { registerAppHandlers } from './core/app-handlers';
 import { registerAppScheme, serveRenderer } from './core/app-protocol';
@@ -17,6 +18,7 @@ import { createSecretsService, registerSecretsHandlers } from './core/secrets/se
 import { installGlobalSecurity } from './core/security';
 import { createSidecar } from './core/sidecar';
 import type { SidecarManager } from './core/sidecar/sidecar-manager';
+import { registerUpdater } from './core/update/updater';
 import { createWebviews } from './core/webviews';
 import type { WebviewService } from './core/webviews/webview-service';
 import { createMainWindow } from './core/window';
@@ -48,6 +50,10 @@ async function start(): Promise<void> {
 	registerAppHandlers();
 	registerDataHandlers(data, notify);
 	registerSecretsHandlers(secrets);
+	registerUpdater(
+		notify,
+		() => data.settings.get('general', GeneralSettingsSchema, DEFAULT_GENERAL).autoUpdate,
+	);
 	sidecar = createSidecar(notify);
 
 	const webviews = createWebviews(() => mainWindow);
