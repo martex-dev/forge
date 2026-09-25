@@ -160,7 +160,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] LSP: basedpyright + typescript-language-server
 - [x] Workspace search (ripgrep)
 - [x] GitHub: PRs, issues, Actions, diff review, inbox notifications (read-only; commenting later)
-- [ ] Vercel: projects, deployments, logs, promote/rollback with confirmation
+- [x] Vercel: projects, deployments, logs, promote/rollback with confirmation
 - [ ] AI chat (Claude / OpenAI / Gemini) from main, file/selection/diff context, streaming, diff-preview apply
 
 ## Phase 3 — Trade depth

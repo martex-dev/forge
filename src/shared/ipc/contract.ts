@@ -16,6 +16,7 @@ import { secretChannels, secretEvents } from './channels/secrets';
 import { sidecarChannels, sidecarEvents } from './channels/sidecar';
 import { terminalChannels, terminalEvents } from './channels/terminal';
 import { vaultChannels, vaultEvents } from './channels/vault';
+import { vercelChannels } from './channels/vercel';
 import { webviewChannels, webviewEvents } from './channels/webview';
 import { workspaceChannels, workspaceEvents } from './channels/workspace';
 import { defineEvents } from './define';
@@ -43,6 +44,7 @@ export const ipcContract = {
 	...searchChannels,
 	...lspChannels,
 	...githubChannels,
+	...vercelChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

@@ -378,6 +378,34 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `vercel` — Vercel
+
+- **Room:** build · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Projects for your account or a team (scope picker), each with its production
+  URL and status. Pick a project for its last 30 deployments (state dot, production / preview /
+  **current** badge, commit, branch, author). A deployment opens in the centre: details, Visit /
+  Inspect links, build logs (live while building) and a sample of runtime logs (the API streams,
+  so Forge reads ~2.5 s / 300 lines per refresh).
+- **Write actions:** _Promote to production_ (ready previews) and _Roll back to this_ (older
+  ready production deployments). Both open a confirmation dialog showing project, deployment,
+  commit, branch and time. Nothing is sent until you confirm (e2e-tested).
+- **Notifications (inbox):** every 60 s main checks recent deployments across projects: build
+  failures (error, Windows toast when Forge is in the background) and production going live
+  (success). The first poll is a baseline.
+- **Panels:** `vercel.panel` — Vercel (tab next to GitHub), `vercel.deployment` — Deployment
+  (centre).
+- **Commands:** `Build: Show Vercel Deployments`.
+- **Settings:** `vercel:teamId` (chosen scope). **Secrets:** `vercel.token` (vercel.com → Account
+  Settings → Tokens).
+- **External services / rate limits:** Vercel REST API with plain `fetch` from main (no SDK).
+  Deployment lists poll every 5 s only while something is building and the Build room is visible.
+- **Security:** token in SecretsService only; write calls are separate IPC channels invoked only
+  from the confirmation dialog, and logged in main.
+- **Known limitations:** no redeploy/cancel yet; runtime logs are a sample, not a live tail;
+  environment variables and domains aren't shown.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>
