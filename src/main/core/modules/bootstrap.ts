@@ -76,13 +76,13 @@ export function createModuleRegistry(services: CoreServices): ModuleRegistry {
 					onChange: (listener) =>
 						disposers.push(workspace.onChange((info) => listener(info.root))),
 				},
-				sidecar: (method, path, body) => {
+				sidecar: (method, path, body, headers) => {
 					if (!sidecar) {
 						return Promise.reject(
 							new ForgeError('SIDECAR_UNAVAILABLE', 'Sidecar is disabled'),
 						);
 					}
-					return sidecar.request(method, path, body);
+					return sidecar.request(method, path, body, headers);
 				},
 			};
 		},

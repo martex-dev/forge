@@ -16,6 +16,7 @@ import { mt5Channels } from './channels/mt5';
 import { searchChannels } from './channels/search';
 import { secretChannels, secretEvents } from './channels/secrets';
 import { sidecarChannels, sidecarEvents } from './channels/sidecar';
+import { solanaChannels } from './channels/solana';
 import { terminalChannels, terminalEvents } from './channels/terminal';
 import { vaultChannels, vaultEvents } from './channels/vault';
 import { vercelChannels } from './channels/vercel';
@@ -49,6 +50,7 @@ export const ipcContract = {
 	...vercelChannels,
 	...aiChannels,
 	...mt5Channels,
+	...solanaChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

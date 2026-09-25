@@ -38,7 +38,13 @@ export interface MainModuleContext {
 		onChange(listener: (root: string | null) => void): void;
 	};
 	/** Authenticated call to the Python sidecar; throws ForgeError('SIDECAR_UNAVAILABLE') if down. */
-	sidecar<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T>;
+	sidecar<T>(
+		method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+		path: string,
+		body?: unknown,
+		/** Extra request headers, e.g. a secret that must not appear in a URL. */
+		headers?: Record<string, string>,
+	): Promise<T>;
 }
 
 export interface MainModule {

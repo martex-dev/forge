@@ -90,13 +90,19 @@ export class SidecarManager {
 	}
 
 	/** Authenticated request to the sidecar. Only main calls this; the renderer goes through IPC. */
-	async request<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
+	async request<T>(
+		method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+		path: string,
+		body?: unknown,
+		extraHeaders: Record<string, string> = {},
+	): Promise<T> {
 		if (this.status.state !== 'ready') {
 			throw new ForgeError('SIDECAR_UNAVAILABLE', `Python sidecar is ${this.status.state}`);
 		}
 		const response = await fetch(`${this.baseUrl}${path}`, {
 			method,
 			headers: {
+				...extraHeaders,
 				Authorization: `Bearer ${this.token}`,
 				...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
 			},

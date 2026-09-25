@@ -450,6 +450,29 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `solana` — Solana Wallets
+
+- **Room:** trade · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Watch up to 50 Solana wallets by **public address** (with labels). Per wallet:
+  total USD value, SOL balance and price, token holdings (SPL + Token-2022) priced via
+  DexScreener (most liquid pair per token; unpriced dust last; up to 300 tokens), and the last
+  transactions with status, opening on Solscan. Refreshes every 60 s while the Trade room is
+  visible, or on demand.
+- **Panels:** `solana.wallets` — Wallets (tab next to the Economic Calendar).
+- **Commands:** `Trade: Show Solana Wallets`.
+- **Settings:** `solana:wallets`. **Secrets:** `solana.rpc` (optional private RPC URL such as
+  Helius; the public mainnet RPC is used otherwise).
+- **Sidecar endpoint:** `GET /solana/wallet?address=&refresh=` with the RPC URL in an
+  `X-Solana-Rpc` header (it usually embeds an API key; never in URLs or logs, https only). 30 s
+  cache, throttled RPC and price calls.
+- **Security (CLAUDE.md §7):** read-only by public address. Input that looks like a secret key
+  (long base58 or a JSON byte array) is refused with an explicit warning and never stored; there
+  is no signing, no key handling and no transaction submission anywhere.
+- **Known limitations:** the public RPC is rate-limited (add a private RPC for many wallets); no
+  NFT view; transaction details (amounts, counterparties) are on Solscan, not parsed in Forge.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>
