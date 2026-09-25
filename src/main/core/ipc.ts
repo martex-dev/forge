@@ -1,6 +1,4 @@
-import { pathToFileURL } from 'node:url';
-
-import { app, BrowserWindow, ipcMain, type IpcMainInvokeEvent } from 'electron';
+import { BrowserWindow, ipcMain, type IpcMainInvokeEvent } from 'electron';
 import log from 'electron-log/main';
 import type { z } from 'zod';
 
@@ -13,6 +11,7 @@ import {
 } from '@shared/ipc/contract';
 import { err } from '@shared/ipc/result';
 
+import { APP_ORIGIN } from './app-protocol';
 import { IpcRouter } from './ipc-router';
 
 export const router = new IpcRouter(ipcContract, {
@@ -26,7 +25,7 @@ function isTrustedSender(event: IpcMainInvokeEvent): boolean {
 	if (!url) return false;
 	const devUrl = process.env['ELECTRON_RENDERER_URL'];
 	if (devUrl && url.startsWith(devUrl)) return true;
-	return url.startsWith(pathToFileURL(app.getAppPath()).href);
+	return url.startsWith(`${APP_ORIGIN}/`);
 }
 
 export function attachIpc(): void {

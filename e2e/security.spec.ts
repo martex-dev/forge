@@ -21,6 +21,7 @@ test('a strict CSP is present', async ({ page }) => {
 	const csp = await page
 		.locator('meta[http-equiv="Content-Security-Policy"]')
 		.getAttribute('content');
-	expect(csp).toContain("script-src 'self';");
+	expect(csp).toContain("script-src 'self' 'wasm-unsafe-eval';");
+	expect(csp).not.toContain("'unsafe-eval'");
 	expect(csp).toContain("object-src 'none'");
 });

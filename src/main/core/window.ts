@@ -4,6 +4,7 @@ import { BrowserWindow, Menu } from 'electron';
 
 import { APP_NAME, WINDOW_CHROME } from '@shared/constants';
 
+import { APP_ORIGIN } from './app-protocol';
 import { lockWindowNavigation } from './security';
 
 export function createMainWindow(): BrowserWindow {
@@ -45,11 +46,7 @@ export function createMainWindow(): BrowserWindow {
 		});
 	}
 
-	if (devUrl) {
-		void win.loadURL(devUrl);
-	} else {
-		void win.loadFile(join(__dirname, '../renderer/index.html'));
-	}
+	void win.loadURL(devUrl ?? `${APP_ORIGIN}/index.html`);
 
 	return win;
 }

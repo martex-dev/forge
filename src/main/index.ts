@@ -4,6 +4,7 @@ import { app, BrowserWindow } from 'electron';
 import log from 'electron-log/main';
 
 import { registerAppHandlers } from './core/app-handlers';
+import { registerAppScheme, serveRenderer } from './core/app-protocol';
 import { createDataServices, registerDataHandlers } from './core/data-handlers';
 import { type DbHandle, openDatabase } from './core/db/client';
 import { attachIpc } from './core/ipc';
@@ -23,6 +24,7 @@ import type { WorkspaceWatcher } from './core/workspace/watcher';
 // Logs live next to the rest of userData so --user-data-dir (tests) isolates them too.
 log.transports.file.resolvePathFn = () => join(app.getPath('userData'), 'logs', 'main.log');
 log.initialize();
+registerAppScheme();
 
 let db: DbHandle | null = null;
 let modules: ModuleRegistry | null = null;
@@ -31,6 +33,7 @@ let watcher: WorkspaceWatcher | null = null;
 
 async function start(): Promise<void> {
 	installGlobalSecurity();
+	serveRenderer(join(__dirname, '../renderer'));
 	attachIpc();
 
 	db = openDatabase(join(app.getPath('userData'), 'forge.db'));

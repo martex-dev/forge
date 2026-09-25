@@ -5,8 +5,10 @@ import { buildCsp } from './csp';
 describe('buildCsp', () => {
 	it('production forbids inline scripts and remote connections', () => {
 		const csp = buildCsp('production');
-		expect(csp).toContain("script-src 'self';");
-		expect(csp).not.toContain('unsafe-eval');
+		// Only WebAssembly compilation is allowed; no inline scripts and no JS eval.
+		expect(csp).toContain("script-src 'self' 'wasm-unsafe-eval';");
+		expect(csp).not.toContain("'unsafe-eval'");
+		expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
 		expect(csp).toContain("connect-src 'self';");
 		expect(csp).toContain("object-src 'none'");
 	});

@@ -87,8 +87,9 @@ test('layout survives a restart', async () => {
 		const page1 = await first.firstWindow();
 		const build1 = page1.locator('[data-room-layout="build"]');
 		await expect(build1.getByText('Write, run and ship code')).toBeVisible();
-		// Close the only panel; the room should then show the empty watermark.
-		await build1.locator('.dv-default-tab-action').first().click();
+		// Close every panel; the room should then show the empty watermark.
+		const closeButtons = build1.locator('.dv-default-tab-action');
+		while ((await closeButtons.count()) > 0) await closeButtons.first().click();
 		await expect(build1.getByText('No panels open')).toBeVisible();
 		await page1.waitForTimeout(1000); // debounce + write
 		await first.close();

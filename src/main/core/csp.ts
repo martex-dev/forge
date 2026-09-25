@@ -7,7 +7,10 @@ export function buildCsp(mode: 'development' | 'production'): string {
 	const dev = mode === 'development';
 	const directives: Record<string, string[]> = {
 		'default-src': ["'self'"],
-		'script-src': dev ? ["'self'", "'unsafe-inline'"] : ["'self'"],
+		// wasm-unsafe-eval allows compiling WebAssembly only (TextMate's oniguruma), not eval().
+		'script-src': dev
+			? ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'"]
+			: ["'self'", "'wasm-unsafe-eval'"],
 		// Radix/motion inject <style> tags at runtime; styles can't execute code.
 		'style-src': ["'self'", "'unsafe-inline'"],
 		'img-src': ["'self'", 'data:', 'blob:', 'https:'],
