@@ -41,17 +41,17 @@ export function EditorBridge(): JSX.Element | null {
 			if (!root) return;
 			commandContext.openPanel('editor.main');
 			const { fontSize, reduceMotion } = settingsRef.current;
+			// Set before opening: the panel applies it as soon as that file is shown (or right
+			// away if it already is).
+			useEditorStore
+				.getState()
+				.setReveal(
+					request.line
+						? { path: request.path, line: request.line, column: request.column ?? 1 }
+						: null,
+				);
 			loadMonaco(fontSize, reduceMotion)
-				.then(async (monaco) => {
-					await openFile(monaco, root, request.path);
-					if (request.line) {
-						useEditorStore.getState().setReveal({
-							path: request.path,
-							line: request.line,
-							column: request.column ?? 1,
-						});
-					}
-				})
+				.then((monaco) => openFile(monaco, root, request.path))
 				.catch((error: unknown) => {
 					rlog.error('editor', 'editor failed to load', error);
 					toast.error(

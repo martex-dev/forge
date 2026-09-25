@@ -106,15 +106,21 @@ export function EditorPanel(): JSX.Element {
 		if (model && active) {
 			const view = getViewState(active);
 			if (view) editor.restoreViewState(view);
-			const reveal = useEditorStore.getState().reveal;
-			if (reveal?.path === active) {
-				editor.setPosition({ lineNumber: reveal.line, column: reveal.column });
-				editor.revealLineInCenter(reveal.line);
-				useEditorStore.getState().setReveal(null);
-			}
 			editor.focus();
 		}
 	}, [active, activeReady, load]);
+
+	// Go-to-line requests (search results, diagnostics) for the file on screen.
+	const reveal = useEditorStore((s) => s.reveal);
+	useEffect(() => {
+		const editor = editorRef.current;
+		if (!editor || !reveal || reveal.path !== active || !activeReady) return;
+		if (shownPath.current !== active) return;
+		editor.setPosition({ lineNumber: reveal.line, column: reveal.column });
+		editor.revealLineInCenter(reveal.line);
+		editor.focus();
+		useEditorStore.getState().setReveal(null);
+	}, [reveal, active, activeReady, load]);
 
 	if (load.status === 'error') {
 		return (
