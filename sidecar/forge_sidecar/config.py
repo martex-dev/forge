@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
 
 
 class ConfigError(RuntimeError):
@@ -11,6 +12,8 @@ class Settings:
 	port: int
 	token: str
 	parent_pid: int | None
+	# Where caches live (Forge's userData/sidecar); None disables persistence.
+	data_dir: Path | None = None
 
 
 def load_settings(env: dict[str, str] | None = None) -> Settings:
@@ -28,4 +31,10 @@ def load_settings(env: dict[str, str] | None = None) -> Settings:
 	if not 1024 <= port <= 65535:
 		raise ConfigError('FORGE_PORT must be between 1024 and 65535')
 	parent = source.get('FORGE_PARENT_PID')
-	return Settings(port=port, token=token, parent_pid=int(parent) if parent else None)
+	data_dir = source.get('FORGE_DATA_DIR')
+	return Settings(
+		port=port,
+		token=token,
+		parent_pid=int(parent) if parent else None,
+		data_dir=Path(data_dir) if data_dir else None,
+	)

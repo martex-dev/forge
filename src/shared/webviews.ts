@@ -18,6 +18,28 @@ export const WEB_SERVICES: readonly WebService[] = [
 		url: 'https://www.tradingview.com/chart/',
 		hosts: ['tradingview.com'],
 	},
+	{
+		// Solana memecoin terminal; wallet connection happens inside the site, never in Forge.
+		id: 'axiom',
+		name: 'Axiom',
+		room: 'trade',
+		url: 'https://axiom.trade/',
+		hosts: ['axiom.trade'],
+	},
+	{
+		id: 'fomo',
+		name: 'Fomo',
+		room: 'trade',
+		url: 'https://fomo.family/',
+		hosts: ['fomo.family'],
+	},
+	{
+		id: 'forexfactory',
+		name: 'Forex Factory',
+		room: 'trade',
+		url: 'https://www.forexfactory.com/calendar',
+		hosts: ['forexfactory.com'],
+	},
 ];
 
 export function getWebService(id: string): WebService | undefined {

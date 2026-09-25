@@ -3,7 +3,12 @@ import { describe, expect, it, vi } from 'vitest';
 import type { SidecarStatus } from '@shared/ipc/channels/sidecar';
 
 import { backoffDelayMs } from './backoff';
-import { type SidecarDeps, SidecarManager, type SidecarProcess } from './sidecar-manager';
+import {
+	extractDetail,
+	type SidecarDeps,
+	SidecarManager,
+	type SidecarProcess,
+} from './sidecar-manager';
 
 class FakeProcess implements SidecarProcess {
 	private exitListeners: Array<(code: number | null) => void> = [];
@@ -44,6 +49,16 @@ function setup(opts: { healthy?: (n: number) => boolean } = {}) {
 }
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
+
+describe('extractDetail', () => {
+	it('prefers FastAPI detail text over raw JSON', () => {
+		expect(extractDetail('{"detail":"Forex Factory is rate-limiting requests"}')).toBe(
+			'Forex Factory is rate-limiting requests',
+		);
+		expect(extractDetail('plain text')).toBe('plain text');
+		expect(extractDetail('{"detail":{"loc":["x"]}}')).toBe('{"detail":{"loc":["x"]}}');
+	});
+});
 
 describe('backoffDelayMs', () => {
 	it('doubles from 1s and caps at 16s', () => {

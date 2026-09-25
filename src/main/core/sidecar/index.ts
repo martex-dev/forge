@@ -76,6 +76,7 @@ export function createSidecar(notify: Notifier): SidecarManager | null {
 		? null
 		: new SidecarManager({
 				spawn: spawnSidecar,
+				dataDir: join(app.getPath('userData'), 'sidecar'),
 				findPort: findFreePort,
 				checkHealth,
 				killTree,

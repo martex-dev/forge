@@ -11,7 +11,9 @@ test('explorer shows the opened folder and follows changes on disk', async ({ pa
 	writeFileSync(join(project, 'README.md'), '# demo\n');
 	try {
 		const tree = page.getByRole('tree', { name: 'Files' });
-		await expect(page.getByText('No folder open')).toBeVisible();
+		await expect(
+			page.getByRole('region', { name: 'Explorer' }).getByText('No folder open'),
+		).toBeVisible();
 
 		await page.evaluate((p) => window.forge.invoke('workspace:open', p), project);
 		await expect(tree.getByRole('treeitem', { name: /README\.md/ })).toBeVisible();

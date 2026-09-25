@@ -17,13 +17,13 @@ export interface FileTree {
 }
 
 /** Lazily lists the root and every expanded folder, and flattens them into rows. */
-export function useFileTree(pending: PendingCreate | null): FileTree {
+export function useFileTree(root: string, pending: PendingCreate | null): FileTree {
 	const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
 	const dirs = useMemo(() => ['', ...expanded], [expanded]);
 
 	const queries = useQueries({
 		queries: dirs.map((dir) => ({
-			queryKey: fsKeys.list(dir),
+			queryKey: fsKeys.list(root, dir),
 			queryFn: () => call('fs:list', dir),
 			staleTime: Infinity,
 		})),

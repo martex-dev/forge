@@ -34,8 +34,11 @@ export function EditorPanel(): JSX.Element {
 
 	const activeFile = files.find((f) => f.path === active) ?? null;
 
-	// Boot Monaco once (shared with every other editor consumer).
+	// Boot Monaco only once a file is open: it's ~10 MB of JS plus TextMate WASM, and loading it
+	// at startup would compete with every other panel's first render.
+	const needsMonaco = files.length > 0;
 	useEffect(() => {
+		if (!needsMonaco) return;
 		let cancelled = false;
 		loadMonaco(settings.fontSize, settings.reduceMotion)
 			.then((monaco) => !cancelled && setLoad({ status: 'ready', monaco }))
@@ -52,7 +55,7 @@ export function EditorPanel(): JSX.Element {
 		};
 		// Settings changes are applied through refreshEditorConfiguration, not a reload.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [attempt]);
+	}, [attempt, needsMonaco]);
 
 	// One editor instance per panel; tabs swap models into it.
 	useEffect(() => {
@@ -127,6 +130,7 @@ export function EditorPanel(): JSX.Element {
 	}
 
 	const showEditor = load.status === 'ready' && activeFile?.state === 'ready';
+	const booting = needsMonaco && load.status === 'loading';
 	return (
 		<div className='flex h-full flex-col bg-bg-1'>
 			{files.length > 0 && (
@@ -145,7 +149,7 @@ export function EditorPanel(): JSX.Element {
 				/>
 				{!showEditor && (
 					<div className='absolute inset-0'>
-						{load.status === 'loading' || activeFile?.state === 'loading' ? (
+						{booting || activeFile?.state === 'loading' ? (
 							<div className='flex h-full items-center justify-center'>
 								<Spinner label='Loading editor' />
 							</div>

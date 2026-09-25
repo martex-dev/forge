@@ -141,6 +141,34 @@ registered through the context is torn down when the module is disabled.
   every 5 s plus after Forge's own operations and file changes (commits made in a terminal show
   up within 5 s).
 
+### `calendar` — Economic Calendar
+
+- **Room:** trade · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** This week's macro events from the public Forex Factory feed
+  (`nfs.faireconomy.media/ff_calendar_thisweek.json`), normalized in the sidecar (UTC times,
+  impact levels, stable ids). Countdown to the next high-impact event; events in the next 30 min
+  highlighted; past events dimmed; impact and currency filters (remembered per machine).
+- **Panels:** `calendar.week` — Economic Calendar (default open, docked right).
+- **Commands:** `Trade: Show Economic Calendar`.
+- **Sidecar endpoints:** `GET /calendar/week`.
+- **External services / rate limits:** Forex Factory rate-limits hard (HTTP 429). The sidecar
+  caches for 30 min in memory **and on disk** (`userData/sidecar/cache`), serves the last good copy
+  (marked _Stale_) for 24 h if a refresh fails, and after a failure waits 5 min (or `Retry-After`)
+  before trying again, explaining that in the error. The panel refetches every 10 min (every
+  minute while in an error state) and automatically when the sidecar becomes ready.
+- **Known limitations:** no official API, so the feed can change or disappear; the source is kept
+  swappable (e.g. Marto's Market Calendar project). No alerts yet (Phase 3).
+
+### `trade-web` — Trading Sites
+
+- **Room:** trade · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Axiom (`axiom.trade`), Fomo (`fomo.family`) and Forex Factory
+  (`forexfactory.com/calendar`) as webview tabs next to TradingView, each in its own persistent
+  partition (`persist:svc-<id>`) — log in once, stays logged in, isolated from each other.
+- **Commands:** `Trade: Open Axiom`, `Trade: Open Fomo`, `Trade: Open Forex Factory`.
+- **Security:** wallet connections happen inside the sites; Forge never sees keys or signs
+  anything. Links leaving each site's own domain open in the system browser.
+
 ---
 
 ## Template

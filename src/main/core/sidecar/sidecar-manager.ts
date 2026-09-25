@@ -33,12 +33,25 @@ export interface SidecarDeps {
 	};
 	startupTimeoutMs?: number;
 	pollIntervalMs?: number;
+	/** Passed as FORGE_DATA_DIR (sidecar caches). */
+	dataDir?: string;
 }
 
 /**
  * Owns the Python sidecar: launch with a fresh port + token, wait for /health, restart with
  * exponential backoff on crash, and kill the whole process tree on stop.
  */
+/** FastAPI errors look like {"detail": "..."}; show that text rather than raw JSON. */
+export function extractDetail(body: string): string {
+	try {
+		const parsed = JSON.parse(body) as { detail?: unknown };
+		if (typeof parsed.detail === 'string') return parsed.detail;
+	} catch {
+		// Not JSON; fall through to the raw text.
+	}
+	return body;
+}
+
 export class SidecarManager {
 	private status: SidecarStatus = { state: 'stopped', attempt: 0 };
 	private child: SidecarProcess | null = null;
@@ -91,7 +104,8 @@ export class SidecarManager {
 			signal: AbortSignal.timeout(30_000),
 		});
 		if (!response.ok) {
-			const detail = await response.text().catch(() => '');
+			const text = await response.text().catch(() => '');
+			const detail = extractDetail(text);
 			throw new ForgeError(`SIDECAR_HTTP_${response.status}`, detail.slice(0, 500) || response.statusText);
 		}
 		return (await response.json()) as T;
@@ -115,6 +129,7 @@ export class SidecarManager {
 			FORGE_TOKEN: this.token,
 			FORGE_PARENT_PID: String(process.pid),
 			PYTHONUNBUFFERED: '1',
+			...(this.deps.dataDir ? { FORGE_DATA_DIR: this.deps.dataDir } : {}),
 		});
 		this.child = child;
 		child.onOutput((line, stream) => {

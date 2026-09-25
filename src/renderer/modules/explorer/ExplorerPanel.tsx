@@ -71,7 +71,7 @@ export function ExplorerPanel(): JSX.Element {
 			</div>
 			<div className='min-h-0 flex-1 overflow-auto'>
 				{/* Keyed by root: a different folder gets a fresh tree state. */}
-				<FileTree key={info.root} handleRef={treeRef} />
+				<FileTree key={info.root} root={info.root} handleRef={treeRef} />
 			</div>
 		</div>
 	);

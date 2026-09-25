@@ -33,7 +33,7 @@ quote-style = 'single'
 
 [tool.ruff.lint]
 select = ['E', 'F', 'W', 'I', 'B', 'UP', 'ASYNC', 'S', 'RUF']
-# W191/E101 conflict with tab indentation (CLAUDE.md §8). S101: asserts are fine in tests.
+# W191/E101 conflict with tab indentation (CLAUDE.md Â§8). S101: asserts are fine in tests.
 ignore = ['W191', 'E101']
 
 [tool.ruff.lint.per-file-ignores]
@@ -41,3 +41,5 @@ ignore = ['W191', 'E101']
 
 [tool.pytest.ini_options]
 testpaths = ['tests']
+# A local basetemp: tmp_path setup in the shared %TEMP% took ~60 s on Windows (AV / lock retries).
+addopts = '--basetemp=.pytest-tmp'

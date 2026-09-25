@@ -13,6 +13,7 @@ import { DesignPlayground } from './DesignPlayground';
 import { useFsInvalidation } from './hooks/use-fs-invalidation';
 import { useApplyGeneralSettings } from './hooks/use-general-settings';
 import { useModules } from './hooks/use-modules';
+import { useSidecarRecovery } from './hooks/use-sidecar-recovery';
 import { RoomLayout } from './layout/RoomLayout';
 import { RoomRail } from './RoomRail';
 import { SettingsDialog } from './settings/SettingsDialog';
@@ -30,6 +31,7 @@ export function AppShell(): JSX.Element {
 	useGlobalShortcuts(commands);
 	useApplyGeneralSettings();
 	useFsInvalidation();
+	useSidecarRecovery();
 
 	useEffect(() => {
 		document.documentElement.dataset['room'] = room;

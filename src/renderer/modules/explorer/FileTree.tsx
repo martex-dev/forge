@@ -24,17 +24,18 @@ export interface FileTreeHandle {
 }
 
 interface FileTreeProps {
+	root: string;
 	handleRef: React.RefObject<FileTreeHandle | null>;
 }
 
-export function FileTree({ handleRef }: FileTreeProps): JSX.Element {
+export function FileTree({ root, handleRef }: FileTreeProps): JSX.Element {
 	const [pending, setPending] = useState<PendingCreate | null>(null);
 	const [renaming, setRenaming] = useState<string | null>(null);
 	const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 	const [focused, setFocused] = useState<string | null>(null);
 	const [menuTarget, setMenuTarget] = useState<FsEntry | null>(null);
-	const tree = useFileTree(pending);
-	const actions = useFsActions();
+	const tree = useFileTree(root, pending);
+	const actions = useFsActions(root);
 	const activeFile = useWorkbenchStore((s) => s.activeFile);
 	const containerRef = useRef<HTMLDivElement>(null);
 

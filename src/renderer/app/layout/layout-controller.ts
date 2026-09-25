@@ -69,10 +69,25 @@ export function nextInstanceId(api: DockviewApi, definitionId: string): string {
 }
 
 /** Clears the room and opens every default panel of its enabled modules. */
+/**
+ * Order in which default panels must be added: centre panels first (the first one fills the
+ * room, so a docked panel added first would lose its docking), then docked ones, then panels
+ * that join another panel's tab group. Stable within each pass.
+ */
+export function defaultLayoutOrder(panels: readonly PanelDefinition[]): PanelDefinition[] {
+	const pass = (def: PanelDefinition): number =>
+		def.tabWith ? 2 : def.position && def.position !== 'tab' ? 1 : 0;
+	return panels
+		.filter((def) => def.defaultOpen)
+		.map((def, i) => ({ def, i }))
+		.sort((a, b) => pass(a.def) - pass(b.def) || a.i - b.i)
+		.map(({ def }) => def);
+}
+
 export function applyDefaultLayout(api: DockviewApi, panels: readonly PanelDefinition[]): void {
 	api.clear();
-	for (const def of panels) {
-		if (def.defaultOpen) openPanelIn(api, def, { background: def.tabWith !== undefined });
+	for (const def of defaultLayoutOrder(panels)) {
+		openPanelIn(api, def, { background: def.tabWith !== undefined });
 	}
 }
 
