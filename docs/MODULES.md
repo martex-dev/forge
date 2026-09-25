@@ -101,6 +101,26 @@ registered through the context is torn down when the module is disabled.
   features (hover, go-to-definition, diagnostics) are Phase 2; binary and >5 MB files show a
   notice instead of content.
 
+### `terminal` — Terminals
+
+- **Room:** build · **Platforms:** all (presets tuned for Windows) · **Enabled by default:** yes
+- **What it does:** Real terminals via node-pty (ConPTY) in main and xterm.js (WebGL renderer,
+  DOM fallback) in the renderer. Each terminal is a dock tab; open as many as you like.
+- **Presets:** PowerShell (pwsh if installed, else Windows PowerShell), Python (venv) — activated by
+  environment (`VIRTUAL_ENV`, `PATH`) so execution policy never needs relaxing — Claude Code,
+  Codex CLI, Gemini CLI (run inside PowerShell, so you land at a prompt when they exit). Missing
+  CLIs show the npm install command with a Copy button.
+- **Panels:** `terminal.session#<n>` — multi-instance, docked below the editor (260 px).
+- **Commands:** `Build: New Terminal` (Ctrl+Shift+\`), `Build: New Python Terminal`,
+  `Build: New Claude Code Terminal`, `Build: New Codex Terminal`, `Build: New Gemini Terminal`.
+- **Behaviour:** starts in the open folder (else home). Ctrl+C copies when text is selected,
+  otherwise interrupts; Ctrl+V pastes; links open in the browser. Output is batched in main
+  (~8 ms) and the last 256 KB is kept per session, so a window reload reattaches with history.
+  Closing the tab kills the shell; exited shells restart on Enter. Disabling the module kills all.
+- **Security:** the renderer can only launch these fixed presets; it never passes a command line.
+- **Known limitations:** Windows PowerShell 5.1 takes a few seconds to start when the profile
+  loads PSReadLine/modules; shells don't survive an app restart (only a window reload).
+
 ---
 
 ## Template

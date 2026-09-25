@@ -38,6 +38,7 @@ export function matchesShortcut(event: KeyLike, shortcut: string): boolean {
 		return (
 			code === `key${s.key}` ||
 			code === `digit${s.key}` ||
+			(s.key === '`' && code === 'backquote') ||
 			(s.key === ',' && code === 'comma')
 		);
 	}

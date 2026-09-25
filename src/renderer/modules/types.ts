@@ -32,6 +32,11 @@ export interface PanelDefinition {
 	position?: 'left' | 'right' | 'below' | 'tab';
 	/** Initial size in px along the split axis (width for left/right, height for below). */
 	initialSize?: number;
+	/**
+	 * Called when the user closes this panel (or its module is disabled / layout reset) —
+	 * not on window reload, so long-lived resources like terminal shells survive reloads.
+	 */
+	onClose?: (params: PanelParams, panelId: string) => void;
 }
 
 export interface OpenPanelOptions {

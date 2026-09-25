@@ -80,6 +80,7 @@ export function EditorPanel(): JSX.Element {
 		const subs = [
 			editor.onDidChangeCursorPosition(updateCursor),
 			editor.onDidChangeModel(updateCursor),
+			editor.onDidChangeModelLanguage(updateCursor),
 		];
 		return () => {
 			for (const s of subs) s.dispose();

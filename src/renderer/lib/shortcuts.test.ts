@@ -37,5 +37,8 @@ describe('shortcuts', () => {
 		).toBe(true);
 		expect(matchesShortcut(ev('2', { ctrl: true }, 'Digit2'), 'Ctrl+2')).toBe(true);
 		expect(matchesShortcut(ev(',', { ctrl: true }, 'Comma'), 'Ctrl+,')).toBe(true);
+		expect(
+			matchesShortcut(ev('~', { ctrl: true, shift: true }, 'Backquote'), 'Ctrl+Shift+`'),
+		).toBe(true);
 	});
 });
