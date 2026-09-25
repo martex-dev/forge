@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { LineChart, RefreshCw } from 'lucide-react';
+import { BookOpenText, LineChart, RefreshCw } from 'lucide-react';
 import { type JSX, useMemo, useState } from 'react';
 
 import type { Mt5Account, Mt5Deal, Mt5Position } from '@shared/ipc/channels/mt5';
 
+import { commandContext } from '../../app/commands/use-commands';
 import { SIDECAR_META } from '../../app/hooks/use-sidecar-recovery';
 import { cn } from '../../lib/cn';
 import { call } from '../../lib/ipc';
@@ -12,8 +13,9 @@ import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { EmptyState } from '../../ui/EmptyState';
 import { ErrorState } from '../../ui/ErrorState';
+import { IconButton } from '../../ui/IconButton';
 import { Spinner } from '../../ui/Spinner';
-import { floating, money, priceDigits, summarizeHistory } from './mt5-model';
+import { floating, money, positionToJournal, priceDigits, summarizeHistory } from './mt5-model';
 
 const pnl = (v: number): string => (v > 0 ? 'text-up' : v < 0 ? 'text-down' : 'text-fg-1');
 const when = (t: number): string =>
@@ -123,6 +125,15 @@ function Positions({
 	);
 }
 
+/** Opens a prefilled Trade Journal entry for the whole position (read-only: nothing goes to MT5). */
+function journal(position: number, deals: Mt5Deal[]): void {
+	const draft = positionToJournal(position, deals);
+	if (!draft) return;
+	commandContext.openPanel('journal.panel', {
+		params: { editing: crypto.randomUUID(), draft },
+	});
+}
+
 function History({ deals, currency }: { deals: Mt5Deal[]; currency: string }): JSX.Element {
 	const s = useMemo(() => summarizeHistory(deals), [deals]);
 	const trades = deals.filter((d) => d.side === 'buy' || d.side === 'sell');
@@ -150,10 +161,20 @@ function History({ deals, currency }: { deals: Mt5Deal[]; currency: string }): J
 								</td>
 								<td className='text-right'>{d.volume}</td>
 								<td className='text-right'>{d.price}</td>
-								<td className={cn('px-3 text-right', pnl(d.profit))}>
+								<td className={cn('pl-3 text-right', pnl(d.profit))}>
 									{d.entry === 'in'
 										? ''
 										: money(d.profit + d.commission + d.swap, currency)}
+								</td>
+								<td className='w-8 px-1 text-right'>
+									{d.entry !== 'in' && (
+										<IconButton
+											label='Journal this trade'
+											size='sm'
+											icon={<BookOpenText size={11} />}
+											onClick={() => journal(d.position, deals)}
+										/>
+									)}
 								</td>
 							</tr>
 						))}

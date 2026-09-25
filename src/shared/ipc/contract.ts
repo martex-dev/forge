@@ -10,6 +10,7 @@ import { dexChannels, dexEvents } from './channels/dex';
 import { fsChannels, fsEvents } from './channels/fs';
 import { gitChannels, gitEvents } from './channels/git';
 import { githubChannels } from './channels/github';
+import { journalChannels } from './channels/journal';
 import { labChannels } from './channels/lab';
 import { lspChannels, lspEvents } from './channels/lsp';
 import { moduleChannels, moduleEvents } from './channels/modules';
@@ -53,6 +54,7 @@ export const ipcContract = {
 	...mt5Channels,
 	...solanaChannels,
 	...alertChannels,
+	...journalChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

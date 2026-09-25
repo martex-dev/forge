@@ -501,6 +501,34 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `journal` — Trade Journal
+
+- **Room:** trade · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Logs trades and ideas: symbol, market, side, status (idea / open / closed),
+  entry, stop, target, exit, size, fees, optional P/L override, open/close times, setup, tags,
+  Markdown notes and screenshots. Live metrics while editing: P/L (from prices × size, or the
+  override, net of fees), result in R (from the stop distance) and planned R:R.
+- **Stats:** net P/L, win rate, profit factor, expectancy, average R, average win/loss, best,
+  worst, max drawdown, equity curve (ECharts), and breakdowns by setup and by symbol. Stats follow
+  the current filter (text, status, tag), so "only #london" or "only breakouts" is one click.
+- **Screenshots:** paste with Ctrl+V anywhere in the entry, or **Add images** (file picker). PNG,
+  JPEG, WebP, up to 10 MB each. Pasting into a new entry saves it first.
+- **From MT5:** the book icon on a closed deal in MT5 → History opens a new entry prefilled with the
+  whole position (averaged prices, lots, net of commission and swap). Read-only: nothing is sent
+  to MT5.
+- **Panels:** `journal.panel` — Journal (tab next to the Economic Calendar): Entries / Stats,
+  filter, editor.
+- **Commands:** `Trade: Trade Journal`, `Trade: New Journal Entry` (Ctrl+Alt+J, from anywhere),
+  `Trade: Journal Stats`. In the editor, Ctrl+Enter saves.
+- **Settings / secrets:** none.
+- **Data:** `%APPDATA%/forge/journal/` — `journal.db` (SQLite, one JSON document per entry) and
+  `images/<entry id>/`. Copy the folder to back it up (see ADR-016).
+- **Known limitations:** no import from exchanges/CSV yet; P/L is in one account currency (no FX
+  conversion); prices × size assumes a linear contract, so use the P/L override for lots,
+  futures multipliers or inverse contracts.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

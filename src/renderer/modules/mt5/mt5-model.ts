@@ -55,3 +55,53 @@ export function priceDigits(...prices: number[]): number {
 
 export const money = (value: number, currency: string): string =>
 	`${value < 0 ? '-' : ''}${Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+
+/** Prefill for a Trade Journal entry (the journal panel's `draft` param). */
+export interface JournalPrefill {
+	symbol: string;
+	market: 'forex';
+	side: 'long' | 'short';
+	status: 'closed';
+	entry: number | null;
+	exit: number | null;
+	size: number | null;
+	pnl: number;
+	openedAt: number | null;
+	closedAt: number | null;
+	notes: string;
+}
+
+const vwap = (ds: readonly Mt5Deal[]): number | null => {
+	const volume = ds.reduce((a, d) => a + d.volume, 0);
+	return volume ? ds.reduce((a, d) => a + d.price * d.volume, 0) / volume : null;
+};
+
+/**
+ * One journal entry per MT5 position: averaged entry/exit prices and the net of every deal on it
+ * (profit, commission and swap), so partial closes don't double count the opening commission.
+ */
+export function positionToJournal(
+	position: number,
+	deals: readonly Mt5Deal[],
+): JournalPrefill | null {
+	const own = deals.filter((d) => d.position === position && TRADING.has(d.side));
+	const ins = own.filter((d) => d.entry === 'in');
+	const outs = own.filter((d) => d.entry === 'out' || d.entry === 'out_by');
+	const first = ins[0] ?? own[0];
+	if (!first || outs.length === 0) return null;
+	// The opening deal's side is the position's side; without it, a closing sell means a long.
+	const long = ins[0] ? ins[0].side === 'buy' : outs[0]?.side === 'sell';
+	return {
+		symbol: first.symbol,
+		market: 'forex',
+		side: long ? 'long' : 'short',
+		status: 'closed',
+		entry: vwap(ins),
+		exit: vwap(outs),
+		size: ins.length ? ins.reduce((a, d) => a + d.volume, 0) : null,
+		pnl: Math.round(own.reduce((a, d) => a + d.profit + d.commission + d.swap, 0) * 100) / 100,
+		openedAt: ins[0]?.time ?? null,
+		closedAt: Math.max(...outs.map((d) => d.time)),
+		notes: `MT5 position #${position} (size in lots).`,
+	};
+}
