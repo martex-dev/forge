@@ -40,6 +40,36 @@ export const WEB_SERVICES: readonly WebService[] = [
 		url: 'https://www.forexfactory.com/calendar',
 		hosts: ['forexfactory.com'],
 	},
+	// Hub: comms and socials. No APIs or user tokens for these (see CLAUDE.md §7): the real
+	// sites, logged in inside their own partitions.
+	{
+		id: 'discord',
+		name: 'Discord',
+		room: 'hub',
+		url: 'https://discord.com/app',
+		hosts: ['discord.com', 'discordapp.com', 'discord.gg'],
+	},
+	{
+		id: 'linkedin',
+		name: 'LinkedIn',
+		room: 'hub',
+		url: 'https://www.linkedin.com/feed/',
+		hosts: ['linkedin.com'],
+	},
+	{
+		id: 'x',
+		name: 'X',
+		room: 'hub',
+		url: 'https://x.com/home',
+		hosts: ['x.com', 'twitter.com'],
+	},
+	{
+		id: 'notion-web',
+		name: 'Notion',
+		room: 'hub',
+		url: 'https://www.notion.so/',
+		hosts: ['notion.so', 'notion.site'],
+	},
 ];
 
 export function getWebService(id: string): WebService | undefined {

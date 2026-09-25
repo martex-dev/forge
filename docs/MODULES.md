@@ -663,6 +663,22 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `hub-web` — Comms & Socials
+
+- **Room:** hub · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Discord, LinkedIn, X and Notion as webview tabs (`WebContentsView`), each
+  with its own persistent partition (`persist:svc-discord`, …): log in once, stay logged in.
+  No preload, no Node; navigation stays in-app only on each site's own hosts, everything else
+  opens in the system browser. Per CLAUDE.md there are no user tokens or scraping; Discord
+  automation uses webhooks (the `discord` module).
+- **Panels:** `hub-web.discord`, `hub-web.linkedin`, `hub-web.x`, `hub-web.notion-web` (not in
+  the default layout, so nothing loads until you open one).
+- **Commands:** `Hub: Open Discord`, `Hub: Open LinkedIn`, `Hub: Open X`, `Hub: Open Notion`.
+- **Known limitations:** "Sign in with Google/Apple" pops out to the system browser (a
+  different site), so use the site's own email login inside the tab.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

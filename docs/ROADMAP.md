@@ -184,7 +184,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 - [ ] Notion module
 - [ ] Discord: webhooks + webview
-- [ ] Social webview tabs (LinkedIn, X, …)
+- [x] Social webview tabs (Discord, LinkedIn, X, Notion)
 - [ ] Unified inbox (GitHub, Vercel, alerts, calendar)
 - [ ] "Today" dashboard
 
