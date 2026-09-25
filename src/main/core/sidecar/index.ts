@@ -10,20 +10,17 @@ import type { SidecarStatus } from '@shared/ipc/channels/sidecar';
 
 import { emitEvent, router } from '../ipc';
 import type { Notifier } from '../notify';
+import { sidecarCommand } from './launch';
 import { findFreePort, killTree } from './process-utils';
 import { type HealthInfo, SidecarManager, type SidecarProcess } from './sidecar-manager';
 
 const HealthSchema = z.object({ status: z.literal('ok'), version: z.string(), python: z.string() });
 const slog = log.scope('sidecar');
 
-function sidecarDir(): string {
-	// TODO(phase-6): packaged builds run a PyInstaller binary from resources instead of uv.
-	return join(app.getAppPath(), 'sidecar');
-}
-
 function spawnSidecar(env: Record<string, string>): SidecarProcess {
-	const child = spawn('uv', ['run', '--project', sidecarDir(), 'python', '-m', 'forge_sidecar'], {
-		cwd: sidecarDir(),
+	const launch = sidecarCommand(app.isPackaged, process.resourcesPath, app.getAppPath());
+	const child = spawn(launch.command, launch.args, {
+		cwd: launch.cwd,
 		env: { ...process.env, ...env },
 		windowsHide: true,
 		// On POSIX, a new process group lets killTree signal uv and python together.
@@ -39,7 +36,12 @@ function spawnSidecar(env: Record<string, string>): SidecarProcess {
 	};
 	child.on('exit', (code) => fireExit(code));
 	child.on('error', (error) => {
-		slog.error('failed to spawn uv — is it installed and on PATH?', error.message);
+		slog.error(
+			app.isPackaged
+				? 'failed to start the bundled sidecar'
+				: 'failed to spawn uv — is it installed and on PATH?',
+			error.message,
+		);
 		fireExit(null);
 	});
 

@@ -15,6 +15,7 @@ import { manifest } from '@shared/modules/runs.manifest';
 
 import { ForgeError } from '../../core/errors';
 import type { MainModule, MainModuleContext } from '../../core/modules/types';
+import { probePackageDir } from '../../core/sidecar/launch';
 import { SidecarRunDetailSchema, SidecarRunSchema, toRun, toRunDetail } from './map-run';
 import { endedRuns, runNotification } from './run-watch';
 
@@ -129,8 +130,12 @@ export const mainModule: MainModule = {
 			await ctx.sidecar('DELETE', `/runs/${id}`);
 		});
 		ctx.ipc.handle('runs:setup', () => {
-			// Only meaningful when running from the repo (dev); a packaged app doesn't ship it.
-			const packageDir = join(app.getAppPath(), 'packages', 'forge-probe');
+			// The probe ships in resources when packaged; the example script only exists in the repo.
+			const packageDir = probePackageDir(
+				app.isPackaged,
+				process.resourcesPath,
+				app.getAppPath(),
+			);
 			const example = join(app.getAppPath(), 'examples', 'train_mnist_probe.py');
 			return {
 				packageDir: existsSync(packageDir) ? packageDir : null,

@@ -13,8 +13,10 @@ export interface ServerLaunch {
 	initializationOptions: Record<string, unknown>;
 }
 
+/** Language servers are asar-unpacked when packaged: they read many files and spawn workers. */
 function packageFile(pkg: string, file: string): string {
-	return join(dirname(require.resolve(`${pkg}/package.json`)), file);
+	const path = join(dirname(require.resolve(`${pkg}/package.json`)), file);
+	return path.replace(/\.asar([\\/])/, '.asar.unpacked$1');
 }
 
 /** The folder's virtual environment, if it has one (`.venv` or `venv`). */

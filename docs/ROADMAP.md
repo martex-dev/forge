@@ -190,9 +190,9 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 ## Phase 6 — Ship
 
-- [ ] Packaging note: language servers run from `node_modules` with Electron-as-Node; `typescript` (fallback tsserver) must ship as a runtime dependency
-- [ ] Packaging note: `asarUnpack` the ripgrep binary (`node_modules/@vscode/ripgrep-*/**`); `rgPath()` already maps `.asar` → `.asar.unpacked`.
-- [ ] PyInstaller sidecar bundled via electron-builder (NSIS). Mind the size: duckdb, polars, scikit-learn/SciPy, pyzmq; forge-probe is a path dependency and purged-cv/calibrate come from git
+- [x] Language servers and `typescript` ship asar-unpacked as runtime dependencies (paths mapped to `.asar.unpacked`)
+- [x] ripgrep asar-unpacked
+- [x] PyInstaller sidecar (one folder, ~420 MB) bundled via electron-builder (NSIS, unsigned); `npm run dist`; packaged-app e2e (`e2e/packaged.spec.ts`)
 - [ ] Auto-update (electron-updater, GitHub Releases)
 - [ ] Performance pass (measured before/after)
 - [ ] Settings backup/export (no secrets); first-launch onboarding

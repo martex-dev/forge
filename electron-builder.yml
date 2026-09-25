@@ -1,0 +1,58 @@
+# Windows installer (NSIS). `npm run dist` builds the app, the PyInstaller sidecar and this.
+# Unsigned by choice (ADR-023): SmartScreen asks once ("More info" → "Run anyway").
+appId: dev.marto.forge
+productName: Forge
+copyright: Copyright © 2026 Marto
+
+directories:
+  output: release
+  buildResources: resources/installer
+
+# Native modules are already Electron-ready: node-pty ships N-API prebuilds and better-sqlite3 is
+# rebuilt for Electron's ABI on install (postinstall). Rebuilding here only fails: gyp can't
+# handle the space in this machine's user folder ("PC Games").
+npmRebuild: false
+
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+
+# Executables and files other processes read must live outside app.asar.
+asarUnpack:
+  - node_modules/@vscode/ripgrep*/**
+  - node_modules/basedpyright/**
+  - node_modules/typescript-language-server/**
+  - node_modules/typescript/**
+
+extraResources:
+  - from: sidecar/dist/forge-sidecar
+    to: sidecar
+  - from: packages/forge-probe
+    to: forge-probe
+    filter:
+      - '**/*'
+      - '!.venv/**'
+      - '!**/__pycache__/**'
+      - '!.pytest_cache/**'
+      - '!.ruff_cache/**'
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: resources/installer/icon.ico
+
+nsis:
+  oneClick: true
+  perMachine: false
+  # Your data (userData: DB, secrets, journal, layouts) survives uninstall/reinstall.
+  deleteAppDataOnUninstall: false
+  artifactName: Forge-Setup-${version}.${ext}
+
+# Updates come from a public repo that only holds installers (ADR-023); the source stays private.
+publish:
+  provider: github
+  owner: martex-dev
+  repo: forge-releases
+  releaseType: release

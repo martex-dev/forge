@@ -483,3 +483,35 @@ notifications as they happen, whichever module raised them.
 
 **Consequences:** A module can react to other modules' notifications without importing them.
 Forwarding must avoid loops, so Discord never forwards its own notices.
+
+---
+
+## ADR-023: Packaging: NSIS installer, PyInstaller sidecar, public releases repo
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Forge must install and run on Windows without the development toolchain (no uv,
+no Python, no Node). Marto chose an unsigned installer and updates from a public repo that holds
+only builds, keeping the source private.
+
+**Decision:**
+
+- electron-builder builds an NSIS installer: one-click, per-user, user data kept on uninstall.
+  Unsigned, so SmartScreen asks once.
+- The sidecar ships as a PyInstaller **one-folder** build in `resources/sidecar` (a one-file
+  build would unpack ~400 MB to %TEMP% on every start). Main runs it when `app.isPackaged`,
+  and `uv run` in development (`src/main/core/sidecar/launch.ts`). The spec collects packages
+  with data files or dynamic imports, and ships `mltool_jobs.py` and `artifacts.py` as source
+  because the environment engine sends their code into kernels.
+- Language servers, `typescript` (now a runtime dependency) and ripgrep are asar-unpacked, and
+  their paths are mapped to `.asar.unpacked`.
+- `npmRebuild: false`: node-pty ships N-API prebuilds and better-sqlite3 is rebuilt for Electron
+  on install. Rebuilding at package time fails because gyp can't handle the space in this
+  machine's user folder.
+- forge-probe ships in `resources/forge-probe`, so the Run Monitor's install hint works when
+  installed.
+- `publish` points at `github.com/martex-dev/forge-releases` (public, installers only).
+
+**Consequences:** The installer is ~260 MB and the install ~900 MB (Electron ~250 MB, sidecar
+~420 MB, of which SciPy/scikit-learn is the bulk). `e2e/packaged.spec.ts` runs the unpacked
+build to prove the installed layout: bundled sidecar, SQLite, ripgrep, basedpyright and the PTY.
