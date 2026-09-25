@@ -1,12 +1,15 @@
 """SQL helpers for the DataFrame viewer: quoting, the single-SELECT rule and JSON-safe values."""
 
+from __future__ import annotations
+
 import datetime as dt
 import math
 import uuid
 from decimal import Decimal
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import duckdb
+if TYPE_CHECKING:
+	import duckdb
 
 MAX_CELL_CHARS = 2000
 
@@ -29,6 +32,8 @@ def check_select(conn: duckdb.DuckDBPyConnection, sql: str) -> None:
 	makes the SQL box and the WHERE filter safe to run: no COPY TO, ATTACH, INSTALL, SET or a
 	second statement smuggled in after a semicolon.
 	"""
+	import duckdb
+
 	try:
 		statements = conn.extract_statements(sql)
 	except duckdb.Error as error:

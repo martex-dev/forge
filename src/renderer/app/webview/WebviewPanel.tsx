@@ -35,7 +35,23 @@ export function WebviewPanel({ serviceId, instanceId, room }: WebviewPanelProps)
 	// Native views paint above all HTML, so they must vanish whenever an overlay is open.
 	const wantVisible = roomActive && !overlayOpen && !state?.error;
 
+	// Every room stays mounted, so without this each site would load at startup (TradingView alone
+	// is ~330 MB). Create the native view the first time its panel is actually on screen.
+	const [activated, setActivated] = useState(false);
 	useEffect(() => {
+		const el = hostRef.current;
+		if (activated || !roomActive || !el) return;
+		const check = (): void => {
+			if (el.offsetWidth > 0 && el.offsetHeight > 0) setActivated(true);
+		};
+		const observer = new ResizeObserver(check);
+		observer.observe(el);
+		check();
+		return () => observer.disconnect();
+	}, [activated, roomActive]);
+
+	useEffect(() => {
+		if (!activated) return;
 		let cancelled = false;
 		call('webview:attach', { instanceId, serviceId })
 			.then((s) => {
@@ -52,7 +68,7 @@ export function WebviewPanel({ serviceId, instanceId, room }: WebviewPanelProps)
 				rlog.warn('webview', 'detach failed', error),
 			);
 		};
-	}, [instanceId, serviceId]);
+	}, [activated, instanceId, serviceId]);
 
 	useForgeEvent('webview:state', (s) => {
 		if (s.instanceId === instanceId) setState(s);

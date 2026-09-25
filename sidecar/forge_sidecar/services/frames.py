@@ -3,6 +3,8 @@ DataFrame viewer backend. Each opened file gets its own in-memory DuckDB databas
 `t`, over the file, so queries always see the file's current contents and SQL can say `FROM t`.
 """
 
+from __future__ import annotations
+
 import asyncio
 import hashlib
 import logging
@@ -10,10 +12,8 @@ import threading
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
-import duckdb
-import polars as pl
 from pydantic import BaseModel
 
 from forge_sidecar.services.frame_sql import (
@@ -24,6 +24,12 @@ from forge_sidecar.services.frame_sql import (
 	quote_literal,
 	to_json_value,
 )
+
+if TYPE_CHECKING:
+	import duckdb
+
+# duckdb and polars are imported where they're used: they cost ~150 ms and ~40 MB at sidecar
+# start for a panel that may never be opened.
 
 logger = logging.getLogger('forge_sidecar.frames')
 
@@ -118,6 +124,8 @@ class FrameStore:
 		folder.mkdir(parents=True, exist_ok=True)
 		target = folder / f'{key}.parquet'
 		if not target.exists():
+			import polars as pl
+
 			pl.read_ipc(path, memory_map=False).write_parquet(target)
 		return f'read_parquet({quote_literal(str(target))})'
 
@@ -129,6 +137,8 @@ class FrameStore:
 			raise ValueError('Open an absolute path to a CSV, TSV, Parquet, JSON or Feather file')
 		if not path.is_file():
 			raise FileNotFoundError(f'{path} does not exist')
+		import duckdb
+
 		conn = duckdb.connect(':memory:')
 		try:
 			conn.execute(f'CREATE VIEW t AS SELECT * FROM {self._source(path, fmt)}')

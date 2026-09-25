@@ -194,7 +194,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] ripgrep asar-unpacked
 - [x] PyInstaller sidecar (one folder, ~420 MB) bundled via electron-builder (NSIS, unsigned); `npm run dist`; packaged-app e2e (`e2e/packaged.spec.ts`)
 - [x] Auto-update (electron-updater) from the public `forge-releases` repo; tag-driven release workflow (docs/RELEASING.md)
-- [ ] Performance pass (measured before/after)
+- [x] Performance pass (measured before/after): idle memory −46% (lazy webviews), sidecar ready −52% (lazy polars/DuckDB); docs/PERFORMANCE.md
 - [ ] Settings backup/export (no secrets); first-launch onboarding
 
 ## Parking lot (not scheduled — discuss before adding)

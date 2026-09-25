@@ -1,7 +1,5 @@
 from typing import Any
 
-import duckdb
-import polars as pl
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
@@ -44,6 +42,9 @@ def _fail(error: Exception) -> HTTPException:
 	if isinstance(error, FileNotFoundError):
 		return HTTPException(status_code=404, detail=str(error))
 	# DuckDB's messages (syntax errors, unknown columns) are what Marto needs to fix a query.
+	import duckdb
+	import polars as pl
+
 	if isinstance(error, QueryRejected | ValueError | duckdb.Error | pl.exceptions.PolarsError):
 		return HTTPException(status_code=400, detail=str(error).strip())
 	raise error
