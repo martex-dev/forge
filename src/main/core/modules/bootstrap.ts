@@ -9,6 +9,7 @@ import { emitEvent, router } from '../ipc';
 import type { Notifier } from '../notify';
 import type { SecretsService } from '../secrets/secrets-service';
 import type { SidecarManager } from '../sidecar/sidecar-manager';
+import type { WorkspaceService } from '../workspace/workspace-service';
 import { ModuleRegistry } from './registry';
 import type { MainModule } from './types';
 
@@ -23,10 +24,11 @@ export interface CoreServices {
 	secrets: SecretsService;
 	notify: Notifier;
 	sidecar: SidecarManager | null;
+	workspace: WorkspaceService;
 }
 
 export function createModuleRegistry(services: CoreServices): ModuleRegistry {
-	const { settings, secrets, notify, sidecar } = services;
+	const { settings, secrets, notify, sidecar, workspace } = services;
 	const mainModules = new Map(Object.values(found).map((m) => [m.manifest.id, m]));
 
 	const registry = new ModuleRegistry({
@@ -62,6 +64,11 @@ export function createModuleRegistry(services: CoreServices): ModuleRegistry {
 						);
 					}
 					return secrets.get(key);
+				},
+				workspace: {
+					root: () => workspace.getRoot(),
+					onChange: (listener) =>
+						disposers.push(workspace.onChange((info) => listener(info.root))),
 				},
 				sidecar: (method, path, body) => {
 					if (!sidecar) {

@@ -27,6 +27,11 @@ export class SettingsRepo {
 
 	set<S extends z.ZodType>(key: string, schema: S, value: z.input<S>): z.output<S> {
 		const parsed = schema.parse(value);
+		// "No value" is stored as a missing row, so reads fall back to their default.
+		if (parsed === null || parsed === undefined) {
+			this.delete(key);
+			return parsed;
+		}
 		this.db
 			.insert(settings)
 			.values({ key, value: parsed })

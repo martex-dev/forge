@@ -25,6 +25,11 @@ export interface MainModuleContext {
 	notify(input: Omit<NewNotification, 'module'>): void;
 	/** Reads a secret this module declared in its manifest. Main-only; never send it to the renderer. */
 	getSecret(key: string): string | null;
+	/** The open folder. `onChange` listeners are removed automatically when the module is disabled. */
+	workspace: {
+		root(): string | null;
+		onChange(listener: (root: string | null) => void): void;
+	};
 	/** Authenticated call to the Python sidecar; throws ForgeError('SIDECAR_UNAVAILABLE') if down. */
 	sidecar<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T>;
 }

@@ -73,9 +73,16 @@ export default tseslint.config(
 			'no-restricted-imports': [
 				'error',
 				{
+					// Exact names here: a gitignore-style pattern like 'fs' would also match './channels/fs'.
+					paths: ['electron', 'fs', 'path', 'child_process', 'os', 'crypto'].map(
+						(name) => ({
+							name,
+							message: 'Renderer/shared code cannot import Node or Electron.',
+						}),
+					),
 					patterns: [
 						{
-							group: ['node:*', 'electron', 'fs', 'path', 'child_process'],
+							group: ['node:*'],
 							message: 'Renderer/shared code cannot import Node or Electron.',
 						},
 						{ group: ['@main/*'], message: 'Only main may import @main.' },

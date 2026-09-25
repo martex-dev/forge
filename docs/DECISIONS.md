@@ -134,3 +134,37 @@ dies.
 
 **Consequences:** One less dependency. An e2e test checks that no process from the sidecar tree
 survives quitting.
+
+---
+
+## ADR-009: VS Code-compatible Monaco as the editor base
+
+**Status:** Accepted (2026-09-25, chosen by Marto)
+
+**Context:** Phase 2 needs LSP (hover, completion, diagnostics, go-to-definition) via
+`monaco-languageclient`. Since v9 it is built on `@codingame/monaco-vscode-api`, a fork that
+exposes VS Code's services on top of Monaco; it does not work with plain `monaco-editor`.
+
+**Decision:** Install `@codingame/monaco-vscode-editor-api` under the package name `monaco-editor`
+(npm alias) from day one, pinned to the version `monaco-languageclient` expects (37.1.0).
+
+**Consequences:** Phase 2 LSP plugs in without an editor rewrite. The bundle is larger, and setup
+goes through `initialize()` with service overrides and extension packages instead of a plain
+`monaco.editor.create`. `@monaco-editor/react` is not used (it loads from a CDN by default).
+
+---
+
+## ADR-010: Workspace and filesystem are core services, not modules
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** The explorer, editor, terminals, Git and search all need "the open folder" and safe
+file access. Putting that in one module would force the others to depend on it.
+
+**Decision:** `core/workspace` in main owns the open folder, the recent list, a path-guarded
+`FsService` and a debounced chokidar watcher. Modules use the `workspace:*` and `fs:*` channels
+(renderer) or `ctx.workspace` (main). Cross-module "open this file" goes through a tiny renderer
+bus (`requestOpenFile`) that the editor module registers with.
+
+**Consequences:** Modules stay independent. Disabling the editor just makes "open file" show a
+toast instead of breaking the explorer.

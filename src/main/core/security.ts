@@ -32,9 +32,9 @@ export function installGlobalSecurity(): void {
 		});
 	});
 
-	// The app UI itself never needs camera, mic, geolocation, notifications, etc.
-	session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => {
-		callback(false);
+	// The app UI only needs to write to the clipboard ("Copy path"); no camera, mic, location…
+	session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => {
+		callback(permission === 'clipboard-sanitized-write');
 	});
 }
 

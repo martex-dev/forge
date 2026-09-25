@@ -16,7 +16,7 @@ export function createCommandContext(): CommandContext {
 	const ui = useUiStore.getState;
 	return {
 		switchRoom: (room) => ui().setRoom(room),
-		openPanel: (panelId) => {
+		openPanel: (panelId, options) => {
 			const def = ALL_PANELS.find((p) => p.id === panelId);
 			if (!def) {
 				toast.error('Unknown panel', panelId);
@@ -24,7 +24,7 @@ export function createCommandContext(): CommandContext {
 			}
 			ui().setRoom(def.room);
 			const api = getLayoutApi(def.room);
-			if (api) openPanelIn(api, def);
+			if (api) openPanelIn(api, def, options);
 		},
 		resetLayout: (room) => void resetRoomLayout(room ?? ui().room),
 		openSettings: (tab) => ui().openSettings(tab),

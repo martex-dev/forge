@@ -17,6 +17,8 @@ import type { SidecarManager } from './core/sidecar/sidecar-manager';
 import { createWebviews } from './core/webviews';
 import type { WebviewService } from './core/webviews/webview-service';
 import { createMainWindow } from './core/window';
+import { createWorkspace } from './core/workspace';
+import type { WorkspaceWatcher } from './core/workspace/watcher';
 
 // Logs live next to the rest of userData so --user-data-dir (tests) isolates them too.
 log.transports.file.resolvePathFn = () => join(app.getPath('userData'), 'logs', 'main.log');
@@ -25,6 +27,7 @@ log.initialize();
 let db: DbHandle | null = null;
 let modules: ModuleRegistry | null = null;
 let sidecar: SidecarManager | null = null;
+let watcher: WorkspaceWatcher | null = null;
 
 async function start(): Promise<void> {
 	installGlobalSecurity();
@@ -41,8 +44,16 @@ async function start(): Promise<void> {
 	sidecar = createSidecar(notify);
 
 	const webviews = createWebviews(() => mainWindow);
+	const ws = createWorkspace(data.settings);
+	watcher = ws.watcher;
 
-	modules = createModuleRegistry({ settings: data.settings, secrets, notify, sidecar });
+	modules = createModuleRegistry({
+		settings: data.settings,
+		secrets,
+		notify,
+		sidecar,
+		workspace: ws.workspace,
+	});
 	await modules.start();
 
 	openWindow(webviews);
@@ -86,6 +97,7 @@ app.on('before-quit', (event) => {
 		try {
 			await modules?.stopAll();
 			await sidecar?.stop();
+			await watcher?.stop();
 		} catch (error) {
 			log.error('[main] error during shutdown', error);
 		}

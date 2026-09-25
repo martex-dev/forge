@@ -10,6 +10,7 @@ import { CommandPalette } from './CommandPalette';
 import { useCommands } from './commands/use-commands';
 import { useGlobalShortcuts } from './commands/use-global-shortcuts';
 import { DesignPlayground } from './DesignPlayground';
+import { useFsInvalidation } from './hooks/use-fs-invalidation';
 import { useApplyGeneralSettings } from './hooks/use-general-settings';
 import { useModules } from './hooks/use-modules';
 import { RoomLayout } from './layout/RoomLayout';
@@ -28,6 +29,7 @@ export function AppShell(): JSX.Element {
 
 	useGlobalShortcuts(commands);
 	useApplyGeneralSettings();
+	useFsInvalidation();
 
 	useEffect(() => {
 		document.documentElement.dataset['room'] = room;

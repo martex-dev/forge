@@ -1,14 +1,9 @@
 import type { IDockviewPanelProps } from 'dockview-react';
 import type { FunctionComponent } from 'react';
 
-import type { RoomId } from '@shared/rooms';
-
 import { ALL_PANELS } from '../../modules/registry';
+import type { PanelParams } from '../../modules/types';
 import { PanelErrorBoundary } from './PanelErrorBoundary';
-
-interface PanelParams {
-	room: RoomId;
-}
 
 /**
  * dockview needs a component for every id that might appear in a saved layout,
@@ -22,7 +17,7 @@ export const PANEL_COMPONENTS: Record<
 		const Component = def.component;
 		const Wrapped: FunctionComponent<IDockviewPanelProps<PanelParams>> = (props) => (
 			<PanelErrorBoundary title={def.title}>
-				<Component panelId={props.api.id} room={def.room} />
+				<Component panelId={props.api.id} room={def.room} params={props.params} />
 			</PanelErrorBoundary>
 		);
 		Wrapped.displayName = `Panel(${def.id})`;

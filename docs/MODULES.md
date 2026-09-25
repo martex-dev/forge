@@ -64,6 +64,23 @@ registered through the context is torn down when the module is disabled.
   system browser, where the session doesn't reach Forge. Use email/password sign-in, or ask to
   allowlist a specific OAuth host.
 
+### `explorer` — Explorer
+
+- **Room:** build · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** File tree for the open folder (workspace). Lazy-loads folders, follows the
+  editor's active file, and updates live from the workspace watcher.
+- **Panels:** `explorer.tree` — Explorer (default open, docked left, 260 px).
+- **Commands:** `Build: Open Folder…` (Ctrl+O), `Build: Close Folder`, `Build: Show Explorer`
+  (Ctrl+Shift+E).
+- **Keyboard:** ↑/↓/Home/End move, → expand / into folder, ← collapse / to parent, Enter open,
+  F2 rename, Delete → confirm → Recycle Bin. Right-click for the context menu.
+- **Secrets / settings / sidecar:** none. Recent folders live in the `workspace.recent` setting.
+- **Core services used:** `workspace:*` and `fs:*` IPC (main `core/workspace`). Every path is
+  workspace-relative and checked in main (`..`, other drives, and junctions pointing outside are
+  refused). Delete is always "move to Recycle Bin", never permanent.
+- **Known limitations:** no drag-and-drop move yet; very large folders (10k+ entries in one
+  directory) render without virtualization.
+
 ---
 
 ## Template
