@@ -1,4 +1,4 @@
-import { resolveToken } from '../../../lib/resolve-color';
+import { resolveToken } from '../resolve-color';
 
 /** VS Code user settings (JSON) that restyle "Default Dark Modern" with Forge's tokens. */
 export function buildUserConfiguration(fontSize: number, reduceMotion: boolean): string {
@@ -29,6 +29,12 @@ export function buildUserConfiguration(fontSize: number, reduceMotion: boolean):
 		'editorError.foreground': c('--down'),
 		'editorWarning.foreground': c('--warn'),
 		'editorInfo.foreground': c('--info'),
+		// Soft tints instead of the default solid diff fills.
+		'diffEditor.insertedLineBackground': c('--up-soft'),
+		'diffEditor.insertedTextBackground': c('--up-soft'),
+		'diffEditor.removedLineBackground': c('--down-soft'),
+		'diffEditor.removedTextBackground': c('--down-soft'),
+		'diffEditor.diagonalFill': c('--bg-3'),
 	};
 	return JSON.stringify({
 		'workbench.colorTheme': 'Default Dark Modern',

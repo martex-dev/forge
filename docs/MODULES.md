@@ -121,6 +121,26 @@ registered through the context is torn down when the module is disabled.
 - **Known limitations:** Windows PowerShell 5.1 takes a few seconds to start when the profile
   loads PSReadLine/modules; shells don't survive an app restart (only a window reload).
 
+### `git` — Git
+
+- **Room:** build · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Source Control for the open folder via the system git (simple-git). Works when
+  the folder is a subfolder of a repo. Lists staged and unstaged changes (untracked files shown
+  individually), opens side-by-side Monaco diffs (HEAD ↔ staged, staged ↔ working tree; staged
+  renames diff against the old path), stages/unstages, commits (Ctrl+Enter), pulls and pushes
+  (first push publishes the branch with upstream).
+- **Panels:** `git.changes` — Source Control (tab next to Explorer); `git.diff` — Diff (tab next to
+  the editor, reused for each file).
+- **Commands:** `Build: Show Source Control` (Ctrl+Shift+G), `Git: Pull`, `Git: Push`.
+- **Status bar:** branch, `*N` pending changes, ↓behind ↑ahead; click opens Source Control.
+- **Secrets:** none. Credentials come from Git Credential Manager (its own window);
+  `GIT_TERMINAL_PROMPT=0` so git never hangs on an invisible prompt.
+- **Environment:** git runs with an allowlisted environment (PATH, home, temp, proxy, `GCM_*`), so
+  helpers inherited from other tools (VS Code's `GIT_ASKPASS`, `EDITOR`…) never leak in.
+- **Known limitations:** no discard, branch switching, stash or history view yet; status refreshes
+  every 5 s plus after Forge's own operations and file changes (commits made in a terminal show
+  up within 5 s).
+
 ---
 
 ## Template

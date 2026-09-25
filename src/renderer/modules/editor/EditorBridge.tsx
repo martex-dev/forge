@@ -7,13 +7,13 @@ import { commandContext } from '../../app/commands/use-commands';
 import { useGeneralSettings } from '../../app/hooks/use-general-settings';
 import { useWorkspace, WORKSPACE_KEY } from '../../app/hooks/use-workspace';
 import { rlog } from '../../lib/log';
+import { loadMonaco, refreshEditorConfiguration } from '../../lib/monaco/load';
 import { useForgeEvent } from '../../lib/use-forge-event';
 import { toast } from '../../stores/toast-store';
 import { useUiStore } from '../../stores/ui-store';
 import { useWorkbenchStore } from '../../stores/workbench-store';
 import { dirtyCount, useEditorStore } from './editor-store';
 import { closeAll, onExternalChange, openFile } from './file-ops';
-import { loadMonaco, refreshEditorConfiguration } from './monaco/load';
 import { loadSession, saveSession } from './session';
 
 /**

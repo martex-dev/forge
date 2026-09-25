@@ -2,9 +2,9 @@ import type * as Monaco from 'monaco-editor';
 
 import { call, IpcCallError } from '../../lib/ipc';
 import { rlog } from '../../lib/log';
+import type { MonacoApi } from '../../lib/monaco/setup';
 import { toast } from '../../stores/toast-store';
 import { useEditorStore } from './editor-store';
-import type { MonacoApi } from './monaco/setup';
 
 interface Tracked {
 	model: Monaco.editor.ITextModel;

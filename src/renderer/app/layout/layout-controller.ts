@@ -29,19 +29,28 @@ export function openPanelIn(
 	const instanceId = options.instanceId ?? def.id;
 	const existing = api.getPanel(instanceId);
 	if (existing) {
+		// Re-opening a single-instance panel with new params (e.g. another diff) updates it.
+		if (options.params) existing.api.updateParameters({ ...options.params, room: def.room });
+		if (options.title) existing.api.setTitle(options.title);
 		existing.api.setActive();
 		return;
 	}
 	// Direction is relative to the whole grid; the first panel just fills the room.
 	const direction = def.position && def.position !== 'tab' ? def.position : null;
 	const horizontal = direction === 'left' || direction === 'right';
+	const sibling = def.tabWith ? api.getPanel(def.tabWith) : undefined;
 	api.addPanel({
 		id: instanceId,
 		component: def.id,
 		title: options.title ?? def.title,
 		params: { ...options.params, room: def.room },
 		...(def.renderer ? { renderer: def.renderer } : {}),
-		...(direction && api.panels.length > 0 ? { position: { direction } } : {}),
+		...(options.background ? { inactive: true } : {}),
+		...(sibling
+			? { position: { referencePanel: sibling, direction: 'within' as const } }
+			: direction && api.panels.length > 0
+				? { position: { direction } }
+				: {}),
 		...(direction && def.initialSize
 			? horizontal
 				? { initialWidth: def.initialSize }
@@ -63,7 +72,7 @@ export function nextInstanceId(api: DockviewApi, definitionId: string): string {
 export function applyDefaultLayout(api: DockviewApi, panels: readonly PanelDefinition[]): void {
 	api.clear();
 	for (const def of panels) {
-		if (def.defaultOpen) openPanelIn(api, def);
+		if (def.defaultOpen) openPanelIn(api, def, { background: def.tabWith !== undefined });
 	}
 }
 

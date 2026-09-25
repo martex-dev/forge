@@ -5,6 +5,8 @@ import { type JSX, useEffect, useRef, useState } from 'react';
 import { useGeneralSettings } from '../../app/hooks/use-general-settings';
 import { useWorkspace } from '../../app/hooks/use-workspace';
 import { rlog } from '../../lib/log';
+import { loadMonaco } from '../../lib/monaco/load';
+import type { MonacoApi } from '../../lib/monaco/setup';
 import { EmptyState } from '../../ui/EmptyState';
 import { ErrorState } from '../../ui/ErrorState';
 import { Kbd } from '../../ui/Kbd';
@@ -13,8 +15,6 @@ import { useEditorStore } from './editor-store';
 import { EditorDialogs } from './EditorDialogs';
 import { EditorTabs } from './EditorTabs';
 import { getModel, getViewState, requestClose, saveViewState } from './file-ops';
-import { loadMonaco } from './monaco/load';
-import type { MonacoApi } from './monaco/setup';
 
 type LoadState =
 	| { status: 'loading' }

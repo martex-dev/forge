@@ -28,6 +28,8 @@ export interface PanelDefinition {
 	 * terminals, which would otherwise be torn down and reloaded on every tab switch).
 	 */
 	renderer?: 'always' | 'onlyWhenVisible';
+	/** Open as a tab in the same group as this panel id, if it's open (e.g. next to Explorer). */
+	tabWith?: string;
 	/** Where a newly opened instance goes relative to existing panels. */
 	position?: 'left' | 'right' | 'below' | 'tab';
 	/** Initial size in px along the split axis (width for left/right, height for below). */
@@ -44,6 +46,8 @@ export interface OpenPanelOptions {
 	instanceId?: string;
 	title?: string;
 	params?: PanelParams;
+	/** Add without activating (keeps the group's current tab in front). */
+	background?: boolean;
 }
 
 /** Everything a command may do; implemented by the shell. */
