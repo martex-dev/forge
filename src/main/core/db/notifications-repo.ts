@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { count, desc, eq } from 'drizzle-orm';
+import { count, desc, eq, inArray } from 'drizzle-orm';
 
 import {
 	type ForgeNotification,
@@ -53,6 +53,14 @@ export class NotificationsRepo {
 
 	markAllRead(): void {
 		this.db.update(notifications).set({ read: true }).run();
+	}
+
+	delete(ids: readonly string[]): number {
+		if (ids.length === 0) return 0;
+		return this.db
+			.delete(notifications)
+			.where(inArray(notifications.id, [...ids]))
+			.run().changes;
 	}
 
 	deleteRead(): number {

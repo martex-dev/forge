@@ -110,4 +110,14 @@ describe('NotificationsRepo', () => {
 		expect(repo.unreadCount()).toBe(0);
 		expect(a.body).toBe('');
 	});
+
+	it('deletes by id', () => {
+		const repo = new NotificationsRepo(handle.db);
+		const a = repo.add({ module: 'core', title: 'A', level: 'info' });
+		const b = repo.add({ module: 'core', title: 'B', level: 'info' });
+		expect(repo.delete([a.id, 'missing'])).toBe(1);
+		expect(repo.list().map((n) => n.id)).toContain(b.id);
+		expect(repo.list().map((n) => n.id)).not.toContain(a.id);
+		expect(repo.delete([])).toBe(0);
+	});
 });

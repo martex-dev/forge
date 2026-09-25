@@ -185,7 +185,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] Notion module (search, read, append, create sub-pages)
 - [x] Discord: webhooks (post + notification forwarding) + webview
 - [x] Social webview tabs (Discord, LinkedIn, X, Notion)
-- [ ] Unified inbox (GitHub, Vercel, alerts, calendar)
+- [x] Unified inbox (GitHub, Vercel, alerts, calendar): source chips, search, collapsed repeats, keyboard
 - [ ] "Today" dashboard
 
 ## Phase 6 — Ship

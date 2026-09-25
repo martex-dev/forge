@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import type { ForgeNotification } from '@shared/notifications';
 
 import {
+	collapseRepeats,
+	countBySource,
 	dayLabel,
 	DEFAULT_FILTERS,
 	filterNotifications,
@@ -54,6 +56,40 @@ describe('filterNotifications', () => {
 
 	it('lists distinct modules', () => {
 		expect(modulesIn(list)).toEqual(['runs', 'sidecar']);
+	});
+
+	it('searches title, body and source', () => {
+		const withText = [
+			n('x', { title: 'Deploy failed', body: 'forge-web' }),
+			n('y', { title: 'Run done' }),
+		];
+		const q = (query: string): string[] =>
+			filterNotifications(withText, { ...DEFAULT_FILTERS, query }).map((i) => i.id);
+		expect(q('deploy')).toEqual(['x']);
+		expect(q('FORGE-WEB')).toEqual(['x']);
+		expect(q('runs')).toEqual(['x', 'y']);
+	});
+
+	it('counts per source, unread first', () => {
+		// Equal unread: the busier source first.
+		expect(countBySource(list)).toEqual([
+			{ module: 'sidecar', total: 2, unread: 1 },
+			{ module: 'runs', total: 1, unread: 1 },
+		]);
+	});
+
+	it('collapses consecutive repeats', () => {
+		const rows = collapseRepeats([
+			n('1', { title: 'BTC > 100k', module: 'alerts' }),
+			n('2', { title: 'BTC > 100k', module: 'alerts', read: true }),
+			n('3', { title: 'Run done' }),
+			n('4', { title: 'BTC > 100k', module: 'alerts', read: true }),
+		]);
+		expect(rows.map((r) => [r.n.id, r.ids.length, r.unread])).toEqual([
+			['1', 2, true],
+			['3', 1, true],
+			['4', 1, false],
+		]);
 	});
 });
 

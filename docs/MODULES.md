@@ -285,9 +285,12 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 ### `inbox` — Inbox
 
 - **Room:** hub · **Platforms:** all · **Enabled by default:** yes
-- **What it does:** Every notification any module raised (`ctx.notify`), newest first, grouped
-  by day. Filter by level (error / warning / success / info), module and unread; mark all read;
-  clear read ones. Clicking a notification marks it read and jumps to its target panel (switching
+- **What it does:** One inbox for every notification any module raised (`ctx.notify`), newest
+  first, grouped by day. **Source chips** with totals and unread counts (GitHub, Vercel,
+  Alerts, Runs, …), level chips, unread-only, and **search** over title, body and source.
+  Consecutive repeats (the same alert firing again, a flapping deploy) **collapse** into one row
+  with ×N. Per row: mark read, delete. Keyboard: ↑/↓ between rows, Enter opens, Delete removes
+  (with its repeats). Mark all read, clear read. Clicking a notification marks it read and jumps to its target panel (switching
   rooms), e.g. a finished training run opens that run in the Run Monitor. The status-bar bell
   shows the unread count and opens the inbox.
 - **Toasts:** warn/error notifications show an in-app toast while Forge is focused and a Windows
@@ -295,9 +298,10 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 - **Panels:** `inbox.main` — Inbox (docked right).
 - **Commands:** `Hub: Show Inbox`, `Hub: Mark All Notifications Read`.
 - **Settings:** none. Notifications live in the app DB (`notifications` table, `target` column).
-- **Producers so far:** sidecar crashes/restarts (core) and `runs` (run finished / failed /
-  interrupted, polled by main every 5 s so it works with the Lab room closed).
-- **Known limitations:** no per-module mute yet; GitHub/Vercel/alerts join in Phases 2–5.
+- **Producers:** sidecar crashes/restarts (core), `runs` (finished / failed / interrupted),
+  `github` (PR reviews, failing Actions), `vercel` (deploy state), `alerts` (price and calendar
+  events). The `discord` module can forward any of them.
+- **Known limitations:** no per-source mute yet (Discord forwarding has its own filters).
 
 ---
 

@@ -32,6 +32,8 @@ export const dataChannels = defineChannels({
 	'notifications:markAllRead': { input: z.void(), output: z.void() },
 	/** Removes read notifications; returns how many. */
 	'notifications:deleteRead': { input: z.void(), output: z.number().int() },
+	/** Removes the given notifications; returns how many. */
+	'notifications:delete': { input: z.array(z.string()).max(500), output: z.number().int() },
 	'notifications:add': { input: NewNotificationSchema, output: NotificationSchema },
 });
 

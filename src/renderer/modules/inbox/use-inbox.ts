@@ -29,7 +29,12 @@ export function useNotifications(): {
 	};
 }
 
-export function useInboxActions(): { markAllRead: () => void; clearRead: () => void } {
+export function useInboxActions(): {
+	markAllRead: () => void;
+	clearRead: () => void;
+	markRead: (ids: string[]) => void;
+	remove: (ids: string[]) => void;
+} {
 	const markAll = useMutation({
 		mutationFn: () => call('notifications:markAllRead'),
 		onError: (error) => toast.error('Could not mark as read', error.message),
@@ -42,5 +47,20 @@ export function useInboxActions(): { markAllRead: () => void; clearRead: () => v
 			),
 		onError: (error) => toast.error('Could not clear notifications', error.message),
 	});
-	return { markAllRead: () => markAll.mutate(), clearRead: () => clear.mutate() };
+	const read = useMutation({
+		mutationFn: async (ids: string[]) => {
+			for (const id of ids) await call('notifications:markRead', id);
+		},
+		onError: (error) => toast.error('Could not mark as read', error.message),
+	});
+	const del = useMutation({
+		mutationFn: (ids: string[]) => call('notifications:delete', ids),
+		onError: (error) => toast.error('Could not delete', error.message),
+	});
+	return {
+		markAllRead: () => markAll.mutate(),
+		clearRead: () => clear.mutate(),
+		markRead: (ids) => read.mutate(ids),
+		remove: (ids) => del.mutate(ids),
+	};
 }

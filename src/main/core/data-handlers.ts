@@ -60,5 +60,10 @@ export function registerDataHandlers(
 		changed();
 		return removed;
 	});
+	router.handle('notifications:delete', (ids) => {
+		const removed = notifications.delete(ids);
+		changed();
+		return removed;
+	});
 	router.handle('notifications:add', (input) => notify(input));
 }
