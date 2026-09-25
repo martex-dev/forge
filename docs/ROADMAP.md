@@ -2,7 +2,7 @@
 
 Source of truth for progress. Tick boxes as work lands. Only the current phase is worked on.
 
-**Current phase: 2 — Build depth.** Phase 1 (all four rooms) is done.
+**Current phase: 3 — Trade depth.** Phases 1 and 2 are done.
 
 ---
 
@@ -161,7 +161,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] Workspace search (ripgrep)
 - [x] GitHub: PRs, issues, Actions, diff review, inbox notifications (read-only; commenting later)
 - [x] Vercel: projects, deployments, logs, promote/rollback with confirmation
-- [ ] AI chat (Claude / OpenAI / Gemini) from main, file/selection/diff context, streaming, diff-preview apply
+- [x] AI chat (Claude / OpenAI / Gemini) from main, file/selection/diff context, streaming, diff-preview apply
 
 ## Phase 3 — Trade depth
 

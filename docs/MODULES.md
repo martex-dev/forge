@@ -406,6 +406,30 @@ registered through the context is torn down when the module is disabled.
 
 ---
 
+### `ai` — AI Chat
+
+- **Room:** build · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** A chat column (right side of Build) for Claude, OpenAI or Gemini — provider
+  picker plus an editable model id (suggestions: `claude-opus-5-5` default, Sonnet 5, Haiku 4.5,
+  Fable 5.1; `gpt-5`; `gemini-2.5-pro`). Attach the open **file**, the **selection** or the
+  **git diff** (working tree vs HEAD, computed in main) as context chips. Replies stream in with
+  Markdown and code blocks; each block has **Copy** and **Apply…**.
+- **Apply:** opens a diff preview of the open file (Monaco diff editor) — replacing the selected
+  lines, or the whole file (toggle). **Accept** applies one undoable edit; the file stays unsaved
+  until Ctrl+S. Nothing is ever written without the preview.
+- **Panels:** `ai.chat` — AI (docked right), `ai.apply` — Apply preview (centre).
+- **Commands:** `Build: Ask AI` (Ctrl+L), `Build: Ask AI About Selection` (Ctrl+Shift+L).
+- **Settings:** `ai:settings` (provider + model per provider). **Secrets:** `anthropic.key`,
+  `openai.key`, `gemini.key`.
+- **Main:** calls each provider's streaming HTTP API with `fetch` and a small SSE parser (no
+  SDKs); keys go in headers, never URLs or logs. Streams arrive as `ai:delta` / `ai:done` /
+  `ai:error` events; a headless overlay collects them even while the chat tab is hidden. Stop
+  cancels the request.
+- **Known limitations:** conversations live in memory (cleared on restart); no tool use / agent
+  mode; the last 30 turns are sent as history; code blocks aren't syntax-highlighted yet.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

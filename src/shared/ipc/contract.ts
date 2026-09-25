@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 
+import { aiChannels, aiEvents } from './channels/ai';
 import { appChannels } from './channels/app';
 import { calendarChannels } from './channels/calendar';
 import { chartChannels } from './channels/chart';
@@ -45,6 +46,7 @@ export const ipcContract = {
 	...lspChannels,
 	...githubChannels,
 	...vercelChannels,
+	...aiChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */
@@ -61,6 +63,7 @@ export const eventContract = defineEvents({
 	...vaultEvents,
 	...lspEvents,
 	...secretEvents,
+	...aiEvents,
 });
 
 export type IpcContract = typeof ipcContract;

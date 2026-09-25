@@ -280,3 +280,28 @@ programs speaking JSON-RPC over stdio. The renderer must not spawn processes or 
 **Consequences:** Real IntelliSense with no system Python/Node requirements beyond the project's
 own venv. basedpyright adds ~27 MB to node_modules. Packaging (Phase 6) must keep the server
 scripts and `typescript` available at runtime.
+
+---
+
+## ADR-015: AI providers over plain HTTP from main; apply only through a diff preview
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** The AI chat must support Claude, OpenAI and Gemini, keep API keys out of the renderer,
+stream replies, and must never overwrite code blindly.
+
+**Decision:**
+
+- Main calls the three streaming HTTP APIs directly with `fetch` and one SSE parser instead of
+  three vendor SDKs (their streaming formats are small and stable; fewer dependencies to audit).
+  Keys come from SecretsService per request.
+- Replies stream to the renderer as events keyed by a request id; cancellation aborts the fetch.
+- Context (file, selection, git diff) is attached explicitly by the user and embedded in the
+  system prompt with labels. Nothing is sent implicitly.
+- Code from replies reaches files only via the Apply preview (Monaco diff). Accept edits the open
+  buffer as one undoable change and leaves saving to the user.
+- The default model is `claude-opus-5-5`; model ids are editable because provider catalogues
+  change faster than releases.
+
+**Consequences:** No new dependencies. Provider API changes affect one adapter file
+(`providers.ts`, unit tested).
