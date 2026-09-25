@@ -529,6 +529,35 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `earnings` — Earnings Calendar
+
+- **Room:** trade · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Earnings for a Monday–Friday week (US Eastern dates), grouped by day. Each row
+  shows the session (BMO before the open, AMC after the close, DMH during hours, — unannounced),
+  ticker, impact, company, EPS estimate, then the reported EPS (green beat / red miss) or the
+  year-ago EPS, and market cap. Filter by impact and ticker/company; browse weeks with ‹ ›.
+  **Journal idea** on a row opens a Trade Journal idea prefilled with the ticker and the date.
+- **Sources** (Earnings source… in the panel or the palette):
+    - **NASDAQ** (default, no key): NASDAQ's public calendar API, one request per weekday, same
+      conventions as Marto's market-calendar: impact from market cap (≥ $500B high, ≥ $50B
+      medium). Unofficial endpoint; it needs a browser User-Agent.
+    - **Finnhub** (key `finnhub.key` in Settings → Secrets): official API with reported EPS. No
+      names or market caps, so impact is index membership only (constituent = medium).
+    - **Market Calendar**: Marto's deployment, `GET <url>/api/events?kind=earnings&start&end`
+      returning market-calendar `MarketEvent` rows (or `{ events: [...] }`). The deployment must
+      not be behind Vercel Authentication. That repo doesn't have this route yet (see ADR-017).
+- **Index filter:** S&P 500 (Wikipedia table) + Nasdaq-100 (NASDAQ list), cached 7 days. If the
+  lists can't load, the panel says so and shows everything.
+- **Panels:** `earnings.panel` — Earnings (tab next to the Economic Calendar).
+- **Commands:** `Trade: Earnings Calendar`, `Trade: Earnings Source…`.
+- **Settings:** `earnings:config` (source, Market Calendar URL, index only).
+- **Caching (sidecar):** upcoming days 6 h, past days 30 days, Finnhub/Market Calendar ranges
+  1 h; the last good copy is served (marked stale) when a source fails.
+- **Known limitations:** NASDAQ gives no exact times, only sessions, and none for past dates;
+  earnings alerts are not wired into Alerts yet.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

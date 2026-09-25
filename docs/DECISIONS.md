@@ -328,3 +328,29 @@ state resets.
 
 **Consequences:** No new dependencies. Querying across entries happens in the renderer (hundreds to
 a few thousand entries is fine). Phase 6 backup/export includes the folder as is.
+
+---
+
+## ADR-017: Earnings calendar with three switchable sources
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Marto asked for all three options: NASDAQ as in his market-calendar project, his
+Market Calendar deployment, and Finnhub.
+
+**Decision:**
+
+- The sidecar parses each source into one `EarningsEvent`; a setting picks the source.
+- NASDAQ is the default: no key, same data and conventions as market-calendar (logic ported, not
+  shared). One request per weekday (four in flight), per-day disk cache with stale fallback.
+- Finnhub's key is a secret. Main passes it to the sidecar in a header, which sends it to Finnhub
+  as `X-Finnhub-Token`, never in a URL.
+- Market Calendar has no JSON events endpoint today. Forge expects
+  `GET /api/events?kind=earnings&start=YYYY-MM-DD&end=YYYY-MM-DD` → `MarketEvent[]`. Adding that
+  route to market-calendar is a separate change in that repo.
+- Wikipedia (S&P 500 list) gets an identifying User-Agent with a contact URL, per its robot
+  policy (a bare product token is refused with 403).
+
+**Consequences:** No new dependencies (stdlib `html.parser` instead of an HTML library). The
+NASDAQ endpoint is unofficial and may break; the cache keeps the last good week and the source
+is one setting away.

@@ -11,10 +11,22 @@ from fastapi import FastAPI
 
 from forge_sidecar import __version__
 from forge_sidecar.auth import TokenAuthMiddleware
-from forge_sidecar.routers import calendar, chart, dex, gpu, health, mt5, probe, runs, solana
+from forge_sidecar.routers import (
+	calendar,
+	chart,
+	dex,
+	earnings,
+	gpu,
+	health,
+	mt5,
+	probe,
+	runs,
+	solana,
+)
 from forge_sidecar.services.cache import TtlCache
 from forge_sidecar.services.charts import ChartData
 from forge_sidecar.services.dexscreener import DexScreener
+from forge_sidecar.services.earnings import EarningsService
 from forge_sidecar.services.gpu import GpuMonitor
 from forge_sidecar.services.mt5 import Mt5Service
 from forge_sidecar.services.runs_store import RunsStore
@@ -82,6 +94,7 @@ def create_app(
 		app.state.gpu = GpuMonitor()
 		app.state.mt5 = Mt5Service()
 		app.state.solana = SolanaClient(client)
+		app.state.earnings = EarningsService(client, cache_dir)
 		probe_file = write_probe_file(data_dir, port, probe_token) if data_dir and port else None
 		try:
 			yield
@@ -113,4 +126,5 @@ def create_app(
 	app.include_router(gpu.router)
 	app.include_router(mt5.router)
 	app.include_router(solana.router)
+	app.include_router(earnings.router)
 	return app

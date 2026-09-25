@@ -2,7 +2,7 @@
 
 Source of truth for progress. Tick boxes as work lands. Only the current phase is worked on.
 
-**Current phase: 3 — Trade depth.** Phases 1 and 2 are done.
+**Current phase: 4 — Lab depth.** Phases 1–3 are done.
 
 ---
 
@@ -168,7 +168,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] MT5 read-only: account, positions with live P/L, history
 - [x] Solana wallet watch (public address only)
 - [x] Alerts: price thresholds and calendar events → inbox + toasts
-- [ ] Earnings calendar (source to be agreed; possibly Market Calendar project)
+- [x] Earnings calendar: NASDAQ (default), Finnhub or Market Calendar, switchable
 - [x] Multi-chart layouts
 - [x] Trade journal (entries, screenshots, tags, notes, stats; prefill from MT5 history)
 
