@@ -54,6 +54,8 @@ function setup(platform = 'win32', manifests: ModuleManifest[] = [always, optIn,
 			onDispose: (fn) => disposers.push(fn),
 			notify: vi.fn(),
 			getSecret: vi.fn(() => null),
+			setSecret: vi.fn(),
+			onNotification: vi.fn(),
 			sidecar: vi.fn(),
 			workspace: { root: () => null, onChange: vi.fn() },
 			settings: {

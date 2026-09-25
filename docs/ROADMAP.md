@@ -183,7 +183,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 ## Phase 5 — Hub depth
 
 - [ ] Notion module
-- [ ] Discord: webhooks + webview
+- [x] Discord: webhooks (post + notification forwarding) + webview
 - [x] Social webview tabs (Discord, LinkedIn, X, Notion)
 - [ ] Unified inbox (GitHub, Vercel, alerts, calendar)
 - [ ] "Today" dashboard

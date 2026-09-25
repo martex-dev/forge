@@ -6,7 +6,12 @@ import type { ForgeNotification, NewNotification } from '@shared/notifications';
 import type { NotificationsRepo } from './db/notifications-repo';
 import { emitEvent } from './ipc';
 
-export type Notifier = (input: NewNotification) => ForgeNotification;
+export type NotificationListener = (created: ForgeNotification) => void;
+
+export type Notifier = ((input: NewNotification) => ForgeNotification) & {
+	/** Main-side listeners (e.g. forwarding to Discord). Returns an unsubscribe function. */
+	subscribe(listener: NotificationListener): () => void;
+};
 
 // Windows drops toasts it can't show anyway; keep the body within what the Action Center displays.
 const MAX_TOAST_BODY = 200;
@@ -50,11 +55,26 @@ export function createNotifier(
 		toast.show();
 	};
 
-	return (input) => {
+	const listeners = new Set<NotificationListener>();
+	const notify = (input: NewNotification): ForgeNotification => {
 		const created = repo.add(input);
 		emitEvent('notifications:changed', { unreadCount: repo.unreadCount() });
 		emitEvent('notifications:added', created);
 		if (created.level === 'warn' || created.level === 'error') toast(created);
+		for (const listener of listeners) {
+			// A failing listener must not break the notification (or the other listeners).
+			try {
+				listener(created);
+			} catch (error) {
+				log.warn('notification listener failed', { error });
+			}
+		}
 		return created;
 	};
+	return Object.assign(notify, {
+		subscribe: (listener: NotificationListener) => {
+			listeners.add(listener);
+			return () => void listeners.delete(listener);
+		},
+	});
 }

@@ -7,6 +7,7 @@ import { calendarChannels } from './channels/calendar';
 import { chartChannels } from './channels/chart';
 import { dataChannels, dataEvents } from './channels/data';
 import { dexChannels, dexEvents } from './channels/dex';
+import { discordChannels } from './channels/discord';
 import { earningsChannels } from './channels/earnings';
 import { framesChannels } from './channels/frames';
 import { fsChannels, fsEvents } from './channels/fs';
@@ -63,6 +64,7 @@ export const ipcContract = {
 	...framesChannels,
 	...notebookChannels,
 	...mlChannels,
+	...discordChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */

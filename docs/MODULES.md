@@ -679,6 +679,30 @@ Grid (2×2)` lays out BTC / ETH / SOL / BNB (each then changeable). Every chart 
 
 ---
 
+### `discord` — Discord
+
+- **Room:** hub · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Discord through **webhooks** only (no user tokens, no self-bots, per
+  CLAUDE.md §7).
+    - **Webhooks:** add one with a name and its URL (Channel settings → Integrations → Webhooks →
+      Copy URL). Forge checks it with Discord first, then stores all webhook URLs in one secret
+      (`discord.webhooks`, DPAPI). The renderer only ever sees names.
+    - **Post:** Markdown to any webhook as "Forge" (Ctrl+Enter). Mentions are never pinged
+      (`allowed_mentions: []`).
+    - **Forward:** per webhook, forward Forge notifications by level (default warn + error) and
+      source module (default: everything), as coloured embeds. Useful for getting alerts, finished
+      training runs and failed deploys on your phone. Discord's own notices are never forwarded.
+      Per-webhook ordered queue; a 429 is waited out once. The last failure is shown on the card.
+- **Panels:** `discord.panel` — Discord (right side of the Hub).
+- **Commands:** `Hub: Discord Webhooks & Forwarding`.
+- **Secrets:** `discord.webhooks` (managed from the panel; deleting it in Settings forgets all).
+- **Settings:** `discord:hooks` (names, Discord's webhook name/channel id, forward rules; no
+  URLs).
+- **Known limitations:** posting only; reading channels needs the Discord webview tab
+  (`hub-web`).
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

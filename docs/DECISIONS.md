@@ -462,3 +462,24 @@ environments.
 **Consequences:** The sidecar environment grows by about 150 MB (SciPy is the bulk), which
 matters for Phase 6 packaging. The ML views (`CvFoldsView`, `CalibrationView`) moved to
 `src/renderer/ui/ml/` because two modules render them.
+
+---
+
+## ADR-022: Module context gains setSecret and onNotification
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** The Discord module stores webhook URLs (they contain a token) and forwards
+notifications as they happen, whichever module raised them.
+
+**Decision:**
+
+- `ctx.setSecret(key, value | null)` writes or deletes a secret the module **declared**
+  (the same rule as `getSecret`). It emits `secrets:changed` without the value.
+- `ctx.onNotification(listener)` subscribes to every stored notification in main. The notifier
+  isolates listener errors, and listeners are removed when the module is disabled.
+- Discord keeps all webhook URLs in one declared secret as JSON, keyed by a random id.
+  Settings hold only names and rules.
+
+**Consequences:** A module can react to other modules' notifications without importing them.
+Forwarding must avoid loops, so Discord never forwards its own notices.

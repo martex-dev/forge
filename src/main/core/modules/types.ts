@@ -3,7 +3,7 @@ import type { z } from 'zod';
 import type { EventPayload, ForgeEvent } from '@shared/ipc/contract';
 import type { Channel } from '@shared/ipc/contract';
 import type { ModuleManifest } from '@shared/modules/types';
-import type { NewNotification } from '@shared/notifications';
+import type { ForgeNotification, NewNotification } from '@shared/notifications';
 
 import type { Handler } from '../ipc-router';
 
@@ -27,6 +27,10 @@ export interface MainModuleContext {
 	notify(input: Omit<NewNotification, 'module'>): void;
 	/** Reads a secret this module declared in its manifest. Main-only; never send it to the renderer. */
 	getSecret(key: string): string | null;
+	/** Saves (or with null, deletes) a declared secret; emits `secrets:changed` without the value. */
+	setSecret(key: string, value: string | null): void;
+	/** Every new notification (from any module), after it's stored. Removed on disable. */
+	onNotification(listener: (notification: ForgeNotification) => void): void;
 	/** Persistent, zod-validated settings, namespaced per module (`<moduleId>:<key>` in the DB). */
 	settings: {
 		get<S extends z.ZodType>(key: string, schema: S, fallback: z.output<S>): z.output<S>;
