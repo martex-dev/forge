@@ -2,7 +2,7 @@
 
 Source of truth for progress. Tick boxes as work lands. Only the current phase is worked on.
 
-**Current phase: 0 — Foundation** (built and tested; two acceptance items need Marto — see notes below 0.12 and 0.13)
+**Current phase: 1 — Vertical slice.** Build room done (explorer, editor, terminals, git). Next: Trade → Lab → Hub.
 
 ---
 
@@ -130,7 +130,7 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 **Acceptance:** workflow green on push.
 
-> Every CI step passes locally from a clean `npm ci`. **Needs Marto:** a GitHub remote — the repo has none yet.
+> CI green on GitHub (private repo martex-dev/forge).
 
 ### 0.14 Wrap-up
 
@@ -141,10 +141,10 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 
 ## Phase 1 — Vertical slice of all four rooms
 
-- [ ] **Build:** file tree (open folder, recents, chokidar watcher, create/rename/delete)
-- [ ] **Build:** Monaco (local), tabs, dirty state, Ctrl+S, theme from tokens
-- [ ] **Build:** terminals (xterm.js + node-pty), tabs, presets: PowerShell, Python venv, Claude Code, Codex, Gemini CLI
-- [ ] **Build:** Git panel (branch, changes, diff, stage, commit, pull/push); branch in StatusBar
+- [x] **Build:** file tree (open folder, recents, chokidar watcher, create/rename/delete)
+- [x] **Build:** Monaco (local), tabs, dirty state, Ctrl+S, theme from tokens
+- [x] **Build:** terminals (xterm.js + node-pty), tabs, presets: PowerShell, Python venv, Claude Code, Codex, Gemini CLI
+- [x] **Build:** Git panel (branch, changes, diff, stage, commit, pull/push); branch in StatusBar
 - [ ] **Trade:** economic calendar (Forex Factory feed, impact/currency filter, countdown)
 - [ ] **Trade:** DexScreener watchlist + token detail, price flashes
 - [ ] **Trade:** chart panel (data source to be agreed)
