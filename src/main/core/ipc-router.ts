@@ -20,7 +20,12 @@ type AnyHandler = (input: unknown) => unknown;
 export interface RouterLogger {
 	error(message: string, meta?: Record<string, unknown>): void;
 	warn(message: string, meta?: Record<string, unknown>): void;
+	debug?(message: string, meta?: Record<string, unknown>): void;
 }
+
+// Normal outcomes that panels handle (sidecar still starting, a search replaced by a newer one):
+// logging them as warnings every poll buries real problems.
+const EXPECTED_ERRORS = new Set(['SIDECAR_UNAVAILABLE', 'SEARCH_CANCELLED']);
 
 /**
  * Validates every incoming call against the shared contract before any handler runs,
@@ -83,11 +88,10 @@ export class IpcRouter {
 			return ok(checked.data);
 		} catch (error) {
 			if (error instanceof ForgeError) {
-				this.logger.warn('[ipc] handler error', {
-					channel,
-					code: error.code,
-					message: error.message,
-				});
+				const meta = { channel, code: error.code, message: error.message };
+				if (EXPECTED_ERRORS.has(error.code))
+					this.logger.debug?.('[ipc] handler error', meta);
+				else this.logger.warn('[ipc] handler error', meta);
 				return err(error.code, error.message);
 			}
 			this.logger.error('[ipc] handler crashed', {

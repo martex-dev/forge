@@ -17,6 +17,7 @@ import { IpcRouter } from './ipc-router';
 export const router = new IpcRouter(ipcContract, {
 	error: (message, meta) => log.error(message, meta),
 	warn: (message, meta) => log.warn(message, meta),
+	debug: (message, meta) => log.debug(message, meta),
 });
 
 /** Only our own renderer (dev server or packaged file) may call privileged IPC. */

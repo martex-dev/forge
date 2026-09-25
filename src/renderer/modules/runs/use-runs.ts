@@ -6,6 +6,7 @@ import type { ProbeSetup, Run, RunDetail } from '@shared/ipc/channels/lab';
 import { SIDECAR_META } from '../../app/hooks/use-sidecar-recovery';
 import { call } from '../../lib/ipc';
 import { toast } from '../../stores/toast-store';
+import { useUiStore } from '../../stores/ui-store';
 import { mergePoints, type Series, type SeriesState, toSeries } from './runs-model';
 
 export const RUNS_KEY = ['runs', 'list'] as const;
@@ -18,13 +19,15 @@ export function useRuns(): {
 	error: Error | null;
 	refetch: () => void;
 } {
+	// Main watches runs for notifications, so the list only needs polling while it's on screen.
+	const visible = useUiStore((s) => s.room === 'lab');
 	const query = useQuery({
 		queryKey: RUNS_KEY,
 		queryFn: () => call('runs:list'),
 		meta: SIDECAR_META,
 		// Fast while something trains; a new run shows up within 10 s otherwise.
 		refetchInterval: (q) =>
-			q.state.data?.some((r) => r.status === 'running') ? 2_000 : 10_000,
+			!visible ? false : q.state.data?.some((r) => r.status === 'running') ? 2_000 : 10_000,
 	});
 	return {
 		runs: query.data ?? [],
@@ -81,8 +84,12 @@ export function useRunMetrics(
 				setError(e instanceof Error ? e : new Error(String(e)));
 			}
 			// Finished runs are still polled slowly: an interrupted run resumes if its probe reconnects.
+			const onScreen = useUiStore.getState().room === 'lab';
 			if (!cancelled)
-				timer = setTimeout(() => void tick(), liveRef.current ? LIVE_MS : IDLE_MS);
+				timer = setTimeout(
+					() => void tick(),
+					liveRef.current && onScreen ? LIVE_MS : IDLE_MS,
+				);
 		};
 		void tick();
 		return () => {

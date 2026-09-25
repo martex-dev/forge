@@ -5,6 +5,7 @@ import type { WatchEntry } from '@shared/ipc/channels/dex';
 
 import { SIDECAR_META } from '../../app/hooks/use-sidecar-recovery';
 import { call } from '../../lib/ipc';
+import { useUiStore } from '../../stores/ui-store';
 import { sourceKey } from './chart-model';
 
 // Binance is cached ~5 s in the sidecar; GeckoTerminal only refreshes OHLCV about once a minute.
@@ -20,12 +21,14 @@ export function useCandles(
 	error: Error | null;
 	refetch: () => void;
 } {
+	// All rooms stay mounted; don't spend Binance/GeckoTerminal quota on a chart nobody sees.
+	const visible = useUiStore((s) => s.room === 'trade');
 	const query = useQuery({
 		queryKey: ['chart', source ? sourceKey(source) : null, interval],
 		queryFn: () => call('chart:candles', { source: source as ChartSource, interval }),
 		enabled: source !== null,
 		meta: SIDECAR_META,
-		refetchInterval: source ? POLL_MS[source.kind] : false,
+		refetchInterval: source && visible ? POLL_MS[source.kind] : false,
 		staleTime: 2_000,
 	});
 	return {
