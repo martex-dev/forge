@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { appChannels } from './channels/app';
 import { calendarChannels } from './channels/calendar';
 import { dataChannels, dataEvents } from './channels/data';
+import { dexChannels, dexEvents } from './channels/dex';
 import { fsChannels, fsEvents } from './channels/fs';
 import { gitChannels, gitEvents } from './channels/git';
 import { moduleChannels, moduleEvents } from './channels/modules';
@@ -29,6 +30,7 @@ export const ipcContract = {
 	...terminalChannels,
 	...gitChannels,
 	...calendarChannels,
+	...dexChannels,
 };
 
 /** Push events main → renderer. Payloads are validated in main before sending. */
@@ -41,6 +43,7 @@ export const eventContract = defineEvents({
 	...fsEvents,
 	...terminalEvents,
 	...gitEvents,
+	...dexEvents,
 });
 
 export type IpcContract = typeof ipcContract;

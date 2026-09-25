@@ -65,6 +65,12 @@ export function createModuleRegistry(services: CoreServices): ModuleRegistry {
 					}
 					return secrets.get(key);
 				},
+				settings: {
+					get: (key, schema, fallback) =>
+						settings.get(`${manifest.id}:${key}`, schema, fallback),
+					set: (key, schema, value) =>
+						settings.set(`${manifest.id}:${key}`, schema, value),
+				},
 				workspace: {
 					root: () => workspace.getRoot(),
 					onChange: (listener) =>

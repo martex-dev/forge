@@ -7,8 +7,9 @@ from fastapi import FastAPI
 
 from forge_sidecar import __version__
 from forge_sidecar.auth import TokenAuthMiddleware
-from forge_sidecar.routers import calendar, health
+from forge_sidecar.routers import calendar, dex, health
 from forge_sidecar.services.cache import TtlCache
+from forge_sidecar.services.dexscreener import DexScreener
 
 USER_AGENT = f'Forge/{__version__} (personal desktop app)'
 
@@ -32,6 +33,7 @@ def create_app(
 		app.state.calendar_cache = TtlCache(
 			ttl=30 * 60, max_stale=24 * 3600, persist_dir=cache_dir, fail_cooldown=5 * 60
 		)
+		app.state.dex = DexScreener(client)
 		try:
 			yield
 		finally:
@@ -50,4 +52,5 @@ def create_app(
 	app.add_middleware(TokenAuthMiddleware, token=token)
 	app.include_router(health.router)
 	app.include_router(calendar.router)
+	app.include_router(dex.router)
 	return app

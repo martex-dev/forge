@@ -56,6 +56,10 @@ function setup(platform = 'win32', manifests: ModuleManifest[] = [always, optIn,
 			getSecret: vi.fn(() => null),
 			sidecar: vi.fn(),
 			workspace: { root: () => null, onChange: vi.fn() },
+			settings: {
+				get: (_key, _schema, fallback) => fallback,
+				set: (_key, schema, value) => schema.parse(value),
+			},
 		}),
 		onError: vi.fn(),
 	};

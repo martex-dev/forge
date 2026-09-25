@@ -169,6 +169,27 @@ registered through the context is torn down when the module is disabled.
 - **Security:** wallet connections happen inside the sites; Forge never sees keys or signs
   anything. Links leaving each site's own domain open in the system browser.
 
+### `dexscreener` — DexScreener
+
+- **Room:** trade · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Watchlist of DEX pairs on any chain DexScreener covers (Solana, Base, ETH,
+  BSC…). Search by name, symbol, token or pair address; live price (flashes on change),
+  5m/1h/24h change, liquidity, 24h volume and FDV, polled every 10 s. Click a row for the
+  Token panel: all change windows, liquidity/volume/FDV/market cap, 24h buy/sell ratio,
+  copyable contract address, project links (opened in the browser).
+- **Panels:** `dexscreener.watchlist` — Watchlist (docked below, stays mounted so prices keep
+  updating); `dexscreener.detail` — Token (tab next to the calendar, reused per pair).
+- **Commands:** `Trade: Show DexScreener Watchlist`.
+- **Settings:** `dexscreener:watchlist` (max 200 pairs).
+- **Sidecar endpoints:** `GET /dex/search?q=`, `GET /dex/pairs?ids=chain:pair,…`.
+- **External services / rate limits:** DexScreener public API (~300 req/min). The sidecar uses a
+  token bucket (20 burst, 4/s), batches up to 30 pairs per call and caches each pair for 10 s.
+  Search results rank pools with ≥ $10K liquidity _and_ trading first, then by volume, so
+  wash-traded knockoffs and dead pools don't win.
+- **Security:** read-only market data; no wallets or keys involved. Only `https:` images/links
+  are passed to the UI.
+- **Known limitations:** no price alerts yet (Phase 3); no sparkline in the table.
+
 ---
 
 ## Template
