@@ -8,6 +8,8 @@ dependencies = [
 	'uvicorn>=0.38',
 	'pydantic>=2.12',
 	'httpx>=0.28',
+	'websockets>=17.1',
+	'nvidia-ml-py>=13.610.43',
 ]
 
 [dependency-groups]
@@ -33,7 +35,7 @@ quote-style = 'single'
 
 [tool.ruff.lint]
 select = ['E', 'F', 'W', 'I', 'B', 'UP', 'ASYNC', 'S', 'RUF']
-# W191/E101 conflict with tab indentation (CLAUDE.md Â§8). S101: asserts are fine in tests.
+# W191/E101 conflict with tab indentation (CLAUDE.md §8). S101: asserts are fine in tests.
 ignore = ['W191', 'E101']
 
 [tool.ruff.lint.per-file-ignores]

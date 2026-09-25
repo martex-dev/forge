@@ -215,6 +215,50 @@ registered through the context is torn down when the module is disabled.
   history paging beyond 500 bars; one chart per panel (multi-chart layouts are Phase 3). The
   pool picker is the DexScreener watchlist, so it needs that module enabled.
 
+### `runs` — Run Monitor
+
+- **Room:** lab · **Platforms:** all · **Enabled by default:** yes
+- **What it does:** Live view of training runs streamed by `forge-probe`
+  (`packages/forge-probe`). Run list (status: running / finished / failed / interrupted, age,
+  duration, last step; ↑/↓ to move, Delete to remove) and, per run: header (start, duration,
+  step, host/pid, script), the error for failed runs, one ECharts line chart per metric
+  (`train/loss` and `val/loss` share a "loss" chart; wheel to zoom; LTTB sampling for long runs)
+  and the flattened config. Follows the newest run unless you pin another one (saved with the
+  layout). The empty state shows the exact `pip install -e` command for this checkout.
+- **Panels:** `runs.monitor` — Run Monitor (centre, in front of Welcome).
+- **Commands:** `Lab: Show Run Monitor`, `Lab: Copy forge-probe Install Command`.
+- **Settings:** none.
+- **Sidecar endpoints:** `WS /probe/ws` (probe → sidecar, JSON-array batches of
+  `start` / `log` / `finish`), `GET /runs`, `GET /runs/{id}`, `GET /runs/{id}/metrics?after=`
+  (incremental by cursor, 50k points per page), `DELETE /runs/{id}`. Runs live in
+  `userData/sidecar/lab/runs.db` (SQLite).
+- **External services / rate limits:** none (local only).
+- **Security:** the probe authenticates with a per-launch **probe token** that opens only
+  `/probe/ws`; it reads it from `userData/sidecar/probe.json` and only connects to `127.0.0.1`.
+  The renderer reads runs through main like every other module.
+- **Known limitations:** one run at a time (side-by-side comparison is Phase 4). Metrics are
+  polled every 1 s while a run is live rather than pushed. No per-run GPU attribution yet.
+
+---
+
+### `gpu` — GPU Monitor
+
+- **Room:** lab · **Platforms:** all (needs an NVIDIA driver) · **Enabled by default:** yes
+- **What it does:** Per-GPU utilization, VRAM used/total, temperature (amber ≥ 80 °C, red ≥ 87 °C)
+  and power vs. limit, polled every 2 s, with a 3-minute utilization/VRAM history chart. A
+  status-bar item (`44% 61°C`) is visible from every room; clicking it opens the panel. Without
+  an NVIDIA GPU or driver the panel says so instead of erroring.
+- **Panels:** `gpu.monitor` — GPU (docked right).
+- **Commands:** `Lab: Show GPU Monitor`.
+- **Settings:** none.
+- **Sidecar endpoints:** `GET /gpu` (NVML via `nvidia-ml-py`, initialised once, run off the event
+  loop).
+- **External services / rate limits:** none.
+- **Security:** read-only hardware counters.
+- **Known limitations:** NVIDIA only; no per-process VRAM list yet.
+
+---
+
 ## Template
 
 ### `<module-id>` — <Name>

@@ -24,7 +24,7 @@ def main() -> int:
 		logger.error('config error: %s', error)
 		return 2
 
-	app = create_app(settings.token, data_dir=settings.data_dir)
+	app = create_app(settings.token, data_dir=settings.data_dir, port=settings.port)
 	config = uvicorn.Config(
 		app,
 		host='127.0.0.1',  # never 0.0.0.0: the sidecar must not be reachable from the network

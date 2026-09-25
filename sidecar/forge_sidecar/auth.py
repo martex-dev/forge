@@ -16,9 +16,12 @@ class TokenAuthMiddleware:
 	routing, so unknown paths can't be used to probe the server either.
 	"""
 
-	def __init__(self, app: ASGIApp, token: str) -> None:
+	def __init__(self, app: ASGIApp, token: str, scoped: dict[str, str] | None = None) -> None:
 		self.app = app
 		self.expected = token.encode('utf-8')
+		# Extra tokens valid for exactly one path, e.g. the probe token for /probe/ws: training
+		# scripts get to push metrics, not to call anything else.
+		self.scoped = {path: t.encode('utf-8') for path, t in (scoped or {}).items()}
 
 	async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
 		if scope['type'] not in ('http', 'websocket'):
@@ -26,7 +29,11 @@ class TokenAuthMiddleware:
 			return
 
 		headers = {k.decode('latin-1').lower(): v.decode('latin-1') for k, v in scope['headers']}
-		if token_matches(headers.get('authorization'), self.expected):
+		authorization = headers.get('authorization')
+		scoped = self.scoped.get(scope.get('path', ''))
+		if token_matches(authorization, self.expected) or (
+			scoped is not None and token_matches(authorization, scoped)
+		):
 			await self.app(scope, receive, send)
 			return
 

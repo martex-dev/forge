@@ -2,7 +2,7 @@
 
 Source of truth for progress. Tick boxes as work lands. Only the current phase is worked on.
 
-**Current phase: 1 — Vertical slice.** Build and Trade rooms done. Next: Lab → Hub.
+**Current phase: 1 — Vertical slice.** Build, Trade and Lab rooms done. Next: Hub.
 
 ---
 
@@ -149,9 +149,9 @@ Source of truth for progress. Tick boxes as work lands. Only the current phase i
 - [x] **Trade:** DexScreener watchlist + token detail, price flashes
 - [x] **Trade:** chart panel (lightweight-charts; Binance spot + GeckoTerminal DEX pools)
 - [x] **Trade:** webview tabs: TradingView, Axiom, Fomo, Forex Factory
-- [ ] **Lab:** `forge-probe` package + Run Monitor (ECharts)
-- [ ] **Lab:** GPU monitor (pynvml, graceful fallback)
-- [ ] **Lab:** `examples/train_mnist_probe.py`
+- [x] **Lab:** `forge-probe` package + Run Monitor (ECharts)
+- [x] **Lab:** GPU monitor (pynvml, graceful fallback)
+- [x] **Lab:** `examples/train_mnist_probe.py`
 - [ ] **Hub:** Obsidian vault (tree, editor/preview, wikilinks, tags, search, quick note)
 - [ ] **Hub:** notification inbox + Windows toasts for warn/error
 

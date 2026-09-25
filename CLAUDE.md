@@ -70,6 +70,7 @@ Do not change the stack without asking. Record every stack decision in `docs/DEC
   - Main picks a free port and generates a random token per launch, then spawns the sidecar with both passed via env (`FORGE_PORT`, `FORGE_TOKEN`).
   - Main polls `/health` until ready, restarts with exponential backoff on crash, and kills the whole process tree on quit.
   - The sidecar binds to `127.0.0.1` only and rejects any request without the token.
+  - Exception, by design: the sidecar also generates a **probe token** that opens only `/probe/ws` (metrics from `forge-probe`). It is advertised in `userData/sidecar/probe.json` and removed on shutdown (ADR-012).
 - Secrets live only in main (§7). The renderer can ask whether a secret exists, never for its value.
 
 ### Module system

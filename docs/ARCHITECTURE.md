@@ -42,6 +42,19 @@
 5. On quit: kills the whole process tree (`uv` → `python`) so nothing is orphaned on Windows.
 6. Status (`starting | ready | restarting | error`) is pushed to the StatusBar.
 
+### Probe ingest (Lab)
+
+Training scripts use `packages/forge-probe` to stream metrics. They never see the main token:
+
+```
+train.py ──forge_probe──► ws://127.0.0.1:<port>/probe/ws   (probe token, only valid on this path)
+                              │  sidecar: RunsStore (SQLite, userData/sidecar/lab/runs.db)
+renderer ◄── IPC runs:* ◄── main ◄── GET /runs… (main token)
+```
+
+The sidecar writes `userData/sidecar/probe.json` (`url`, probe token, pid) on startup and deletes
+it on shutdown; the probe reads it (or `FORGE_PROBE_FILE`). See ADR-012.
+
 ## Module system
 
 ```

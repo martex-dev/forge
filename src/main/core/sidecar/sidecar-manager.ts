@@ -108,6 +108,8 @@ export class SidecarManager {
 			const detail = extractDetail(text);
 			throw new ForgeError(`SIDECAR_HTTP_${response.status}`, detail.slice(0, 500) || response.statusText);
 		}
+		// 204 No Content (e.g. DELETE) has no body to parse.
+		if (response.status === 204) return undefined as T;
 		return (await response.json()) as T;
 	}
 

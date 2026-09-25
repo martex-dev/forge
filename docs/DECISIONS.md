@@ -188,3 +188,35 @@ now saved with the layout (`PanelProps.setParams`).
 **Consequences:** No secrets needed and nothing can place orders. GeckoTerminal's ~30 req/min
 limit means pool charts refresh every 30 s at best. Swapping a source means touching only
 `sidecar/forge_sidecar/services/charts.py`.
+
+---
+
+## ADR-012: forge-probe transport, auth and run storage
+
+**Status:** Accepted (2026-09-25)
+
+**Context:** Training scripts run in their own environments (often older Pythons with CUDA
+wheels), in any terminal, and must not slow down or crash when Forge is closed. The sidecar's
+main token must never leave main.
+
+**Decision:**
+
+- `forge-probe` is a separate, tiny package (`packages/forge-probe`, Python ≥ 3.10, only
+  dependency `websockets`). A background thread batches messages to `ws://127.0.0.1:<port>/probe/ws`
+  every 250 ms, re-announces the run on reconnect, keeps a bounded buffer (10k messages) and gives
+  up silently when Forge isn't running.
+- On startup the sidecar generates a **probe token** that its auth middleware accepts on
+  `/probe/ws` only, and writes `{url, token, pid}` to `userData/sidecar/probe.json` (readable only by
+  this Windows user). It removes the file on shutdown. The sidecar gained `websockets` because
+  uvicorn needs it to serve WebSockets at all.
+- Runs are stored by the sidecar in SQLite (stdlib `sqlite3`, WAL) rather than DuckDB: many small
+  appends, point lookups and no analytics yet.
+- The renderer gets metrics through main with incremental polling (`after` cursor, 1 s while
+  live), not a WebSocket relay: simpler, survives sidecar restarts for free, and 1 s latency is
+  plenty for training curves.
+- Charts use ECharts (tree-shaken core: line, grid, tooltip, legend, dataZoom, canvas).
+- GPU stats come from NVIDIA's official `nvidia-ml-py` bindings (pure ctypes, no dependencies).
+
+**Consequences:** Any process running as Marto can read `probe.json` and push fake runs. It
+cannot call any other sidecar endpoint, which is acceptable for a single-user machine. A future
+push channel (MessagePort relay) can replace polling without touching the probe.
